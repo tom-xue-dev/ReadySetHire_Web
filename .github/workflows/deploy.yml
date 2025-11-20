@@ -1,0 +1,36 @@
+name: Deploy to S3
+
+on:
+  push:
+    branches:
+      - main # Or your desired branch
+
+jobs:
+  build-and-deploy:
+    defaults: { run: { working-directory: client } }
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Or your desired Node.js version
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build frontend
+        run: npm run build # Or your build command (e.g., yarn build)
+
+      - name: Deploy to S3
+        uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --follow-symlinks --delete
+        env:
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ap-southeast-2 # e.g., us-east-1
+          SOURCE_DIR: client/dist # Or your build output directory (e.g., dist)

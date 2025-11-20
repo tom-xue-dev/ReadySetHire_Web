@@ -1,0 +1,331 @@
+// Import configuration from centralized config file
+import { apiConfig } from '../config/apiConfig';
+
+const API_BASE_URL = apiConfig.baseUrl;
+
+const API_LOG_ENABLED = apiConfig.apiLogs;
+
+function generateRequestId(): string {
+  const rand: string = Math.random().toString(36).slice(2, 8);
+  return `${Date.now().toString(36)}-${rand}`;
+}
+
+function maskHeaders(headers: Record<string, string> | null | undefined): Record<string, string> {
+  const masked: Record<string, string> = { ...(headers || {}) };
+  if (masked.Authorization) {
+    const token: string = String(masked.Authorization);
+    masked.Authorization = token.length > 16 ? `${token.slice(0, 12)}...` : '***';
+  }
+  return masked;
+}
+
+function preview(value: unknown, max: number = 200): string {
+  try {
+    const text: string = typeof value === 'string' ? value : JSON.stringify(value);
+    return text.length > max ? `${text.slice(0, max)}…` : text;
+  } catch (_e) {
+    return '[unserializable]';
+  }
+}
+
+function nowMs(): number {
+  try {
+    return typeof performance !== 'undefined' ? performance.now() : Date.now();
+  } catch (_e) {
+    return Date.now();
+  }
+}
+
+/**
+ * Get the current JWT token from localStorage
+ */
+function getAuthToken(): string {
+  return localStorage.getItem('token') || '';
+}
+
+/**
+ * Helper function to handle API requests with timeout and error handling.
+ * It sets the Authorization token and optionally includes the request body.
+ *
+ * @param {string} endpoint - The API endpoint to call.
+ * @param {string} [method='GET'] - The HTTP method to use (GET, POST, PATCH).
+ * @param {object} [body=null] - The request body to send, typically for POST or PATCH.
+ * @param {number} [timeout=10000] - Request timeout in milliseconds (default: 10000ms).
+ * @returns {Promise<object>} - The JSON response from the API.
+ * @throws Will throw an error if the HTTP response is not OK or request times out.
+ */
+export async function apiRequest(endpoint: string, method: string = 'GET', body: Record<string, unknown> | null = null, timeout: number = 10000): Promise<Record<string, unknown> | null> {
+    // Create AbortController for request timeout
+    const controller: AbortController = new AbortController();
+    const timeoutId: ReturnType<typeof setTimeout> = setTimeout(() => controller.abort(), timeout);
+    const requestId: string = generateRequestId();
+    const start: number = nowMs();
+
+    const headers: Record<string, string> = {
+        'Content-Type': 'application/json', // Indicate that we are sending JSON data
+        'Authorization': `Bearer ${getAuthToken()}` // Include the JWT token for authentication
+    };
+
+    // If the method is POST or PATCH, we want the response to include the full representation
+    if (method === 'POST' || method === 'PATCH') {
+        headers['Prefer'] = 'return=representation';
+    }
+
+    const options: RequestInit = {
+        method, // Set the HTTP method (GET, POST, PATCH)
+        headers,
+        signal: controller.signal, // Add signal for timeout control
+    };
+
+    // If a body is provided, add it to the request
+    if (body) {
+        options.body = JSON.stringify(body);
+    }
+
+    try {
+        if (API_LOG_ENABLED) {
+            console.groupCollapsed(`🛰️ API ${method} ${endpoint} [${requestId}]`);
+            console.log('URL:', `${API_BASE_URL}${endpoint}`);
+            console.log('Options:', { ...options, headers: maskHeaders(headers) });
+            if (body) console.log('Body:', preview(body));
+            console.groupEnd();
+        }
+
+        // Make the API request and check if the response is OK
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+        clearTimeout(timeoutId); // Clear timeout if request completes
+
+        if (response.status === 204) {
+            if (API_LOG_ENABLED) {
+                const duration: number = Math.round(nowMs() - start);
+                console.log(`✅ API ${method} ${endpoint} [${requestId}] → 204 No Content (${duration}ms)`);
+            }
+            return null;
+        }
+        if (!response.ok) {
+            const errorText: string = await response.text().catch(() => 'Unknown error');
+            const duration: number = Math.round(nowMs() - start);
+            
+            // Handle 401 Unauthorized - token is invalid or expired
+            if (response.status === 401) {
+                console.warn('🔐 Authentication failed - token may be invalid or expired');
+                
+                // Clear invalid token from localStorage
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                
+                // Dispatch a custom event to notify components about authentication failure
+                window.dispatchEvent(new CustomEvent('auth-failed', {
+                    detail: { 
+                        reason: 'Invalid or expired token',
+                        endpoint: endpoint,
+                        method: method
+                    }
+                }));
+                
+                // Redirect to login page if not already there
+                if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/register')) {
+                    console.log('🔄 Redirecting to login page due to authentication failure');
+                    window.location.href = '/login';
+                }
+            }
+            
+            const err: Error = new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+            if (API_LOG_ENABLED) {
+                console.error(`❌ API ${method} ${endpoint} [${requestId}] failed (${duration}ms)`, { status: response.status, error: preview(errorText) });
+            }
+            throw err;
+        }
+
+        // Parse JSON once so we can log a preview
+        const json: Record<string, unknown> = await response.json() as Record<string, unknown>;
+        if (API_LOG_ENABLED) {
+            const duration: number = Math.round(nowMs() - start);
+            const contentLength: string | null = response.headers.get('content-length');
+            console.log(`✅ API ${method} ${endpoint} [${requestId}] → ${response.status} (${duration}ms)`, {
+                size: contentLength ? `${contentLength} bytes` : 'unknown',
+                preview: preview(json, 300)
+            });
+        }
+        return json;
+    } catch (error: unknown) {
+        clearTimeout(timeoutId); // Clear timeout on error
+        
+        if (error instanceof Error && error.name === 'AbortError') {
+            const duration: number = Math.round(nowMs() - start);
+            const err: Error = new Error(`Request timeout after ${timeout}ms`);
+            if (API_LOG_ENABLED) {
+                console.error(`⏱️  API ${method} ${endpoint} [${requestId}] timed out (${duration}ms)`);
+            }
+            throw err;
+        }
+        if (API_LOG_ENABLED) {
+            const duration: number = Math.round(nowMs() - start);
+            console.error(`❌ API ${method} ${endpoint} [${requestId}] exception (${duration}ms)`, error);
+        }
+        throw error; // Re-throw other errors
+    }
+}
+
+
+// Question APIs - Updated for new API format
+export async function getQuestions(interviewId: string | number): Promise<unknown[]> {
+    const response = await apiRequest(`/question/interview/${interviewId}`);
+    return (response as { data?: unknown[] })?.data || [];
+}
+
+export async function createQuestion(question: Record<string, unknown>): Promise<Record<string, unknown> | null> {
+    return apiRequest(`/question`, 'POST', question);
+}
+
+export async function updateQuestion(id: string | number, data: Record<string, unknown>): Promise<Record<string, unknown> | null> {
+    return apiRequest(`/question/${id}`, 'PATCH', data);
+}
+
+export async function deleteQuestion(id: string | number): Promise<Record<string, unknown> | null> {
+    return apiRequest(`/question/${id}`, 'DELETE');
+}
+
+/**
+ * Generate questions using LLM based on job description
+ * @param {number} interviewId - The interview ID
+ * @param {number} count - Number of questions to generate (default: 5)
+ * @returns {Promise<object>} - The generated questions response
+ */
+export async function generateQuestions(interviewId: string | number, count: number = 5): Promise<Record<string, unknown> | null> {
+    return apiRequest(`/question/generate/${interviewId}`, 'POST', { count });
+}
+
+// Applicants APIs - Updated for new API format
+export async function getAllApplicants(): Promise<unknown[]> {
+    const response = await apiRequest(`/applicants`);
+    if (response && typeof response === 'object' && 'data' in response && Array.isArray(response.data)) {
+        return response.data;
+    }
+    if (Array.isArray(response)) {
+        return response;
+    }
+    return [];
+}
+
+export async function getApplicantsByInterview(interviewId: string | number): Promise<unknown[]> {
+    const response = await apiRequest(`/interviews/${interviewId}/applicants`);
+    if (response && typeof response === 'object' && 'data' in response && Array.isArray(response.data)) {
+        return response.data;
+    }
+    if (Array.isArray(response)) {
+        return response;
+    }
+    return [];
+}
+
+export async function createApplicant(applicant: Record<string, unknown>): Promise<Record<string, unknown> | null> {
+    return apiRequest(`/applicants`, 'POST', applicant);
+}
+
+export async function updateApplicant(id: string | number, data: Record<string, unknown>): Promise<Record<string, unknown> | null> {
+    return apiRequest(`/applicants/${id}`, 'PATCH', data);
+}
+
+export async function deleteApplicant(id: string | number): Promise<Record<string, unknown> | null> {
+    return apiRequest(`/applicants/${id}`, 'DELETE');
+}
+
+export async function bindApplicantToInterview(applicantId: string | number, interviewId: string | number, status: string = 'NOT_STARTED'): Promise<Record<string, unknown> | null> {
+    // Preferred RESTful: POST /interviews/:interviewId/applicants
+    return apiRequest(`/interviews/${interviewId}/applicants`, 'POST', { applicant_id: applicantId, status });
+}
+
+export async function unbindApplicantFromInterview(applicantId: string | number, interviewId: string | number): Promise<Record<string, unknown> | null> {
+    return apiRequest(`/interviews/${interviewId}/applicants/${applicantId}`, 'DELETE');
+}
+
+export async function updateApplicantInterviewStatus(applicantId: string | number, interviewId: string | number, status: string = 'COMPLETED'): Promise<Record<string, unknown> | null> {
+    return apiRequest(`/interviews/${interviewId}/applicants/${applicantId}`, 'PATCH', { status });
+}
+
+// Applicant Answer APIs - Updated for new API format
+export async function getAnswersByApplicant(applicantId: string | number): Promise<unknown[]> {
+    const response = await apiRequest(`/applicant_answers/applicant/${applicantId}`);
+    // New API returns {data: [], pagination: {}} format
+    return (response as { data?: unknown[] })?.data || [];
+}
+
+export async function getAnswersByInterviewAndApplicant(interviewId: string | number, applicantId: string | number): Promise<unknown[]> {
+    const response = await apiRequest(`/applicant_answers/interview/${interviewId}/applicant/${applicantId}`);
+    return (response as { data?: unknown[] })?.data || [];
+}
+
+export async function createApplicantAnswer(answer: Record<string, unknown>): Promise<Record<string, unknown> | null> {
+    return apiRequest(`/applicant_answers`, 'POST', answer);
+}
+
+export async function updateApplicantAnswer(id: string | number, data: Record<string, unknown>): Promise<Record<string, unknown> | null> {
+    return apiRequest(`/applicant_answers/${id}`, 'PATCH', data);
+}
+
+// Health check endpoint for connection testing
+export async function healthCheck(): Promise<{ status: string; timestamp: string }> {
+    try {
+        // Create a controller for timeout
+        const controller: AbortController = new AbortController();
+        const timeoutId: ReturnType<typeof setTimeout> = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+        const requestId: string = generateRequestId();
+        const start: number = nowMs();
+        
+        // Try a simple endpoint that should always be available
+        const response: Response = await fetch(`${API_BASE_URL}/health`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getAuthToken()}`
+            },
+            signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (response.ok) {
+            if (API_LOG_ENABLED) {
+                const duration: number = Math.round(nowMs() - start);
+                console.log(`✅ API GET /health [${requestId}] → ${response.status} (${duration}ms)`);
+            }
+            return { status: 'healthy', timestamp: new Date().toISOString() };
+        } else {
+            const duration: number = Math.round(nowMs() - start);
+            const err: Error = new Error(`Server responded with status: ${response.status}`);
+            if (API_LOG_ENABLED) {
+                console.error(`❌ API GET /health [${requestId}] failed (${duration}ms)`, { status: response.status });
+            }
+            throw err;
+        }
+    } catch (error: unknown) {
+        if (error instanceof Error && error.name === 'AbortError') {
+            if (API_LOG_ENABLED) console.error('⏱️  API GET /health timed out');
+            throw new Error('Connection timeout - server is not responding');
+        }
+        if (API_LOG_ENABLED) console.error('❌ API GET /health exception', error);
+        const errorMessage: string = error instanceof Error ? error.message : 'Unknown error';
+        throw new Error(`Connection failed: ${errorMessage}`);
+    }
+}
+
+// Billing APIs
+export async function createCheckoutSession(): Promise<Record<string, unknown> | null> {
+    return apiRequest(`/billing/create-checkout-session`, 'POST', {});
+}
+
+
+
+
+
+/**
+ * Main function to demonstrate API usage.
+ *
+ * Creates a new interview, lists all interviews, and retrieves a single interview by ID.
+ */
+// @ts-ignore - Function is for demonstration purposes only
+
+export async function bindApplicantToInterviewV2(interviewId: string | number, applicantId: string | number, status: string = 'NOT_STARTED'): Promise<Record<string, unknown> | null> {
+    return apiRequest(`/interviews/${interviewId}/applicants`, 'POST', { applicant_id: applicantId, status });
+}

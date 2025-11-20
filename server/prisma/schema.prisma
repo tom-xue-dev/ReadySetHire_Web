@@ -1,0 +1,230 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Configure Prisma seed
+// Prisma will run `npm run db:seed` when `prisma db seed` is executed
+// See package.json scripts
+
+model User {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  firstName    String?  @map("first_name")
+  lastName     String?  @map("last_name")
+  role         UserRole @default(RECRUITER)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  jobs             Job[]
+  interviews       Interview[]
+  questions        Question[]
+  applicants       Applicant[]
+  applicantAnswers ApplicantAnswer[]
+
+  @@map("users")
+}
+
+model Job {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  requirements String?
+  location    String?
+  salaryRange String?  @map("salary_range")
+  status      JobStatus @default(DRAFT)
+  userId      Int      @map("user_id")
+  publishedAt DateTime? @map("published_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  interviews      Interview[]
+  jobApplications JobApplication[]
+
+  @@map("jobs")
+}
+
+model Interview {
+  id          Int      @id @default(autoincrement())
+  title       String
+  jobRole     String   @map("job_role")
+  description String?
+  status      InterviewStatus @default(DRAFT)
+  userId      Int      @map("user_id")
+  jobId       Int?     @map("job_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  job              Job?              @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  questions        Question[]
+  applicantAnswers ApplicantAnswer[]
+  applicants       Applicant[]
+
+  @@map("interviews")
+}
+
+model Question {
+  id          Int      @id @default(autoincrement())
+  interviewId Int      @map("interview_id")
+  question    String
+  difficulty  Difficulty @default(EASY)
+  userId      Int      @map("user_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  interview       Interview         @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applicantAnswers ApplicantAnswer[]
+
+  @@map("questions")
+}
+
+model Applicant {
+  id              Int              @id @default(autoincrement())
+  interviewId     Int?             @map("interview_id")
+  firstName       String           @map("firstname")
+  lastName        String           @map("surname")
+  phoneNumber     String?          @map("phone_number")
+  emailAddress    String           @map("email_address")
+  interviewStatus InterviewStatus @default(NOT_STARTED) @map("interview_status")
+  userId          Int             @map("user_id")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+
+  // Relations
+  interview        Interview?        @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applicantAnswers ApplicantAnswer[]
+
+  @@map("applicants")
+}
+
+
+
+model ApplicantAnswer {
+  id          Int      @id @default(autoincrement())
+  interviewId Int      @map("interview_id")
+  questionId  Int      @map("question_id")
+  applicantId Int      @map("applicant_id")
+  answer      String?
+  userId      Int      @map("user_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  interview  Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+  question   Question  @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  applicant  Applicant @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("applicant_answers")
+}
+
+// Enums
+enum UserRole {
+  ADMIN
+  RECRUITER
+  INTERVIEWER
+}
+
+enum JobStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+}
+
+enum InterviewStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+  NOT_STARTED
+  COMPLETED
+}
+
+enum Title {
+  MR
+  MS
+  DR
+}
+
+enum Difficulty {
+  EASY
+  INTERMEDIATE
+  ADVANCED
+}
+
+// Job Application and Resume Models
+model JobApplication {
+  id              Int                  @id @default(autoincrement())
+  jobId           Int                  @map("job_id")
+  firstName       String               @map("first_name")
+  lastName        String               @map("last_name")
+  email           String
+  phone           String?
+  coverLetter     String?              @map("cover_letter")
+  linkedinUrl     String?              @map("linkedin_url")
+  portfolioUrl    String?              @map("portfolio_url")
+  yearsExperience Int?                 @map("years_experience")
+  status          ApplicationStatus    @default(SUBMITTED)
+  resumeId        Int?                 @map("resume_id")
+  trackingToken   String               @unique @map("tracking_token") // For public status checking
+  source          String?              @default("website") // where the application came from
+  notes           String?              // Internal notes from recruiter
+  reviewedBy      Int?                 @map("reviewed_by")
+  reviewedAt      DateTime?            @map("reviewed_at")
+  createdAt       DateTime             @default(now()) @map("created_at")
+  updatedAt       DateTime             @updatedAt @map("updated_at")
+
+  // Relations
+  job    Job     @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  resume Resume? @relation(fields: [resumeId], references: [id], onDelete: SetNull)
+
+  @@index([jobId, status])
+  @@index([email])
+  @@index([trackingToken])
+  @@map("job_applications")
+}
+
+model Resume {
+  id              Int              @id @default(autoincrement())
+  originalName    String           @map("original_name")
+  fileName        String           @map("file_name")          // Stored file name
+  filePath        String           @map("file_path")          // Storage path
+  fileSize        Int              @map("file_size")          // In bytes
+  mimeType        String           @map("mime_type")
+  extractedText   String?          @map("extracted_text")     // Parsed text content
+  parsedData      Json?            @map("parsed_data")        // Structured data (skills, experience, etc.)
+  uploadedAt      DateTime         @default(now()) @map("uploaded_at")
+  
+  // Relations
+  applications JobApplication[]
+
+  @@map("resumes")
+}
+
+enum ApplicationStatus {
+  SUBMITTED       // Initial submission
+  UNDER_REVIEW    // Being reviewed by recruiter
+  SHORTLISTED     // Passed initial screening
+  INTERVIEW_SCHEDULED  // Interview scheduled
+  INTERVIEWED     // Interview completed
+  OFFER_EXTENDED  // Job offer sent
+  HIRED           // Accepted offer
+  REJECTED        // Application rejected
+  WITHDRAWN       // Candidate withdrew
+}

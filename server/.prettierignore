@@ -1,0 +1,9 @@
+node_modules/
+dist/
+coverage/
+*.md
+*.json
+.env*
+prisma/migrations/
+docker-compose.yml
+Dockerfile

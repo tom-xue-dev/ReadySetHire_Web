@@ -1,0 +1,179 @@
+{
+  "common": {
+    "welcome": "Welcome",
+    "logout": "Logout",
+    "login": "Login",
+    "dashboard": "Dashboard",
+    "toggleMenu": "Toggle Menu",
+    "confirmLogout": "Are you sure you want to logout?",
+    "copyright": "© 2025 ReadySetHire - Streamlining the hiring process with AI",
+    "settings": "Settings",
+    "closeMenu": "Close Menu"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "interviews": "Interviews",
+    "jobs": "Job Postings",
+    "applicants": "Applicants",
+    "subscription": "Subscription",
+    "questions": "Questions",
+    "resumeManagement": "Resume Management"
+  },
+  "home": {
+    "title": "ReadySetHire",
+    "loginLink": "Login",
+    "dashboardLink": "Dashboard"
+  },
+  "landing": {
+    "header": {
+      "brand": "ReadySetHire",
+      "nav": {
+        "features": "Features",
+        "howItWorks": "How it works",
+        "contact": "Contact"
+      },
+      "cta": {
+        "login": "Login",
+        "register": "Register"
+      }
+    },
+    "hero": {
+      "title": "Hire faster with AI-powered interviews and resume screening",
+      "subtitle": "Streamline your hiring workflow from job posting to offer with an all-in-one platform.",
+      "primaryCta": "Get started",
+      "secondaryCta": "See how it works"
+    },
+    "features": {
+      "title": "What you can do",
+      "items": {
+        "ats": {
+          "title": "Track applicants",
+          "desc": "Manage job postings, candidates, and interview stages."
+        },
+        "resumeAI": {
+          "title": "AI resume assessment",
+          "desc": "Screen resumes against your JD in seconds."
+        },
+        "voiceInterview": {
+          "title": "Voice interview",
+          "desc": "Record and transcribe answers securely."
+        },
+        "analytics": {
+          "title": "Insights",
+          "desc": "Understand pipeline efficiency and hiring metrics."
+        },
+        "collaboration": {
+          "title": "Team collaboration",
+          "desc": "Share notes and evaluations with your team."
+        },
+        "multilingual": {
+          "title": "Multilingual UI",
+          "desc": "English and Chinese built-in."
+        }
+      }
+    },
+    "howItWorks": {
+      "title": "How it works",
+      "steps": {
+        "one": {
+          "title": "Create a job",
+          "desc": "Define the role and requirements."
+        },
+        "two": {
+          "title": "Add questions",
+          "desc": "Create interview questions or use templates."
+        },
+        "three": {
+          "title": "Invite applicants",
+          "desc": "Collect resumes and run voice interviews."
+        },
+        "four": {
+          "title": "Review and decide",
+          "desc": "Compare answers, assess resumes, and move forward."
+        }
+      }
+    },
+    "ctaBottom": {
+      "title": "Ready to streamline hiring?",
+      "subtitle": "Create an account or sign in to continue.",
+      "primary": "Create account",
+      "secondary": "Sign in"
+    },
+    "footer": {
+      "company": "Company",
+      "resources": "Resources",
+      "legal": "Legal",
+      "links": {
+        "about": "About",
+        "contact": "Contact",
+        "docs": "Docs",
+        "api": "API",
+        "privacy": "Privacy",
+        "terms": "Terms"
+      }
+    }
+  },
+  "interview": {
+    "placeholder": "Type your answer here or use voice recording...",
+    "transcribing": "Transcribing...",
+    "speechError": "Speech Recognition Error",
+    "retrySpeech": "🔄 Retry Speech Recognition",
+    "recordMore": "Record More",
+    "reset": "Reset",
+    "startRecording": "Start Recording",
+    "pause": "Pause",
+    "resume": "Resume",
+    "stopTranscribe": "Stop & Transcribe"
+  },
+  "resume": {
+    "title": "Resume Assessment",
+    "fileLabel": "Resume file (.pdf or .txt) *",
+    "jdLabel": "Job Description (JD) *",
+    "jdPlaceholder": "Paste the JD here...",
+    "selectedFile": "Selected: {fileName} ({fileSize} KB)",
+    "extractedText": "Extracted text preview (TXT):",
+    "prepare": "Prepare Assessment",
+    "reset": "Reset",
+    "uploadFirst": "Please upload a PDF or TXT resume file first.",
+    "pasteJD": "Please paste the Job Description (JD).",
+    "loadedTxt": "Loaded TXT with {charCount} characters.",
+    "pdfSelected": "PDF selected. Parsing will be handled by backend.",
+    "unsupportedFile": "Unsupported file type. Please upload .pdf or .txt"
+  },
+  "forms": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "add": "Add",
+    "submit": "Submit",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "table": {
+    "noData": "No data",
+    "actions": "Actions",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your application preferences",
+    "language": {
+      "title": "Language Settings",
+      "description": "Choose your preferred language for the application interface",
+      "current": "Current Language"
+    },
+    "appearance": {
+      "title": "Appearance",
+      "description": "Customize the look and feel of the application"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "description": "Configure notification preferences"
+    },
+    "comingSoon": "Coming Soon"
+  }
+}

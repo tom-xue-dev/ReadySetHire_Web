@@ -1,0 +1,439 @@
+openapi: 3.0.3
+info:
+  title: ReadySetHire API
+  version: 1.0.0
+  description: RESTful API for jobs, interviews, questions, applicants and answers.
+servers:
+  - url: /api
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: OK
+  /auth/login:
+    post:
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+              required: [username, password]
+      responses:
+        '200':
+          description: JWT and user info
+  /jobs:
+    get:
+      summary: List jobs
+      responses:
+        '200': { description: OK }
+    post:
+      summary: Create job
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Job'
+      responses:
+        '201': { description: Created }
+  /jobs/{id}:
+    get:
+      summary: Get job by id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+  /jobs/{jobId}/apply:
+    post:
+      summary: Submit job application
+      description: Public endpoint to submit a job application with optional resume upload.
+      parameters:
+        - in: path
+          name: jobId
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/JobApplicationSubmission'
+      responses:
+        '201':
+          description: Application submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobApplicationCreated'
+        '400': { description: Bad Request }
+        '409': { description: Conflict (duplicate application) }
+        '500': { description: Internal Server Error }
+    patch:
+      summary: Update job
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Job'
+      responses:
+        '200': { description: Updated }
+    delete:
+      summary: Delete job
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '204': { description: Deleted }
+  /interviews:
+    get:
+      summary: List interviews
+      responses:
+        '200': { description: OK }
+    post:
+      summary: Create interview
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Interview'
+      responses:
+        '201': { description: Created }
+  /interviews/{id}:
+    get:
+      summary: Get interview
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+    patch:
+      summary: Update interview
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Interview'
+      responses:
+        '200': { description: Updated }
+    delete:
+      summary: Delete interview
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '204': { description: Deleted }
+  /interviews/{interviewId}/applicants:
+    get:
+      summary: List applicants bound to interview
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: interviewId
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+    post:
+      summary: Bind applicant to interview
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: interviewId
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                applicant_id: { type: integer }
+                status: { type: string }
+              required: [applicant_id]
+      responses:
+        '200': { description: Bound }
+  /interviews/{interviewId}/applicants/{applicantId}:
+    patch:
+      summary: Update applicant interview status
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: interviewId
+          required: true
+          schema: { type: integer }
+        - in: path
+          name: applicantId
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status: { type: string }
+      responses:
+        '200': { description: Updated }
+    delete:
+      summary: Unbind applicant from interview
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: interviewId
+          required: true
+          schema: { type: integer }
+        - in: path
+          name: applicantId
+          required: true
+          schema: { type: integer }
+      responses:
+        '204': { description: Unbound }
+  /applicants:
+    get:
+      summary: List applicants
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: OK }
+    post:
+      summary: Create applicant
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Applicant'
+      responses:
+        '201': { description: Created }
+  /applicants/{id}:
+    get:
+      summary: Get applicant
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+    patch:
+      summary: Update applicant
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Applicant'
+      responses:
+        '200': { description: Updated }
+    delete:
+      summary: Delete applicant
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '204': { description: Deleted }
+  /question:
+    get:
+      summary: List questions
+      responses:
+        '200': { description: OK }
+    post:
+      summary: Create question
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Question'
+      responses:
+        '201': { description: Created }
+  /question/interview/{interviewId}:
+    get:
+      summary: List questions by interview
+      parameters:
+        - in: path
+          name: interviewId
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+  /question/{id}:
+    patch:
+      summary: Update question
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Question'
+      responses:
+        '200': { description: Updated }
+    delete:
+      summary: Delete question
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '204': { description: Deleted }
+  /applications/track/{token}:
+    get:
+      summary: Track application status by token
+      description: Public endpoint to get the current status of an application by tracking token.
+      parameters:
+        - in: path
+          name: token
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationPublicStatus'
+        '404': { description: Not Found }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Job:
+      type: object
+      properties:
+        title: { type: string }
+        description: { type: string }
+        requirements: { type: string }
+        location: { type: string }
+        salaryRange: { type: string }
+        status: { type: string, enum: [DRAFT, PUBLISHED, ARCHIVED, CLOSED] }
+        company: { type: string }
+        department: { type: string }
+      required: [title, description, status]
+    JobApplicationSubmission:
+      type: object
+      properties:
+        firstName: { type: string }
+        lastName: { type: string }
+        email: { type: string, format: email }
+        phone: { type: string }
+        coverLetter: { type: string }
+        linkedinUrl: { type: string, format: uri }
+        portfolioUrl: { type: string, format: uri }
+        yearsExperience: { type: integer, minimum: 0 }
+        resume:
+          type: string
+          format: binary
+      required: [firstName, lastName, email]
+    JobApplicationCreated:
+      type: object
+      properties:
+        message: { type: string }
+        trackingToken: { type: string }
+        application:
+          type: object
+          properties:
+            id: { type: integer }
+            jobTitle: { type: string }
+            status: { type: string, enum: [SUBMITTED, UNDER_REVIEW, SHORTLISTED, INTERVIEW_SCHEDULED, INTERVIEWED, OFFER_EXTENDED, HIRED, REJECTED, WITHDRAWN] }
+            submittedAt: { type: string, format: date-time }
+      required: [trackingToken]
+    ApplicationPublicStatus:
+      type: object
+      properties:
+        success: { type: boolean }
+        application:
+          type: object
+          properties:
+            id: { type: integer }
+            jobTitle: { type: string }
+            applicantName: { type: string }
+            status: { type: string, enum: [SUBMITTED, UNDER_REVIEW, SHORTLISTED, INTERVIEW_SCHEDULED, INTERVIEWED, OFFER_EXTENDED, HIRED, REJECTED, WITHDRAWN] }
+            submittedAt: { type: string, format: date-time }
+            lastUpdated: { type: string, format: date-time }
+    Interview:
+      type: object
+      properties:
+        title: { type: string }
+        jobRole: { type: string }
+        description: { type: string }
+        status: { type: string, enum: [DRAFT, ACTIVE, CLOSED, ARCHIVED] }
+        jobId: { type: integer }
+      required: [title, jobRole, status]
+    Applicant:
+      type: object
+      properties:
+        firstname: { type: string }
+        surname: { type: string }
+        emailAddress: { type: string }
+        phoneNumber: { type: string }
+      required: [firstname, surname, emailAddress]
+    Question:
+      type: object
+      properties:
+        interview_id: { type: integer }
+        question: { type: string }
+        difficulty: { type: string, enum: [EASY, INTERMEDIATE, ADVANCED] }
+      required: [interview_id, question, difficulty]
+
+

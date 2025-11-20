@@ -1,0 +1,180 @@
+{
+  "common": {
+    "welcome": "欢迎",
+    "logout": "退出登录",
+    "login": "登录",
+    "dashboard": "仪表板",
+    "toggleMenu": "切换菜单",
+    "confirmLogout": "您确定要退出登录吗？",
+    "copyright": "© 2025 ReadySetHire - 使用AI简化招聘流程",
+    "settings": "设置",
+    "closeMenu": "关闭菜单"
+  },
+  "navigation": {
+    "dashboard": "仪表板",
+    "interviews": "面试",
+    "jobs": "职位发布",
+    "applicants": "申请人",
+    "subscription": "订阅",
+    "questions": "问题",
+    "resumeManagement": "简历管理",
+    "menu": "菜单"
+  },
+  "home": {
+    "title": "ReadySetHire",
+    "loginLink": "登录",
+    "dashboardLink": "仪表板"
+  },
+  "landing": {
+    "header": {
+      "brand": "ReadySetHire",
+      "nav": {
+        "features": "功能",
+        "howItWorks": "如何运作",
+        "contact": "联系"
+      },
+      "cta": {
+        "login": "登录",
+        "register": "注册"
+      }
+    },
+    "hero": {
+      "title": "用AI驱动的面试与简历筛选加速招聘",
+      "subtitle": "从职位发布到发放Offer，一站式平台简化招聘流程。",
+      "primaryCta": "立即开始",
+      "secondaryCta": "了解流程"
+    },
+    "features": {
+      "title": "你可以做到",
+      "items": {
+        "ats": {
+          "title": "追踪候选人",
+          "desc": "管理职位、候选人与面试阶段。"
+        },
+        "resumeAI": {
+          "title": "AI简历评估",
+          "desc": "秒级对照JD筛选简历。"
+        },
+        "voiceInterview": {
+          "title": "语音面试",
+          "desc": "安全录制并转录回答。"
+        },
+        "analytics": {
+          "title": "洞察",
+          "desc": "了解招聘漏斗与效率指标。"
+        },
+        "collaboration": {
+          "title": "团队协作",
+          "desc": "与团队共享笔记与评估。"
+        },
+        "multilingual": {
+          "title": "多语言界面",
+          "desc": "内置中英双语。"
+        }
+      }
+    },
+    "howItWorks": {
+      "title": "如何运作",
+      "steps": {
+        "one": {
+          "title": "创建职位",
+          "desc": "定义岗位与要求。"
+        },
+        "two": {
+          "title": "添加问题",
+          "desc": "自建面试题或使用模板。"
+        },
+        "three": {
+          "title": "邀请候选人",
+          "desc": "收集简历并进行语音面试。"
+        },
+        "four": {
+          "title": "评审并决策",
+          "desc": "对比回答、评估简历并推进。"
+        }
+      }
+    },
+    "ctaBottom": {
+      "title": "准备好简化招聘了吗？",
+      "subtitle": "创建账户或登录继续。",
+      "primary": "创建账户",
+      "secondary": "登录"
+    },
+    "footer": {
+      "company": "公司",
+      "resources": "资源",
+      "legal": "法律",
+      "links": {
+        "about": "关于我们",
+        "contact": "联系",
+        "docs": "文档",
+        "api": "API",
+        "privacy": "隐私政策",
+        "terms": "服务条款"
+      }
+    }
+  },
+  "interview": {
+    "placeholder": "在此输入您的答案或使用语音录制...",
+    "transcribing": "转录中...",
+    "speechError": "语音识别错误",
+    "retrySpeech": "🔄 重试语音识别",
+    "recordMore": "继续录制",
+    "reset": "重置",
+    "startRecording": "开始录制",
+    "pause": "暂停",
+    "resume": "继续",
+    "stopTranscribe": "停止并转录"
+  },
+  "resume": {
+    "title": "简历评估",
+    "fileLabel": "简历文件 (.pdf 或 .txt) *",
+    "jdLabel": "职位描述 (JD) *",
+    "jdPlaceholder": "在此粘贴职位描述...",
+    "selectedFile": "已选择: {fileName} ({fileSize} KB)",
+    "extractedText": "提取的文本预览 (TXT):",
+    "prepare": "准备评估",
+    "reset": "重置",
+    "uploadFirst": "请先上传PDF或TXT简历文件。",
+    "pasteJD": "请粘贴职位描述 (JD)。",
+    "loadedTxt": "已加载TXT文件，包含 {charCount} 个字符。",
+    "pdfSelected": "已选择PDF文件。解析将由后端处理。",
+    "unsupportedFile": "不支持的文件类型。请上传 .pdf 或 .txt 文件"
+  },
+  "forms": {
+    "save": "保存",
+    "cancel": "取消",
+    "edit": "编辑",
+    "delete": "删除",
+    "add": "添加",
+    "submit": "提交",
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功"
+  },
+  "table": {
+    "noData": "暂无数据",
+    "actions": "操作",
+    "search": "搜索",
+    "filter": "筛选",
+    "sort": "排序"
+  },
+  "settings": {
+    "title": "设置",
+    "subtitle": "管理您的应用程序偏好设置",
+    "language": {
+      "title": "语言设置",
+      "description": "选择您偏好的应用程序界面语言",
+      "current": "当前语言"
+    },
+    "appearance": {
+      "title": "外观",
+      "description": "自定义应用程序的外观和感觉"
+    },
+    "notifications": {
+      "title": "通知",
+      "description": "配置通知偏好设置"
+    },
+    "comingSoon": "即将推出"
+  }
+}

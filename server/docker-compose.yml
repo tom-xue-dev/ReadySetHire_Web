@@ -1,0 +1,74 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: readysethire-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: readysethire
+      POSTGRES_USER: readysethire_user
+      POSTGRES_PASSWORD: readysethire_password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - readysethire-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U readysethire_user -d readysethire"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API Server
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: readysethire-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DATABASE_URL: postgresql://readysethire_user:readysethire_password@postgres:5432/readysethire?schema=public
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      CORS_ORIGIN: http://localhost:5173
+      LOG_LEVEL: debug
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./config:/app/config:ro
+      - ./logs:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - readysethire-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 8
+      start_period: 120s
+
+  ollama:
+    image: ollama/ollama
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    entrypoint: ["/bin/bash", "-c"]
+    command: ["ollama serve & sleep 5 && ollama pull deepseek-r1:7b && tail -f /dev/null"]
+
+
+volumes:
+  postgres_data:
+    driver: local
+  ollama-data:
+    driver: local
+
+networks:
+  readysethire-network:
+    driver: bridge
