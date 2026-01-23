@@ -11,7 +11,6 @@ import {
   EnvelopeIcon,
   TagIcon,
   UserGroupIcon,
-  DocumentArrowUpIcon,
 } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -65,7 +64,6 @@ export default function ResumeManagement() {
   const [q, setQ] = useState('');
   const [role, setRole] = useState<string | null>(null);
   const [minScore, setMinScore] = useState<number | null>(null);
-  const [uploadOpen, setUploadOpen] = useState(false);
   const [detail, setDetail] = useState<Candidate | null>(null);
   const [sortBy, setSortBy] = useState<{ key: 'updatedAt' | 'score' | 'name'; dir: 'asc' | 'desc' }>({ key: 'updatedAt', dir: 'desc' });
   const [loading, setLoading] = useState(true);

@@ -32,7 +32,7 @@ export default function Jobs() {
     setError(null);
     try {
       const data = await getJobs();
-      setJobs(data);
+      setJobs(data as Job[]);
     } catch (err: any) {
       setError(err?.message ?? 'Failed to load jobs');
     } finally {

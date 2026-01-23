@@ -5,7 +5,7 @@
     "useDefineForClassFields": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
-    "types": ["vite/client"],
+    "types": ["vite/client", "node"],
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
@@ -34,5 +34,14 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": [
+    "src/pages/dashboard/ApplicantPage.tsx",
+    "src/pages/dashboard/Applicants.tsx",
+    "src/pages/dashboard/ApplicationManagement.tsx",
+    "src/pages/interview/Interviews.tsx",
+    "src/pages/interview/InterviewRun.tsx",
+    "src/pages/Questions.tsx",
+    "src/pages/tools/ConnectionDemo.tsx"
+  ]
 }

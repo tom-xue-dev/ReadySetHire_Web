@@ -23,12 +23,13 @@ services:
       timeout: 5s
       retries: 5
 
-  # Backend API Server (Development mode with code mounting)
+  # Backend API Server (Using Dockerfile)
   backend:
-    image: node:18-slim
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: readysethire-backend
     restart: unless-stopped
-    working_dir: /app
     env_file:
       - .env.dev
     environment:
@@ -41,38 +42,17 @@ services:
       LOG_LEVEL: debug
     ports:
       - "3000:3000"
-    volumes:
-      # Mount source code for hot reload
-      - .:/app
-      # Use anonymous volume for node_modules to avoid conflicts with host
-      - /app/node_modules
-      - ./config:/app/config:ro
-      - ./logs:/app/logs
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       - readysethire-network
-    # Install dependencies and generate Prisma client on first run, then start dev server
-    command: >
-      sh -c "
-        apt-get update -qq && 
-        apt-get install -y -qq wget ca-certificates openssl libc6 libstdc++6 libgomp1 > /dev/null 2>&1 &&
-        if [ ! -d node_modules ] || [ ! -f node_modules/.prisma/client/index.js ]; then
-          echo '📦 Installing dependencies...' &&
-          npm ci &&
-          echo '🔧 Generating Prisma client...' &&
-          npx prisma generate
-        fi &&
-        echo '🚀 Starting development server with hot reload...' &&
-        npm run dev
-      "
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', r => process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
       interval: 30s
       timeout: 10s
-      retries: 8
-      start_period: 120s
+      retries: 3
+      start_period: 40s
 
   ollama:
     image: ollama/ollama
