@@ -1,0 +1,47 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 部署到 EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 13.54.230.70
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            # 进入项目目录（如果不存在则克隆）
+            if [ ! -d "ReadysetHire" ]; then
+              git clone https://github.com/${{ github.repository }}.git ReadysetHire
+            fi
+            
+            cd ReadysetHire
+            
+            # 拉取最新代码
+            git pull origin main
+            
+            # 进入 server 目录
+            cd server
+            
+            # 停止并移除旧容器
+            docker-compose down
+            
+            # 启动新容器
+            docker-compose up -d
+            
+            # 等待服务启动
+            sleep 10
+            
+            # 显示状态
+            docker-compose ps
+            
+            echo "✅ 部署完成！"
