@@ -21,7 +21,7 @@ jobs:
           script: |
             # 进入项目目录（如果不存在则克隆）
             if [ ! -d "ReadysetHire" ]; then
-              git clone https://github.com/${{ github.repository }}.git ReadysetHire
+              git clone git@github.com:${{ github.repository }}.git ReadysetHire
             fi
             
             cd ReadysetHire
