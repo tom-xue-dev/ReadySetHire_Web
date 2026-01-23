@@ -39,31 +39,52 @@ export abstract class BaseService<T> {
   }
 
   async create(data: any): Promise<T> {
-    return (this.prisma as any)[this.model].create({ data });
+    // Prisma client uses lowercase model names (e.g., 'job' not 'Job')
+    const modelName = this.model.toLowerCase();
+    return (this.prisma as any)[modelName].create({ data });
   }
 
-  async findMany(where?: any, include?: any): Promise<T[]> {
-    return (this.prisma as any)[this.model].findMany({ where, include });
+  async findMany(where?: any, options?: { include?: any; select?: any }): Promise<T[]> {
+    // Prisma client uses lowercase model names (e.g., 'job' not 'Job')
+    const modelName = this.model.toLowerCase();
+    const queryOptions: any = { where };
+    if (options?.include) {
+      queryOptions.include = options.include;
+    }
+    if (options?.select) {
+      queryOptions.select = options.select;
+    }
+    return (this.prisma as any)[modelName].findMany(queryOptions);
   }
 
   async findUnique(where: any, options?: { select?: any; include?: any }): Promise<T | null> {
-    return (this.prisma as any)[this.model].findUnique({ where, ...options });
+    // Prisma client uses lowercase model names (e.g., 'job' not 'Job')
+    const modelName = this.model.toLowerCase();
+    return (this.prisma as any)[modelName].findUnique({ where, ...options });
   }
 
   async findFirst(where: any, include?: any): Promise<T | null> {
-    return (this.prisma as any)[this.model].findFirst({ where, include });
+    // Prisma client uses lowercase model names (e.g., 'job' not 'Job')
+    const modelName = this.model.toLowerCase();
+    return (this.prisma as any)[modelName].findFirst({ where, include });
   }
 
   async update(id: number, data: any): Promise<T> {
-    return (this.prisma as any)[this.model].update({ where: { id }, data });
+    // Prisma client uses lowercase model names (e.g., 'job' not 'Job')
+    const modelName = this.model.toLowerCase();
+    return (this.prisma as any)[modelName].update({ where: { id }, data });
   }
 
   async delete(where: any): Promise<T> {
-    return (this.prisma as any)[this.model].delete({ where });
+    // Prisma client uses lowercase model names (e.g., 'job' not 'Job')
+    const modelName = this.model.toLowerCase();
+    return (this.prisma as any)[modelName].delete({ where });
   }
 
   async count(where?: any): Promise<number> {
-    return (this.prisma as any)[this.model].count({ where });
+    // Prisma client uses lowercase model names (e.g., 'job' not 'Job')
+    const modelName = this.model.toLowerCase();
+    return (this.prisma as any)[modelName].count({ where });
   }
 }
 

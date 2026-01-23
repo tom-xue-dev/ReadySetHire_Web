@@ -105,11 +105,19 @@ export class CRUDController<T> {
   }
 
   // Helper method to build where clause from query parameters
-  private buildWhereClause(filters: any): any {
+  protected buildWhereClause(filters: any): any {
     const where: any = {};
+    
+    // Reserved query parameters that should not be included in where clause
+    const reservedParams = ['include', 'select', 'orderBy', 'skip', 'take', 'cursor'];
 
     Object.keys(filters).forEach(key => {
       const value = filters[key];
+      
+      // Skip reserved parameters
+      if (reservedParams.includes(key)) {
+        return;
+      }
       
       if (value !== undefined && value !== null && value !== '') {
         // Handle special operators
@@ -130,7 +138,7 @@ export class CRUDController<T> {
           where[field] = { in: value.split(',') };
         } else if (key.includes('_contains')) {
           const field = key.replace('_contains', '');
-          where[field] = { contains: value };
+          where[field] = { contains: value, mode: 'insensitive' };
         } else if (key.includes('_startsWith')) {
           const field = key.replace('_startsWith', '');
           where[field] = { startsWith: value };
@@ -149,9 +157,11 @@ export class CRUDController<T> {
 
   // Helper method to parse values based on type
   private parseValue(value: any): any {
-    // Try to parse as number
-    if (!isNaN(Number(value))) {
-      return Number(value);
+    // Don't parse strings that look like numbers if they're for text fields
+    // Only parse if it's clearly a number (no leading zeros, etc.)
+    const numValue = Number(value);
+    if (!isNaN(numValue) && value !== '' && String(numValue) === String(value) && !value.includes('.')) {
+      return numValue;
     }
     
     // Try to parse as boolean

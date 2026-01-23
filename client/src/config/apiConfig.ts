@@ -3,7 +3,7 @@
  * --------------------------------------
  * Centralized configuration for API endpoints.
  * Automatically reads environment variables
- * and supports development / staging / production modes.
+ * and supports development / production modes.
  */
 
 export interface ApiConfig {

@@ -202,3 +202,5 @@ ALTER TABLE "public"."job_applications" ADD CONSTRAINT "job_applications_job_id_
 
 -- AddForeignKey
 ALTER TABLE "public"."job_applications" ADD CONSTRAINT "job_applications_resume_id_fkey" FOREIGN KEY ("resume_id") REFERENCES "public"."resumes"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+Insert into public.users (username, email, password_hash, first_name, last_name, role) values ('admin', 'admin@example.com', 'admin', 'Admin', 'Admin', 'ADMIN');

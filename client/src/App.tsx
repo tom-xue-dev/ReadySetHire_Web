@@ -12,6 +12,7 @@ import Layout from "./components/layout/layout.tsx";
 import Subscription from "./pages/dashboard/Subscription.tsx";
 import Jobs from "./pages/dashboard/Jobs.tsx";
 import ResumeManagement from "./pages/dashboard/ResumeManagement.tsx";
+import TrackingJobs from "./pages/dashboard/TrackingJobs.tsx";
 import PublicJobDetails from "./pages/PublicJobDetails.tsx";
 import PublicJobApplication from "./pages/PublicJobApplication.tsx";
 function AppContent() {
@@ -42,6 +43,11 @@ function AppContent() {
                   <Route path="/dashboard" element={<HRDashboard />} />
                   <Route path="/subscription" element={<Subscription />} />
                   <Route path="/jobs" element={<Jobs />} />
+                  <Route path="/tracking-jobs" element={
+                    <ProtectedRoute requiredRole="INTERVIEWER">
+                      <TrackingJobs />
+                    </ProtectedRoute>
+                  } />
                   <Route path="/resume-management" element={<ResumeManagement />} />
                 </Routes>
               </Layout>

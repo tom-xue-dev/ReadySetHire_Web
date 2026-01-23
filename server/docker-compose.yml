@@ -4,10 +4,12 @@ services:
     image: postgres:15-alpine
     container_name: readysethire-postgres
     restart: unless-stopped
+    env_file:
+      - .env.dev
     environment:
-      POSTGRES_DB: readysethire
-      POSTGRES_USER: readysethire_user
-      POSTGRES_PASSWORD: readysethire_password
+      POSTGRES_DB: ${POSTGRES_DB:-readysethire}
+      POSTGRES_USER: ${POSTGRES_USER:-readysethire_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-readysethire_password}
       POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
     ports:
       - "5432:5432"
@@ -21,23 +23,29 @@ services:
       timeout: 5s
       retries: 5
 
-  # Backend API Server
+  # Backend API Server (Development mode with code mounting)
   backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: node:18-slim
     container_name: readysethire-backend
     restart: unless-stopped
+    working_dir: /app
+    env_file:
+      - .env.dev
     environment:
       NODE_ENV: development
       PORT: 3000
-      DATABASE_URL: postgresql://readysethire_user:readysethire_password@postgres:5432/readysethire?schema=public
-      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      # Force use service name 'postgres' instead of localhost for Docker networking
+      DATABASE_URL: postgresql://${POSTGRES_USER:-readysethire_user}:${POSTGRES_PASSWORD:-readysethire_password}@postgres:5432/${POSTGRES_DB:-readysethire}?schema=public
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
       CORS_ORIGIN: http://localhost:5173
       LOG_LEVEL: debug
     ports:
       - "3000:3000"
     volumes:
+      # Mount source code for hot reload
+      - .:/app
+      # Use anonymous volume for node_modules to avoid conflicts with host
+      - /app/node_modules
       - ./config:/app/config:ro
       - ./logs:/app/logs
     depends_on:
@@ -45,6 +53,20 @@ services:
         condition: service_healthy
     networks:
       - readysethire-network
+    # Install dependencies and generate Prisma client on first run, then start dev server
+    command: >
+      sh -c "
+        apt-get update -qq && 
+        apt-get install -y -qq wget ca-certificates openssl libc6 libstdc++6 libgomp1 > /dev/null 2>&1 &&
+        if [ ! -d node_modules ] || [ ! -f node_modules/.prisma/client/index.js ]; then
+          echo '📦 Installing dependencies...' &&
+          npm ci &&
+          echo '🔧 Generating Prisma client...' &&
+          npx prisma generate
+        fi &&
+        echo '🚀 Starting development server with hot reload...' &&
+        npm run dev
+      "
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
       interval: 30s

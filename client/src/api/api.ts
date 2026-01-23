@@ -61,10 +61,26 @@ export async function apiRequest(endpoint: string, method: string = 'GET', body:
     const requestId: string = generateRequestId();
     const start: number = nowMs();
 
+    const token = getAuthToken();
+    
+    // Debug: Log token status
+    if (!token) {
+        console.warn('⚠️ No token found in localStorage for request:', endpoint);
+        console.warn('⚠️ localStorage.getItem("token"):', localStorage.getItem('token'));
+    } else {
+        console.log('🔑 Token found, length:', token.length);
+    }
+    
     const headers: Record<string, string> = {
         'Content-Type': 'application/json', // Indicate that we are sending JSON data
-        'Authorization': `Bearer ${getAuthToken()}` // Include the JWT token for authentication
     };
+    
+    // Only add Authorization header if token exists
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    } else {
+        console.error('❌ Cannot add Authorization header - token is empty');
+    }
 
     // If the method is POST or PATCH, we want the response to include the full representation
     if (method === 'POST' || method === 'PATCH') {
@@ -86,6 +102,8 @@ export async function apiRequest(endpoint: string, method: string = 'GET', body:
         if (API_LOG_ENABLED) {
             console.groupCollapsed(`🛰️ API ${method} ${endpoint} [${requestId}]`);
             console.log('URL:', `${API_BASE_URL}${endpoint}`);
+            console.log('Headers:', maskHeaders(headers));
+            console.log('Authorization header present:', !!headers['Authorization']);
             console.log('Options:', { ...options, headers: maskHeaders(headers) });
             if (body) console.log('Body:', preview(body));
             console.groupEnd();

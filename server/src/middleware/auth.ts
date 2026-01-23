@@ -49,11 +49,15 @@ export const authenticateToken = async (
     const token = JWTUtils.extractTokenFromHeader(authHeader || '');
 
     if (!token) {
+      console.log('❌ No token provided in Authorization header');
       res.status(401).json({ error: 'Access token required' });
       return;
     }
+    
+    console.log('🔐 Token received, verifying...');
 
     const decoded = JWTUtils.verifyToken(token) as any;
+    console.log('✅ Token decoded successfully:', { id: decoded.id, role: decoded.role });
     
     // Verify user still exists
     const user = await userService.findUnique(
@@ -62,19 +66,23 @@ export const authenticateToken = async (
     );
 
     if (!user) {
+      console.log('❌ User not found in database:', decoded.id);
       res.status(401).json({ error: 'Invalid token - user not found' });
       return;
     }
 
+    console.log('✅ User verified:', { id: user.id, role: user.role });
     req.user = user;
     next();
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {
+      console.log('❌ JWT verification failed:', error.message);
       res.status(401).json({ error: 'Invalid token' });
     } else if (error instanceof jwt.TokenExpiredError) {
+      console.log('❌ Token expired');
       res.status(401).json({ error: 'Token expired' });
     } else {
-      console.error('Authentication error:', error);
+      console.error('❌ Authentication error:', error);
       res.status(500).json({ error: 'Authentication failed' });
     }
   }
@@ -82,17 +90,21 @@ export const authenticateToken = async (
 
 // Role-based authorization middleware
 export const requireRole = (roles: string[]) => {
-  return (req: Request, res: Response, next: NextFunction): void => {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     if (!req.user) {
+      console.log('❌ requireRole: No user in request');
       res.status(401).json({ error: 'Authentication required' });
       return;
     }
 
+    console.log('🔐 Checking role:', { required: roles, userRole: req.user.role });
     if (!roles.includes(req.user.role)) {
+      console.log('❌ Insufficient permissions:', { required: roles, userRole: req.user.role });
       res.status(403).json({ error: 'Insufficient permissions' });
       return;
     }
 
+    console.log('✅ Role check passed');
     next();
   };
 };

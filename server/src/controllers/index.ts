@@ -10,6 +10,42 @@ export class JobController extends CRUDController<any> {
     super(jobService);
   }
 
+  async getAll(req: Request, res: Response): Promise<void> {
+    try {
+      const { ...filters } = req.query;
+      const isTracking = req.originalUrl.includes('/tracking');
+
+      // Build where clause from query parameters
+      const where = this.buildWhereClause(filters);
+
+      console.log(`Fetching ${this.modelName} with where:`, where);
+
+      // For tracking endpoint, include user relation to show all fields
+      let items;
+      if (isTracking) {
+        // Use Prisma client directly for include relation
+        // Prisma model name is 'job' (lowercase) in the client
+        items = await (this.service as any).prisma.job.findMany({
+          where,
+          include: { user: true }
+        });
+      } else {
+        items = await this.service.findMany(where);
+      }
+
+      res.json({
+        data: items
+      });
+    } catch (error) {
+      console.error(`Error fetching ${this.modelName}:`, error);
+      console.error('Error details:', error);
+      res.status(500).json({ 
+        error: `Failed to fetch ${this.modelName}`,
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
   protected validateAndTransformData(data: any, req?: any): any {
     ValidationUtils.validateRequired(data, ['title', 'description']);
     

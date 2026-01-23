@@ -30,7 +30,7 @@
   
 
   FROM node:18-slim AS runtime
-  ENV NODE_ENV=production
+  ENV NODE_ENV=dev
   WORKDIR /app
   
 
