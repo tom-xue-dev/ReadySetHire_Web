@@ -33,15 +33,15 @@ jobs:
             cd server
             
             # 停止并移除旧容器
-            docker compose down
+            sudo docker compose down
             
             # 启动新容器
-            docker compose up -d
+            sudo docker compose up -d
             
             # 等待服务启动
             sleep 10
             
             # 显示状态
-            docker compose ps
+            sudo docker compose ps
             
             echo "✅ 部署完成！"
