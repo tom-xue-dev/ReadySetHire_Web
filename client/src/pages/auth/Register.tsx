@@ -15,7 +15,7 @@ interface RegisterFormData {
   confirmPassword: string;
   firstName: string;
   lastName: string;
-  role: 'ADMIN' | 'RECRUITER' | 'INTERVIEWER';
+  role: 'ADMIN' | 'RECRUITER' | 'EMPLOYEE';
 }
 
 export default function Register() {
@@ -138,7 +138,7 @@ export default function Register() {
             onChange={handleChange}
           >
             <option value="RECRUITER">Recruiter</option>
-            <option value="INTERVIEWER">Interviewer</option>
+            <option value="EMPLOYEE">Employee</option>
             <option value="ADMIN">Admin</option>
           </Select>
 

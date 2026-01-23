@@ -8,8 +8,8 @@ const interviewController = new InterviewController(interviewService);
 
 router.get('/interviews', optionalAuth, interviewController.getAll.bind(interviewController));
 router.get('/interviews/:id', optionalAuth, interviewController.getById.bind(interviewController));
-router.post('/interviews', authenticateToken, requireRole(['ADMIN', 'RECRUITER', 'INTERVIEWER']), interviewController.create.bind(interviewController));
-router.patch('/interviews/:id', authenticateToken, requireRole(['ADMIN', 'RECRUITER', 'INTERVIEWER']), interviewController.update.bind(interviewController));
+router.post('/interviews', authenticateToken, requireRole(['ADMIN', 'RECRUITER', 'EMPLOYEE']), interviewController.create.bind(interviewController));
+router.patch('/interviews/:id', authenticateToken, requireRole(['ADMIN', 'RECRUITER', 'EMPLOYEE']), interviewController.update.bind(interviewController));
 router.delete('/interviews/:id', authenticateToken, requireRole(['ADMIN', 'RECRUITER']), interviewController.delete.bind(interviewController));
 
 export default router;

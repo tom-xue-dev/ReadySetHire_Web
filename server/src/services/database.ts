@@ -113,7 +113,7 @@ export class UserService extends BaseService<any> {
     password: string;
     firstName?: string;
     lastName?: string;
-    role?: 'ADMIN' | 'RECRUITER' | 'INTERVIEWER';
+    role?: 'ADMIN' | 'RECRUITER' | 'EMPLOYEE';
   }) {
     const { password, ...data } = userData;
     const passwordHash = await bcrypt.hash(password, 12);

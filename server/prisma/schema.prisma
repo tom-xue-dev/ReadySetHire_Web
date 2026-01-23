@@ -139,7 +139,7 @@ model ApplicantAnswer {
 enum UserRole {
   ADMIN
   RECRUITER
-  INTERVIEWER
+  EMPLOYEE
 }
 
 enum JobStatus {

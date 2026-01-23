@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { BriefcaseIcon, BookmarkIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { BookmarkIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
 import { apiRequest } from '@/api/api';
-import PageShell from '@/components/layout/PageShell';
+import LandingHeader from '@/components/layout/LandingHeader';
+import LandingFooter from '@/components/layout/LandingFooter';
 
 interface Job {
   id: number;
@@ -47,15 +48,9 @@ export default function TrackingJobs() {
     setLoading(true);
     setError(null);
     try {
-      // Check if user is authenticated
+      // Check if user is authenticated (optional for this page)
       const token = localStorage.getItem('token');
-      console.log('🔍 Checking token:', token ? `Found (length: ${token.length})` : 'Not found');
-      
-      if (!token) {
-        console.error('❌ No token in localStorage');
-        setError('Please log in to access this page');
-        return;
-      }
+      console.log('🔍 Checking token:', token ? `Found (length: ${token.length})` : 'Not found (public access)');
 
       const params = new URLSearchParams();
       // Use contains for fuzzy search on title and description
@@ -70,7 +65,7 @@ export default function TrackingJobs() {
       }
 
       const queryString = params.toString();
-      // Use tracking endpoint for interviewers to get all fields with user relation
+      // Use tracking endpoint for employees to get all fields with user relation
       const url = `/jobs/tracking${queryString ? `?${queryString}` : ''}`;
       const response = await apiRequest(url);
       const data = (response as { data?: Job[] })?.data || [];
@@ -169,15 +164,20 @@ export default function TrackingJobs() {
   }
 
   return (
-    <PageShell title="Job Tracking" icon={<BriefcaseIcon />}>
-      <div className="min-h-screen bg-gray-50">
-        {/* Header with Search Bar - Seek.com.au style */}
-        <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-pink-600 relative overflow-hidden">
-          <div className="absolute inset-0 opacity-20">
-            <div className="absolute top-0 right-0 w-96 h-96 bg-pink-500 rounded-full blur-3xl"></div>
-            <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500 rounded-full blur-3xl"></div>
-          </div>
-          
+    <div className="bg-white min-h-screen relative flex flex-col">
+      <LandingHeader showNavLinks={false} />
+      
+      {/* Top background decoration - same as Home page */}
+      <div aria-hidden="true" className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-[80px] sm:-top-80">
+        <div
+          style={{clipPath:'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)'}}
+          className="relative left-1/2 aspect-1155/678 w-400 -translate-x-1/2 rotate-30 bg-linear-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 blur-3xl pointer-events-none sm:w-560"
+        />
+      </div>
+
+      <div className="min-h-screen bg-transparent pt-14">
+        {/* Header with Search Bar */}
+        <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 relative overflow-hidden shadow-lg">
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="bg-white rounded-lg shadow-xl p-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -476,6 +476,8 @@ export default function TrackingJobs() {
           </div>
         </div>
       </div>
-    </PageShell>
+      
+      <LandingFooter />
+    </div>
   );
 }

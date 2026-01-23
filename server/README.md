@@ -15,7 +15,7 @@ A modern TypeScript Express server using Prisma ORM for type-safe database opera
 ## 📊 Database Schema
 
 ### Models
-- **User**: User accounts with roles (ADMIN, RECRUITER, INTERVIEWER)
+- **User**: User accounts with roles (ADMIN, RECRUITER, EMPLOYEE)
 - **Job**: Job postings linked to users
 - **Interview**: Interview sessions linked to jobs
 - **Question**: Interview questions linked to interviews

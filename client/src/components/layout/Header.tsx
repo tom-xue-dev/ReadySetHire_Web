@@ -11,12 +11,25 @@ interface HeaderProps {
 }
 
 export default function Header({ sidebarOpen = false, onToggle }: HeaderProps) {
-  const { user, logout } = useAuth();
+  const { user, logout, isAuthenticated } = useAuth();
   const { t } = useI18n();
   const navigate = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLElement>(null);
+
+  const handleLogoClick = () => {
+    if (!isAuthenticated) {
+      // Not logged in -> go to home page
+      navigate('/');
+    } else if (user?.role === 'EMPLOYEE') {
+      // Employee -> go to tracking-jobs
+      navigate('/tracking-jobs');
+    } else {
+      // Recruiter/Admin -> go to dashboard
+      navigate('/dashboard');
+    }
+  };
 
   const handleSettings = () => {
     navigate('/settings');
@@ -69,7 +82,7 @@ export default function Header({ sidebarOpen = false, onToggle }: HeaderProps) {
       </button>
       <div className="max-w-full mx-auto px-5 flex justify-between items-center">
         <div className={`flex items-center gap-3 transition-all duration-300 ${sidebarOpen ? 'ml-[280px]' : 'ml-[45px]'}`}>
-          <button onClick={() => navigate('/')} style={brandTitleStyle}>
+          <button onClick={handleLogoClick} style={brandTitleStyle}>
             <img src={logo} style={{ height: 40, width: 'auto' }} className="block object-contain" />
           </button>
         </div>

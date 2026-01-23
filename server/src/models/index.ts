@@ -8,7 +8,7 @@ export interface User {
   password_hash: string;
   first_name?: string;
   last_name?: string;
-  role: 'admin' | 'recruiter' | 'interviewer';
+  role: 'admin' | 'recruiter' | 'employee';
   created_at?: Date;
   updated_at?: Date;
 }

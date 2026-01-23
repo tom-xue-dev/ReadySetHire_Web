@@ -36,6 +36,15 @@ function AppContent() {
           } />
           <Route path="/jobs/:jobId" element={<PublicJobDetails />} />
           <Route path="/jobs/:jobId/apply" element={<PublicJobApplication />} />
+          
+          {/* TrackingJobs - Standalone route with role protection */}
+          <Route path="/tracking-jobs" element={
+            <ProtectedRoute requiredRole="EMPLOYEE">
+              <TrackingJobs />
+            </ProtectedRoute>
+          } />
+          
+          {/* Dashboard routes - Protected with Layout */}
           <Route path="/*" element={
             <ProtectedRoute>
               <Layout>
@@ -43,11 +52,6 @@ function AppContent() {
                   <Route path="/dashboard" element={<HRDashboard />} />
                   <Route path="/subscription" element={<Subscription />} />
                   <Route path="/jobs" element={<Jobs />} />
-                  <Route path="/tracking-jobs" element={
-                    <ProtectedRoute requiredRole="INTERVIEWER">
-                      <TrackingJobs />
-                    </ProtectedRoute>
-                  } />
                   <Route path="/resume-management" element={<ResumeManagement />} />
                 </Routes>
               </Layout>
