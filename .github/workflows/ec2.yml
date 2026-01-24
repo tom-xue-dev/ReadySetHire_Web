@@ -2,7 +2,7 @@ name: Build & Deploy to EC2 via ECR
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "**" ]
 
 permissions:
   id-token: write

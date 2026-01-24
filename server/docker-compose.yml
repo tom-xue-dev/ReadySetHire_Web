@@ -30,12 +30,12 @@ services:
     container_name: readysethire-backend
     restart: unless-stopped
     environment:
-      NODE_ENV: development
+      NODE_ENV: production
       PORT: 3000
       # Force use service name 'postgres' instead of localhost for Docker networking
       DATABASE_URL: postgresql://${POSTGRES_USER:-readysethire_user}:${POSTGRES_PASSWORD:-readysethire_password}@postgres:5432/${POSTGRES_DB:-readysethire}?schema=public
       JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
-      CORS_ORIGIN: http://localhost:5173
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
       LOG_LEVEL: debug
     ports:
       - "3000:3000"
