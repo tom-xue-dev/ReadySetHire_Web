@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "public"."UserRole" AS ENUM ('ADMIN', 'RECRUITER', 'INTERVIEWER');
+CREATE TYPE "public"."UserRole" AS ENUM ('ADMIN', 'RECRUITER', 'EMPLOYEE');
 
 -- CreateEnum
 CREATE TYPE "public"."JobStatus" AS ENUM ('DRAFT', 'PUBLISHED', 'CLOSED');
