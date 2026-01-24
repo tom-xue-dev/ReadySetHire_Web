@@ -86,22 +86,22 @@ jobs:
             export BACKEND_IMAGE=${IMAGE_URI}
             
             # Stop old containers
-            docker-compose down || true
+            docker compose down || true
             
             # Start new containers with production config
-            docker-compose up -d
+            docker compose up -d
             
             # Wait for backend to be healthy
             sleep 15
             
             # Check if backend is healthy
-            docker-compose ps backend
+            docker compose ps backend
             
             # Run database migrations
-            docker-compose exec -T backend npx prisma migrate deploy || echo "⚠️ Migration skipped or failed"
+            docker compose exec -T backend npx prisma migrate deploy || echo "⚠️ Migration skipped or failed"
             
             # Clean up old images
             docker image prune -af --filter "until=24h"
             
             echo "✅ Deployment completed!"
-            docker-compose ps
+            docker compose ps
