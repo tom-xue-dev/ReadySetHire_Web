@@ -88,6 +88,9 @@ jobs:
             # Stop old containers
             docker compose down || true
             
+            # 如果需要重置数据库密码，取消下一行注释（会删除所有数据）
+            # docker volume rm readysethire_postgres_data || true
+            
             # Start new containers with production config
             docker compose up -d
             
