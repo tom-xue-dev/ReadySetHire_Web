@@ -1,47 +1,107 @@
-name: Deploy to EC2
+name: Build & Deploy to EC2 via ECR
 
 on:
   push:
-    branches:
-      - main
-  workflow_dispatch:
+    branches: [ "main" ]
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: 部署到 EC2
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push image
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          ECR_REPO: ${{ secrets.ECR_REPO }}
+          GIT_SHA: ${{ github.sha }}
+        run: |
+          IMAGE_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}"
+          cd server
+          docker build -t "${IMAGE_URI}:${GIT_SHA}" -t "${IMAGE_URI}:latest" -f Dockerfile .
+          docker push "${IMAGE_URI}:${GIT_SHA}"
+          docker push "${IMAGE_URI}:latest"
+
+      - name: Copy docker-compose to EC2
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: 13.54.230.70
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
+          source: "server/docker-compose.yml,server/.env.production"
+          target: "/home/${{ secrets.EC2_USERNAME }}/readysethire"
+          strip_components: 1
+
+      - name: Deploy on EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          ECR_REPO: ${{ secrets.ECR_REPO }}
+        with:
+          host: 13.54.230.70
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          envs: AWS_ACCOUNT_ID,AWS_REGION,ECR_REPO
           script: |
-            # 进入项目目录（如果不存在则克隆）
-            if [ ! -d "ReadysetHire" ]; then
-              git clone git@github.com:${{ github.repository }}.git ReadysetHire
+            set -e
+            cd /home/${{ secrets.EC2_USERNAME }}/readysethire
+            
+            # 复制 .env.production 为 .env (docker-compose 会自动读取)
+            if [ -f .env.production ]; then
+              cp .env.production .env
+              echo "✅ Using .env.production for deployment"
+            else
+              echo "❌ .env.production not found!"
+              exit 1
             fi
             
-            cd ReadysetHire
+            # Login to ECR
+            aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
             
-            # 拉取最新代码
-            git pull origin main
+            # Pull latest image
+            IMAGE_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:latest"
+            docker pull ${IMAGE_URI}
             
-            # 进入 server 目录
-            cd server
+            # Update docker-compose to use ECR image
+            export BACKEND_IMAGE=${IMAGE_URI}
             
-            # 停止并移除旧容器
-            sudo docker compose down
+            # Stop old containers
+            docker-compose down || true
             
-            # 启动新容器
-            sudo docker compose up -d
+            # Start new containers with production config
+            docker-compose up -d
             
-            # 等待服务启动
-            sleep 10
+            # Wait for backend to be healthy
+            sleep 15
             
-            # 显示状态
-            sudo docker compose ps
+            # Check if backend is healthy
+            docker-compose ps backend
             
-            echo "✅ 部署完成！"
+            # Run database migrations
+            docker-compose exec -T backend npx prisma migrate deploy || echo "⚠️ Migration skipped or failed"
+            
+            # Clean up old images
+            docker image prune -af --filter "until=24h"
+            
+            echo "✅ Deployment completed!"
+            docker-compose ps

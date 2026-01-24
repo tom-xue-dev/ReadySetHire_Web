@@ -4,8 +4,6 @@ services:
     image: postgres:15-alpine
     container_name: readysethire-postgres
     restart: unless-stopped
-    env_file:
-      - .env.dev
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-readysethire}
       POSTGRES_USER: ${POSTGRES_USER:-readysethire_user}
@@ -25,13 +23,12 @@ services:
 
   # Backend API Server (Using Dockerfile)
   backend:
+    image: ${BACKEND_IMAGE:-server-backend}
     build:
       context: .
       dockerfile: Dockerfile
     container_name: readysethire-backend
     restart: unless-stopped
-    env_file:
-      - .env.dev
     environment:
       NODE_ENV: development
       PORT: 3000
