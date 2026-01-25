@@ -9,6 +9,7 @@ import questionsRoutes from './questions.routes';
 import applicantsRoutes from './applicants.routes';
 import applicantAnswersRoutes from './applicantAnswers.routes';
 import audioRoutes from './audio.routes';
+import resumeRatingRoutes from './resumeRating.routes';
 export function createRoutes() {
   const router = Router();
 
@@ -23,6 +24,9 @@ export function createRoutes() {
   router.use('/', audioRoutes);
   // Job Application routes (includes public endpoints)
   router.use('/', jobApplicationRoutes);
+
+  // Resume Rating routes (AI-powered JD-resume matching)
+  router.use('/', resumeRatingRoutes);
 
   // Billing routes
   router.use('/billing', billingRoutes);

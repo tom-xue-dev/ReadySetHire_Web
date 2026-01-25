@@ -13,6 +13,9 @@ import Subscription from "./pages/dashboard/Subscription.tsx";
 import Jobs from "./pages/dashboard/Jobs.tsx";
 import ResumeManagement from "./pages/dashboard/ResumeManagement.tsx";
 import TrackingJobs from "./pages/dashboard/TrackingJobs.tsx";
+import RateResume from "./pages/dashboard/RateResume.tsx";
+import Settings from "./pages/dashboard/Settings.tsx";
+import EmployeeSettings from "./pages/dashboard/EmployeeSettings.tsx";
 import PublicJobDetails from "./pages/PublicJobDetails.tsx";
 import PublicJobApplication from "./pages/PublicJobApplication.tsx";
 function AppContent() {
@@ -44,6 +47,20 @@ function AppContent() {
             </ProtectedRoute>
           } />
           
+          {/* Rate Resume - Standalone route for ADMIN and EMPLOYEE */}
+          <Route path="/rate-resume" element={
+            <ProtectedRoute requiredRoles={['ADMIN', 'EMPLOYEE']}>
+              <RateResume />
+            </ProtectedRoute>
+          } />
+          
+          {/* Employee Settings - Standalone route for EMPLOYEE and ADMIN */}
+          <Route path="/employee/settings" element={
+            <ProtectedRoute requiredRoles={['ADMIN', 'EMPLOYEE']}>
+              <EmployeeSettings />
+            </ProtectedRoute>
+          } />
+          
           {/* Dashboard routes - Protected with Layout */}
           <Route path="/*" element={
             <ProtectedRoute>
@@ -53,6 +70,7 @@ function AppContent() {
                   <Route path="/subscription" element={<Subscription />} />
                   <Route path="/jobs" element={<Jobs />} />
                   <Route path="/resume-management" element={<ResumeManagement />} />
+                  <Route path="/settings" element={<Settings />} />
                 </Routes>
               </Layout>
             </ProtectedRoute>

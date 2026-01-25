@@ -4,6 +4,7 @@ import { BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
 import { apiRequest } from '@/api/api';
 import LandingHeader from '@/components/layout/LandingHeader';
 import LandingFooter from '@/components/layout/LandingFooter';
+import { useI18n } from '@/contexts/I18nContext';
 
 interface Job {
   id: number;
@@ -27,6 +28,7 @@ interface Job {
 }
 
 export default function TrackingJobs() {
+  const { t } = useI18n();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -184,11 +186,11 @@ export default function TrackingJobs() {
                 {/* What - Keywords */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Job Title
+                    {t('trackingJobs.jobTitle')}
                   </label>
                   <input
                     type="text"
-                    placeholder="Enter keywords"
+                    placeholder={t('trackingJobs.enterKeywords')}
                     value={searchKeyword}
                     onChange={(e) => setSearchKeyword(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-pink-500 focus:border-transparent"
@@ -199,11 +201,11 @@ export default function TrackingJobs() {
                 {/* Where - Location */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Location
+                    {t('trackingJobs.location')}
                   </label>
                   <input
                     type="text"
-                    placeholder="Enter suburb, city, or region"
+                    placeholder={t('trackingJobs.enterLocation')}
                     value={searchLocation}
                     onChange={(e) => setSearchLocation(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-pink-500 focus:border-transparent"
@@ -217,7 +219,7 @@ export default function TrackingJobs() {
                   {/* Salary Range - Min */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Min Salary ($)
+                      {t('trackingJobs.minSalary')}
                     </label>
                     <input
                       type="number"
@@ -231,7 +233,7 @@ export default function TrackingJobs() {
                   {/* Salary Range - Max */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Max Salary ($)
+                      {t('trackingJobs.maxSalary')}
                     </label>
                     <input
                       type="number"
@@ -245,17 +247,17 @@ export default function TrackingJobs() {
                   {/* Posted Within */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Posted Within
+                      {t('trackingJobs.postedWithin')}
                     </label>
                     <select
                       value={postedWithin}
                       onChange={(e) => setPostedWithin(e.target.value)}
                       className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                     >
-                      <option value="ALL">Any time</option>
-                      <option value="24h">Last 24 hours</option>
-                      <option value="7d">Last 7 days</option>
-                      <option value="30d">Last 30 days</option>
+                      <option value="ALL">{t('trackingJobs.anyTime')}</option>
+                      <option value="24h">{t('trackingJobs.last24h')}</option>
+                      <option value="7d">{t('trackingJobs.last7d')}</option>
+                      <option value="30d">{t('trackingJobs.last30d')}</option>
                     </select>
                   </div>
                 </div>
@@ -267,20 +269,20 @@ export default function TrackingJobs() {
                     onClick={loadJobs}
                     className="bg-pink-600 hover:bg-pink-700 text-white font-semibold px-8 py-3 rounded-md transition-colors"
                   >
-                    SEARCH
+                    {t('trackingJobs.search')}
                   </button>
                   <button
                     onClick={clearAllFilters}
                     className="text-sm text-gray-600 hover:text-gray-900 underline"
                   >
-                    Clear all filters
+                    {t('trackingJobs.clearFilters')}
                   </button>
                 </div>
                 <button
                   onClick={() => setShowMoreOptions(!showMoreOptions)}
                   className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1"
                 >
-                  {showMoreOptions ? '▲ Less options' : '▼ More options'}
+                  {showMoreOptions ? `▲ ${t('trackingJobs.lessOptions')}` : `▼ ${t('trackingJobs.moreOptions')}`}
                 </button>
               </div>
             </div>
@@ -294,16 +296,16 @@ export default function TrackingJobs() {
             <div className="lg:col-span-3">
               <div className="bg-white rounded-lg shadow-sm">
                 <div className="px-6 py-4 border-b border-gray-200">
-                  <h2 className="text-lg font-semibold text-gray-900">Recommended</h2>
-                  <p className="text-sm text-gray-500 mt-1">{filteredJobs.length} job(s) found</p>
+                  <h2 className="text-lg font-semibold text-gray-900">{t('trackingJobs.recommended')}</h2>
+                  <p className="text-sm text-gray-500 mt-1">{t('trackingJobs.jobsFound', { count: filteredJobs.length })}</p>
                 </div>
 
                 {loading ? (
-                  <div className="p-8 text-center text-gray-500">Loading jobs...</div>
+                  <div className="p-8 text-center text-gray-500">{t('trackingJobs.loading')}</div>
                 ) : error ? (
                   <div className="p-8 text-center text-red-500">{error}</div>
                 ) : filteredJobs.length === 0 ? (
-                  <div className="p-8 text-center text-gray-500">No jobs found</div>
+                  <div className="p-8 text-center text-gray-500">{t('trackingJobs.noJobs')}</div>
                 ) : (
                   <div className="divide-y divide-gray-100">
                     {filteredJobs.map((job) => (
@@ -320,7 +322,7 @@ export default function TrackingJobs() {
                               </h3>
                               {job.status === 'PUBLISHED' && (
                                 <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                                  New to you
+                                  {t('trackingJobs.newToYou')}
                                 </span>
                               )}
                             </div>
@@ -372,7 +374,7 @@ export default function TrackingJobs() {
                                 toggleSaveJob(job.id);
                               }}
                               className="p-2 text-gray-400 hover:text-pink-600 transition-colors"
-                              title={savedJobs.has(job.id) ? 'Unsave job' : 'Save job'}
+                              title={savedJobs.has(job.id) ? t('trackingJobs.unsaveJob') : t('trackingJobs.saveJob')}
                             >
                               {savedJobs.has(job.id) ? (
                                 <BookmarkSolidIcon className="w-5 h-5 text-pink-600" />
@@ -386,7 +388,7 @@ export default function TrackingJobs() {
                                 // Hide job functionality
                               }}
                               className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-                              title="Hide job"
+                              title={t('trackingJobs.hideJob')}
                             >
                               <XMarkIcon className="w-5 h-5" />
                             </button>
@@ -404,21 +406,21 @@ export default function TrackingJobs() {
               <div className="space-y-6">
                 {/* Saved Searches */}
                 <div className="bg-white rounded-lg shadow-sm p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Saved searches</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('trackingJobs.savedSearches')}</h3>
                   <p className="text-sm text-gray-600">
-                    Use the Save search button below the search results to save your search and receive every new job.
+                    {t('trackingJobs.savedSearchesDesc')}
                   </p>
                 </div>
 
                 {/* Saved Jobs */}
                 <div className="bg-white rounded-lg shadow-sm p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Saved jobs</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('trackingJobs.savedJobs')}</h3>
                   <p className="text-sm text-gray-600">
-                    Use the Save button on each job listing to save it for later. You can then access them on all your devices.
+                    {t('trackingJobs.savedJobsDesc')}
                   </p>
                   {savedJobs.size > 0 && (
                     <div className="mt-4 text-sm text-pink-600">
-                      {savedJobs.size} job(s) saved
+                      {t('trackingJobs.savedCount', { count: savedJobs.size })}
                     </div>
                   )}
                 </div>
@@ -426,45 +428,45 @@ export default function TrackingJobs() {
                 {/* Job Details Panel */}
                 {selectedJob && (
                   <div className="bg-white rounded-lg shadow-sm p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Job Details</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('trackingJobs.jobDetails')}</h3>
                     <div className="space-y-3 text-sm">
                       <div>
-                        <span className="font-medium text-gray-700">Title:</span>
+                        <span className="font-medium text-gray-700">{t('trackingJobs.title')}:</span>
                         <p className="text-gray-900">{selectedJob.title}</p>
                       </div>
                       <div>
-                        <span className="font-medium text-gray-700">Description:</span>
+                        <span className="font-medium text-gray-700">{t('trackingJobs.description')}:</span>
                         <p className="text-gray-600">{selectedJob.description}</p>
                       </div>
                       {selectedJob.requirements && (
                         <div>
-                          <span className="font-medium text-gray-700">Requirements:</span>
+                          <span className="font-medium text-gray-700">{t('trackingJobs.requirements')}:</span>
                           <p className="text-gray-600">{selectedJob.requirements}</p>
                         </div>
                       )}
                       {selectedJob.location && (
                         <div>
-                          <span className="font-medium text-gray-700">Location:</span>
+                          <span className="font-medium text-gray-700">{t('trackingJobs.location')}:</span>
                           <p className="text-gray-600">{selectedJob.location}</p>
                         </div>
                       )}
                       {selectedJob.salaryRange && (
                         <div>
-                          <span className="font-medium text-gray-700">Salary Range:</span>
+                          <span className="font-medium text-gray-700">{t('trackingJobs.salaryRange')}:</span>
                           <p className="text-gray-600">{selectedJob.salaryRange}</p>
                         </div>
                       )}
                       <div>
-                        <span className="font-medium text-gray-700">Status:</span>
+                        <span className="font-medium text-gray-700">{t('trackingJobs.status')}:</span>
                         <p className="text-gray-600">{selectedJob.status}</p>
                       </div>
                       <div>
-                        <span className="font-medium text-gray-700">Created:</span>
+                        <span className="font-medium text-gray-700">{t('trackingJobs.created')}:</span>
                         <p className="text-gray-600">{new Date(selectedJob.createdAt).toLocaleDateString()}</p>
                       </div>
                       {selectedJob.publishedAt && (
                         <div>
-                          <span className="font-medium text-gray-700">Published:</span>
+                          <span className="font-medium text-gray-700">{t('trackingJobs.published')}:</span>
                           <p className="text-gray-600">{new Date(selectedJob.publishedAt).toLocaleDateString()}</p>
                         </div>
                       )}

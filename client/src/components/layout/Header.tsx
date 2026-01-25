@@ -32,7 +32,12 @@ export default function Header({ sidebarOpen = false, onToggle }: HeaderProps) {
   };
 
   const handleSettings = () => {
-    navigate('/settings');
+    // EMPLOYEE 和 ADMIN 跳转到独立的 settings 页面，RECRUITER 跳转到 dashboard settings
+    if (user?.role === 'EMPLOYEE' || user?.role === 'ADMIN') {
+      navigate('/employee/settings');
+    } else {
+      navigate('/settings');
+    }
     setIsDropdownOpen(false);
   };
 

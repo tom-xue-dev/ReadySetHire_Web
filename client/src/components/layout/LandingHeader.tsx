@@ -1,5 +1,5 @@
-import { Link, useNavigate } from "react-router-dom";
-import { UserCircleIcon, Cog6ToothIcon } from '@heroicons/react/24/solid';
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { UserCircleIcon, Cog6ToothIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/solid';
 import { useState, useRef, useEffect } from 'react';
 import { useI18n } from "../../contexts/I18nContext";
 import { useAuth } from "../../pages/auth/AuthContext";
@@ -12,8 +12,10 @@ interface LandingHeaderProps {
 export default function LandingHeader({ showNavLinks = true }: LandingHeaderProps) {
   const { t } = useI18n();
   const navigate = useNavigate();
+  const location = useLocation();
   const { isAuthenticated, user, logout } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const handleLogoClick = () => {
@@ -27,7 +29,12 @@ export default function LandingHeader({ showNavLinks = true }: LandingHeaderProp
   };
 
   const handleSettings = () => {
-    navigate('/settings');
+    // EMPLOYEE 和 ADMIN 跳转到独立的 settings 页面
+    if (user?.role === 'EMPLOYEE' || user?.role === 'ADMIN') {
+      navigate('/employee/settings');
+    } else {
+      navigate('/settings');
+    }
     setIsDropdownOpen(false);
   };
 
@@ -61,8 +68,8 @@ export default function LandingHeader({ showNavLinks = true }: LandingHeaderProp
             <span className="sr-only">{t('landing.header.brand')}</span>
           </button>
 
-          {/* Navigation links - only show on home page */}
-          {showNavLinks && (
+          {/* Navigation links */}
+          {showNavLinks ? (
             <div className="hidden md:flex items-center gap-8">
               <a href="#features" className="text-sm font-medium text-gray-700 hover:text-gray-900">
                 {t('landing.header.nav.features')}
@@ -74,6 +81,46 @@ export default function LandingHeader({ showNavLinks = true }: LandingHeaderProp
                 {t('landing.header.nav.contact')}
               </a>
             </div>
+          ) : (
+            /* Employee navigation - show when user is EMPLOYEE or ADMIN */
+            isAuthenticated && (user?.role === 'EMPLOYEE' || user?.role === 'ADMIN') && (
+              <div className="hidden md:flex items-center gap-6">
+                <button
+                  onClick={() => navigate('/tracking-jobs')}
+                  className={`text-sm font-medium transition-colors ${
+                    location.pathname === '/tracking-jobs'
+                      ? 'text-indigo-600 border-b-2 border-indigo-600 pb-1'
+                      : 'text-gray-700 hover:text-gray-900'
+                  }`}
+                >
+                  {t('navigation.jobSearch')}
+                </button>
+                <button
+                  onClick={() => navigate('/rate-resume')}
+                  className={`text-sm font-medium transition-colors ${
+                    location.pathname === '/rate-resume'
+                      ? 'text-indigo-600 border-b-2 border-indigo-600 pb-1'
+                      : 'text-gray-700 hover:text-gray-900'
+                  }`}
+                >
+                  {t('navigation.aiResumeRating')}
+                </button>
+              </div>
+            )
+          )}
+
+          {/* Mobile menu button - show for employee navigation */}
+          {!showNavLinks && isAuthenticated && (user?.role === 'EMPLOYEE' || user?.role === 'ADMIN') && (
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              {isMobileMenuOpen ? (
+                <XMarkIcon className="w-6 h-6 text-gray-700" />
+              ) : (
+                <Bars3Icon className="w-6 h-6 text-gray-700" />
+              )}
+            </button>
           )}
 
           {/* Right side - show different content based on auth status */}
@@ -131,6 +178,40 @@ export default function LandingHeader({ showNavLinks = true }: LandingHeaderProp
             </div>
           )}
         </nav>
+
+        {/* Mobile navigation menu - show for employee */}
+        {!showNavLinks && isMobileMenuOpen && isAuthenticated && (user?.role === 'EMPLOYEE' || user?.role === 'ADMIN') && (
+          <div className="md:hidden border-t border-gray-200 py-4">
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={() => {
+                  navigate('/tracking-jobs');
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`px-4 py-2 text-left text-sm font-medium transition-colors ${
+                  location.pathname === '/tracking-jobs'
+                    ? 'text-indigo-600 bg-indigo-50'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                {t('navigation.jobSearch')}
+              </button>
+              <button
+                onClick={() => {
+                  navigate('/rate-resume');
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`px-4 py-2 text-left text-sm font-medium transition-colors ${
+                  location.pathname === '/rate-resume'
+                    ? 'text-indigo-600 bg-indigo-50'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                {t('navigation.aiResumeRating')}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </header>
   );

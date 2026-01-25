@@ -333,6 +333,43 @@ export async function createCheckoutSession(): Promise<Record<string, unknown> |
     return apiRequest(`/billing/create-checkout-session`, 'POST', {});
 }
 
+// Resume Rating APIs
+export interface AnalyzeResumeRequest {
+    jdText: string;
+    resumeText: string;
+    settings?: {
+        level?: string;
+        mustHaveWeight?: number;
+        language?: string;
+        anonymize?: boolean;
+    };
+}
+
+export interface AnalysisResult {
+    score: number;
+    conclusion: 'STRONG_HIRE' | 'HIRE' | 'LEAN_HIRE' | 'LEAN_NO' | 'NO';
+    topStrengths: Array<{ point: string; evidence: string }>;
+    topGaps: Array<{ gap: string; severity: 'high' | 'medium' | 'low' }>;
+    risks: string[];
+    hardRequirements: Array<{ requirement: string; status: 'pass' | 'warning' | 'fail'; evidence: string }>;
+    skillsMatrix: Array<{ skill: string; candidateEvidence: string; match: number }>;
+    interviewQuestions: Array<{ question: string; purpose: string; goodAnswer: string }>;
+}
+
+/**
+ * Analyze JD and resume match using AI
+ * @param {AnalyzeResumeRequest} request - The analysis request containing JD and resume text
+ * @returns {Promise<AnalysisResult>} - The analysis result
+ */
+export async function analyzeResume(request: AnalyzeResumeRequest): Promise<AnalysisResult> {
+    // 使用更长的超时时间（2分钟），因为 LLM 推理需要时间
+    const response = await apiRequest('/resume-rating/analyze', 'POST', request as Record<string, unknown>, 120000);
+    if (response && typeof response === 'object' && 'data' in response) {
+        return response.data as AnalysisResult;
+    }
+    throw new Error('Invalid response format from resume analysis API');
+}
+
 
 
 

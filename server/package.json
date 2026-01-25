@@ -13,6 +13,7 @@
     "db:reset": "npx prisma migrate reset",
     "db:studio": "npx prisma studio",
     "db:create-admin": "tsx scripts/create-admin.ts",
+    "db:init-jobs": "tsx scripts/init-jobs.ts",
     "test": "jest",
     "test:unit": "jest --config jest.unit.config.js",
     "test:integration": "cross-env NODE_ENV=test jest src/__tests__/integration",
