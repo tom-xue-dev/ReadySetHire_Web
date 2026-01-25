@@ -16,6 +16,7 @@ import TrackingJobs from "./pages/dashboard/TrackingJobs.tsx";
 import RateResume from "./pages/dashboard/RateResume.tsx";
 import Settings from "./pages/dashboard/Settings.tsx";
 import EmployeeSettings from "./pages/dashboard/EmployeeSettings.tsx";
+import EmployeeSubscription from "./pages/employee/EmployeeSubscription.tsx";
 import PublicJobDetails from "./pages/PublicJobDetails.tsx";
 import PublicJobApplication from "./pages/PublicJobApplication.tsx";
 function AppContent() {
@@ -40,15 +41,14 @@ function AppContent() {
           <Route path="/jobs/:jobId" element={<PublicJobDetails />} />
           <Route path="/jobs/:jobId/apply" element={<PublicJobApplication />} />
           
-          {/* TrackingJobs - Standalone route with role protection */}
-          <Route path="/tracking-jobs" element={
+          {/* Employee Routes - Standalone routes with role protection */}
+          <Route path="/employee/tracking-jobs" element={
             <ProtectedRoute requiredRole="EMPLOYEE">
               <TrackingJobs />
             </ProtectedRoute>
           } />
           
-          {/* Rate Resume - Standalone route for ADMIN and EMPLOYEE */}
-          <Route path="/rate-resume" element={
+          <Route path="/employee/rate-resume" element={
             <ProtectedRoute requiredRoles={['ADMIN', 'EMPLOYEE']}>
               <RateResume />
             </ProtectedRoute>
@@ -58,6 +58,13 @@ function AppContent() {
           <Route path="/employee/settings" element={
             <ProtectedRoute requiredRoles={['ADMIN', 'EMPLOYEE']}>
               <EmployeeSettings />
+            </ProtectedRoute>
+          } />
+          
+          {/* Employee Subscription - Standalone route for EMPLOYEE and ADMIN */}
+          <Route path="/employee/subscription" element={
+            <ProtectedRoute requiredRoles={['ADMIN', 'EMPLOYEE']}>
+              <EmployeeSubscription />
             </ProtectedRoute>
           } />
           

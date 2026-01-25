@@ -24,7 +24,7 @@ export default function Header({ sidebarOpen = false, onToggle }: HeaderProps) {
       navigate('/');
     } else if (user?.role === 'EMPLOYEE') {
       // Employee -> go to tracking-jobs
-      navigate('/tracking-jobs');
+      navigate('/employee/tracking-jobs');
     } else {
       // Recruiter/Admin -> go to dashboard
       navigate('/dashboard');

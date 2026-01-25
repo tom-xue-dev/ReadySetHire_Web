@@ -290,5 +290,133 @@
     "hideJob": "Hide job",
     "enterKeywords": "Enter keywords",
     "enterLocation": "Enter suburb, city, or region"
+  },
+  "subscription": {
+    "title": "Pricing Plans",
+    "subtitle": "ReadySetHire helps you attract, evaluate, and hire with a clean pipeline, automation, and enterprise-grade security.",
+    "billingLabel": "Monthly billing",
+    "billingNote": "No hidden fees. Cancel anytime.",
+    "processing": "Processing...",
+    "errorCheckout": "Unable to start checkout",
+    "popularBadge": "Most Popular",
+    "recommended": "Recommended",
+    "included": "Included",
+    "seats": "Seats",
+    "support": "Support",
+    "plans": {
+      "basic": {
+        "name": "Basic",
+        "subtitle": "For individual HR or small teams",
+        "button": "Start Basic",
+        "features": {
+          "unlimitedScoring": "Unlimited AI resume scoring",
+          "basicAnalysis": "Basic resume analysis",
+          "emailNotifications": "Email notifications",
+          "basicAnalytics": "Basic analytics"
+        },
+        "seats": "1 seat",
+        "support": "Email support"
+      },
+      "professional": {
+        "name": "Professional",
+        "subtitle": "For fast-growing hiring teams",
+        "button": "Upgrade to Professional",
+        "features": {
+          "allBasic": "All Basic features",
+          "batchScoring": "10 batch AI scoring per month",
+          "teamCollaboration": "Team collaboration",
+          "advancedAnalytics": "Advanced analytics",
+          "prioritySupport": "Priority support"
+        },
+        "seats": "Up to 5 seats",
+        "support": "Priority support"
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "subtitle": "For large-scale hiring needs",
+        "button": "Upgrade to Enterprise",
+        "features": {
+          "allProfessional": "All Professional features",
+          "unlimitedBatch": "Unlimited batch AI scoring",
+          "customModels": "Custom scoring models",
+          "dedicatedManager": "Dedicated account manager",
+          "enterpriseSLA": "Enterprise SLA guarantee",
+          "apiAccess": "API access"
+        },
+        "seats": "Unlimited seats",
+        "support": "Dedicated manager"
+      }
+    },
+    "highlights": {
+      "security": {
+        "title": "Enterprise-grade security",
+        "description": "Encryption in transit & at rest, granular permissions, and audit logs"
+      },
+      "speed": {
+        "title": "Faster time-to-hire",
+        "description": "Automations and structured pipelines reduce coordination overhead"
+      },
+      "teams": {
+        "title": "Designed for real teams",
+        "description": "Built-in collaboration, roles, and reporting—no spreadsheets required"
+      }
+    }
+  },
+  "employeeSubscription": {
+    "title": "AI Resume Scoring Plans",
+    "subtitle": "Choose the plan that fits your job search needs. Get AI-powered resume scoring to match your profile with job requirements.",
+    "billingNote": "One-time payment. No subscription required.",
+    "processing": "Processing...",
+    "errorCheckout": "Unable to start checkout",
+    "recommendedBadge": "Best Value",
+    "included": "What's Included",
+    "validity": "Validity",
+    "model": "AI Model",
+    "accuracy": "Accuracy",
+    "plans": {
+      "trial": {
+        "name": "Trial",
+        "subtitle": "Perfect for trying out the service",
+        "button": "Get Trial Plan",
+        "features": {
+          "unlimited": "Unlimited AI resume scoring",
+          "basicModel": "Standard AI model",
+          "instantResults": "Instant results",
+          "validity": "Valid for 3 days"
+        },
+        "validity": "3 days",
+        "model": "Standard",
+        "accuracy": "Good"
+      },
+      "premium": {
+        "name": "Premium",
+        "subtitle": "Best for serious job seekers",
+        "button": "Get Premium Plan",
+        "features": {
+          "unlimited": "Unlimited AI resume scoring",
+          "advancedModel": "Advanced AI model",
+          "higherAccuracy": "Higher accuracy scoring",
+          "priorityProcessing": "Priority processing",
+          "validity": "Valid for 30 days"
+        },
+        "validity": "30 days",
+        "model": "Advanced",
+        "accuracy": "Excellent"
+      }
+    },
+    "highlights": {
+      "instant": {
+        "title": "Instant Analysis",
+        "description": "Get your resume score in seconds with AI-powered matching"
+      },
+      "accurate": {
+        "title": "Highly Accurate",
+        "description": "Advanced algorithms provide precise job-resume matching scores"
+      },
+      "unlimited": {
+        "title": "Unlimited Usage",
+        "description": "Score as many resumes as you need during your plan period"
+      }
+    }
   }
 }

@@ -67,8 +67,7 @@ services:
     networks:
       - readysethire-network
     entrypoint: ["/bin/bash", "-c"]
-    # 使用 qwen2.5:7b 替代 deepseek-r1:7b，速度更快且适合文本分析任务
-    command: ["ollama serve & sleep 5 && ollama pull qwen2.5:7b && tail -f /dev/null"]
+    command: ["ollama serve & sleep 5 && ollama pull deepseek-r1:7b && tail -f /dev/null"]
     healthcheck:
       test: ["CMD", "ollama", "list"]
       interval: 30s

@@ -291,5 +291,133 @@
     "hideJob": "隐藏职位",
     "enterKeywords": "输入关键词",
     "enterLocation": "输入地点、城市或地区"
+  },
+  "subscription": {
+    "title": "定价方案",
+    "subtitle": "ReadySetHire 帮助您吸引、评估和招聘优秀人才，提供清晰的招聘流程、自动化工具和企业级安全保障。",
+    "billingLabel": "按月计费",
+    "billingNote": "无隐藏费用，随时可取消",
+    "processing": "处理中...",
+    "errorCheckout": "无法启动结账流程",
+    "popularBadge": "最受欢迎",
+    "recommended": "推荐",
+    "included": "包含内容",
+    "seats": "用户席位",
+    "support": "客服支持",
+    "plans": {
+      "basic": {
+        "name": "Basic",
+        "subtitle": "适合个人HR或小型团队",
+        "button": "开始使用 Basic",
+        "features": {
+          "unlimitedScoring": "Unlimited AI简历评分",
+          "basicAnalysis": "基础简历分析",
+          "emailNotifications": "邮件通知",
+          "basicAnalytics": "基础数据分析"
+        },
+        "seats": "1个席位",
+        "support": "邮件支持"
+      },
+      "professional": {
+        "name": "Professional",
+        "subtitle": "适合快速成长的招聘团队",
+        "button": "升级到 Professional",
+        "features": {
+          "allBasic": "Basic计划所有功能",
+          "batchScoring": "每月10次批量AI评分",
+          "teamCollaboration": "团队协作功能",
+          "advancedAnalytics": "高级数据分析",
+          "prioritySupport": "优先客服支持"
+        },
+        "seats": "最多5个席位",
+        "support": "优先支持"
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "subtitle": "适合大规模招聘需求",
+        "button": "升级到 Enterprise",
+        "features": {
+          "allProfessional": "Professional计划所有功能",
+          "unlimitedBatch": "不限量批量AI评分",
+          "customModels": "自定义评分模型",
+          "dedicatedManager": "专属客户经理",
+          "enterpriseSLA": "企业级SLA保障",
+          "apiAccess": "API访问权限"
+        },
+        "seats": "不限席位",
+        "support": "专属经理"
+      }
+    },
+    "highlights": {
+      "security": {
+        "title": "企业级安全",
+        "description": "传输和静态加密，细粒度权限控制和审计日志"
+      },
+      "speed": {
+        "title": "更快速招聘",
+        "description": "自动化工具和结构化流程减少协调工作"
+      },
+      "teams": {
+        "title": "为真实团队设计",
+        "description": "内置协作、角色和报告功能，无需电子表格"
+      }
+    }
+  },
+  "employeeSubscription": {
+    "title": "AI简历评分方案",
+    "subtitle": "选择适合您求职需求的方案。获取AI驱动的简历评分，让您的简历与职位要求完美匹配。",
+    "billingNote": "一次性支付，无需订阅",
+    "processing": "处理中...",
+    "errorCheckout": "无法启动结账流程",
+    "recommendedBadge": "超值推荐",
+    "included": "包含内容",
+    "validity": "有效期",
+    "model": "AI模型",
+    "accuracy": "准确度",
+    "plans": {
+      "trial": {
+        "name": "体验版",
+        "subtitle": "适合初次尝试服务的用户",
+        "button": "购买体验版",
+        "features": {
+          "unlimited": "不限量AI简历评分",
+          "basicModel": "标准AI模型",
+          "instantResults": "即时获取结果",
+          "validity": "3天有效期"
+        },
+        "validity": "3天",
+        "model": "标准版",
+        "accuracy": "良好"
+      },
+      "premium": {
+        "name": "高级版",
+        "subtitle": "认真求职者的最佳选择",
+        "button": "购买高级版",
+        "features": {
+          "unlimited": "不限量AI简历评分",
+          "advancedModel": "高级AI模型",
+          "higherAccuracy": "更高准确度评分",
+          "priorityProcessing": "优先处理",
+          "validity": "30天有效期"
+        },
+        "validity": "30天",
+        "model": "高级版",
+        "accuracy": "优秀"
+      }
+    },
+    "highlights": {
+      "instant": {
+        "title": "即时分析",
+        "description": "AI驱动匹配，秒级获取简历评分"
+      },
+      "accurate": {
+        "title": "高度精准",
+        "description": "先进算法提供精确的职位-简历匹配分数"
+      },
+      "unlimited": {
+        "title": "不限使用",
+        "description": "在套餐有效期内无限次评分简历"
+      }
+    }
   }
 }

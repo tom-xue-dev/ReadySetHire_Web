@@ -1,12 +1,21 @@
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '../pages/auth/AuthContext';
+
 interface ConditionalRouteProps {
   children: React.ReactNode;
 }
 
 export default function ConditionalRoute({ children }: ConditionalRouteProps) {
-  // Future: redirect authenticated users to dashboard
-  // const { isAuthenticated } = useAuth();
-  // if (isAuthenticated) {
-  //   return <Navigate to="/dashboard" replace />;
-  // }
+  const { isAuthenticated, user } = useAuth();
+  
+  if (isAuthenticated) {
+    // Redirect EMPLOYEE users to their tracking jobs page
+    if (user?.role === 'EMPLOYEE') {
+      return <Navigate to="/employee/tracking-jobs" replace />;
+    }
+    // Redirect other authenticated users to dashboard
+    return <Navigate to="/dashboard" replace />;
+  }
+  
   return <>{children}</>;
 }
