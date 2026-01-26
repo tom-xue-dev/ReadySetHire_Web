@@ -193,25 +193,14 @@
     "savingFeature": "保存功能开发中",
     "jd": {
       "title": "JD（岗位描述）",
-      "selectJob": "选择站内职位",
+      "selectJob": "选择保存的职位",
       "pasteText": "粘贴文本",
       "uploadFile": "上传文件",
       "selectPlaceholder": "请选择职位",
       "textPlaceholder": "粘贴岗位描述文本...",
       "uploadPrompt": "点击上传或拖拽文件到此处",
       "uploadFormats": "支持 PDF, DOCX, TXT 格式",
-      "selectFile": "选择文件",
-      "moreSettings": "更多设置",
-      "hideSettings": "收起",
-      "level": "职级/年限",
-      "mustHaveWeight": "Must-have 权重",
-      "languageReq": "语言要求",
-      "chinese": "中文",
-      "english": "英文",
-      "bilingual": "双语",
-      "levelJunior": "Junior (0-2年)",
-      "levelMid": "Mid (3-5年)",
-      "levelSenior": "Senior (5年以上)"
+      "selectFile": "选择文件"
     },
     "resume": {
       "title": "候选人简历",

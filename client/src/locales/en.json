@@ -192,25 +192,14 @@
     "savingFeature": "Save feature coming soon",
     "jd": {
       "title": "JD (Job Description)",
-      "selectJob": "Select Job",
+      "selectJob": "Select Saved Job",
       "pasteText": "Paste Text",
       "uploadFile": "Upload File",
       "selectPlaceholder": "Please select a job",
       "textPlaceholder": "Paste job description text...",
       "uploadPrompt": "Click to upload or drag file here",
       "uploadFormats": "Supports PDF, DOCX, TXT formats",
-      "selectFile": "Select File",
-      "moreSettings": "More Settings",
-      "hideSettings": "Hide",
-      "level": "Level/Experience",
-      "mustHaveWeight": "Must-have Weight",
-      "languageReq": "Language Requirement",
-      "chinese": "Chinese",
-      "english": "English",
-      "bilingual": "Bilingual",
-      "levelJunior": "Junior (0-2 years)",
-      "levelMid": "Mid (3-5 years)",
-      "levelSenior": "Senior (5+ years)"
+      "selectFile": "Select File"
     },
     "resume": {
       "title": "Candidate Resume",

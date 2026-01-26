@@ -62,7 +62,6 @@ export default function RateResume() {
     complianceCheck: true,
   });
 
-  const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [activeTab, setActiveTab] = useState<AnalysisTab>('overview');
@@ -313,58 +312,6 @@ export default function RateResume() {
                     {jdInput.file.name}
                   </div>
                 )}
-              </div>
-            )}
-
-            {/* 更多设置 */}
-            <button
-              type="button"
-              onClick={() => setShowAdvancedSettings(!showAdvancedSettings)}
-              className="text-sm text-blue-600 hover:text-blue-700 mb-3"
-            >
-              {showAdvancedSettings ? t('rateResume.jd.hideSettings') : t('rateResume.jd.moreSettings')} ▼
-            </button>
-
-            {showAdvancedSettings && (
-              <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('rateResume.jd.level')}</label>
-                  <select
-                    value={jdInput.level}
-                    onChange={(e) => setJdInput({ ...jdInput, level: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                  >
-                    <option value="Junior">{t('rateResume.jd.levelJunior')}</option>
-                    <option value="Mid">{t('rateResume.jd.levelMid')}</option>
-                    <option value="Senior">{t('rateResume.jd.levelSenior')}</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('rateResume.jd.mustHaveWeight')}: {jdInput.mustHaveWeight}%
-                  </label>
-                  <input
-                    type="range"
-                    min="50"
-                    max="80"
-                    step="10"
-                    value={jdInput.mustHaveWeight}
-                    onChange={(e) => setJdInput({ ...jdInput, mustHaveWeight: Number(e.target.value) })}
-                    className="w-full"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('rateResume.jd.languageReq')}</label>
-                  <select
-                    value={jdInput.language}
-                    onChange={(e) => setJdInput({ ...jdInput, language: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                  >
-                    <option value="中文">{t('rateResume.jd.chinese')}</option>
-                    <option value="英文">{t('rateResume.jd.english')}</option>
-                    <option value="双语">{t('rateResume.jd.bilingual')}</option>
-                  </select>
-                </div>
               </div>
             )}
           </Card>
