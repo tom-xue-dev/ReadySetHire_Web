@@ -12,13 +12,14 @@ import Layout from "./components/layout/layout.tsx";
 import Subscription from "./pages/dashboard/Subscription.tsx";
 import Jobs from "./pages/dashboard/Jobs.tsx";
 import ResumeManagement from "./pages/dashboard/ResumeManagement.tsx";
-import TrackingJobs from "./pages/dashboard/TrackingJobs.tsx";
-import RateResume from "./pages/dashboard/RateResume.tsx";
 import Settings from "./pages/dashboard/Settings.tsx";
-import EmployeeSettings from "./pages/dashboard/EmployeeSettings.tsx";
-import EmployeeSubscription from "./pages/employee/EmployeeSubscription.tsx";
 import PublicJobDetails from "./pages/PublicJobDetails.tsx";
 import PublicJobApplication from "./pages/PublicJobApplication.tsx";
+// Employee pages
+import TrackingJobs from "./pages/employee/TrackingJobs.tsx";
+import RateResume from "./pages/employee/RateResume.tsx";
+import EmployeeSettings from "./pages/employee/EmployeeSettings.tsx";
+import EmployeeSubscription from "./pages/employee/EmployeeSubscription.tsx";
 function AppContent() {
   const { showAuthNotification, hideAuthNotification } = useAuth();
   

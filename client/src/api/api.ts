@@ -363,7 +363,7 @@ export interface AnalysisResult {
  */
 export async function analyzeResume(request: AnalyzeResumeRequest): Promise<AnalysisResult> {
     // 使用更长的超时时间（2分钟），因为 LLM 推理需要时间
-    const response = await apiRequest('/resume-rating/analyze', 'POST', request as Record<string, unknown>, 120000);
+    const response = await apiRequest('/resume-rating/analyze', 'POST', request as unknown as Record<string, unknown>, 120000);
     if (response && typeof response === 'object' && 'data' in response) {
         return response.data as AnalysisResult;
     }

@@ -40,7 +40,7 @@ export default function Login() {
       if (!res.ok) throw new Error(data.error || 'Login failed');
 
       login(data.token, data.user);
-      navigate('/interviews', { replace: true });
+      navigate('/', { replace: true });
     } catch (err: any) {
       setError(err.message);
     } finally {

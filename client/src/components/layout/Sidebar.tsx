@@ -16,12 +16,9 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
   const menuItems = [
     { path: '/dashboard', label: t('navigation.dashboard'), icon: '📊' },
     { path: '/jobs', label: t('navigation.jobs'), icon: '💼' },
-    { path: '/interviews', label: t('navigation.interviews'), icon: '🎯' },
     { path: '/applicants', label: t('navigation.applicants'), icon: '👥' },
     { path: '/resume-management', label: t('navigation.resumeManagement'), icon: '📄' },
     { path: '/subscription', label: t('navigation.subscription'), icon: '💳' },
-    // { path: '/questions', label: t('navigation.questions'), icon: '❓' },
-     
   ];
 
   const isActive = (path: string) => {
