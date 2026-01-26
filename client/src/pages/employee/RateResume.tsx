@@ -147,7 +147,7 @@ export default function RateResume() {
 
       <div className="min-h-screen bg-transparent pt-14">
         {/* Header Section */}
-        <div className="bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 relative overflow-hidden shadow-lg">
+        <div className="bg-linear-to-r from-purple-600 via-indigo-600 to-pink-600 relative overflow-hidden shadow-lg">
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="text-center mb-6">
               <div className="flex items-center justify-center gap-3 mb-3">
@@ -169,7 +169,7 @@ export default function RateResume() {
                 type="button"
                 onClick={handleAnalyze}
                 disabled={analyzing || !jdInput.text || !resumeInput.text}
-                className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                className="flex items-center gap-2 bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
               >
                 <SparklesIcon className="w-4 h-4" />
                 {analyzing ? t('rateResume.analyzing') : t('rateResume.analyzeButton')}
@@ -571,7 +571,7 @@ export default function RateResume() {
                       </div>
                       <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-500"
+                          className="h-full bg-linear-to-r from-purple-500 to-blue-500 transition-all duration-500"
                           style={{ width: `${analysisResult.score}%` }}
                         />
                       </div>
@@ -741,7 +741,7 @@ export default function RateResume() {
                   {analysisResult.interviewQuestions.map((q, idx) => (
                     <div key={idx} className="p-4 bg-blue-50 rounded-lg border border-blue-200">
                       <div className="flex items-start gap-2 mb-2">
-                        <QuestionMarkCircleIcon className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                        <QuestionMarkCircleIcon className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
                         <div className="flex-1">
                           <div className="text-sm font-medium text-gray-900 mb-1">{q.question}</div>
                           <div className="text-xs text-gray-600 mb-2">

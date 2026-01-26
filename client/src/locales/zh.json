@@ -20,7 +20,8 @@
     "resumeManagement": "简历管理",
     "menu": "菜单",
     "jobSearch": "职位搜索",
-    "aiResumeRating": "AI简历评分"
+    "aiResumeRating": "AI简历评分",
+    "profile": "个人资料"
   },
   "home": {
     "title": "ReadySetHire",
@@ -286,11 +287,38 @@
     "status": "状态",
     "created": "创建时间",
     "published": "发布时间",
-    "saveJob": "保存职位",
+    "saveJob": "保存",
     "unsaveJob": "取消保存",
+    "quickApply": "快速申请",
     "hideJob": "隐藏职位",
     "enterKeywords": "输入关键词",
-    "enterLocation": "输入地点、城市或地区"
+    "enterLocation": "输入地点、城市或地区",
+    "companyInfo": "公司",
+    "postedDate": "发布于",
+    "viewAllJobs": "查看所有职位"
+  },
+  "profile": {
+    "title": "我的资料",
+    "subtitle": "管理您的简历和职位偏好",
+    "resumeSection": {
+      "title": "简历",
+      "description": "上传您的简历以快速申请职位",
+      "upload": "上传简历",
+      "current": "当前简历",
+      "noResume": "尚未上传简历",
+      "uploadFormats": "支持 PDF、DOCX 格式",
+      "uploadSuccess": "简历上传成功",
+      "uploadError": "简历上传失败"
+    },
+    "preferencesSection": {
+      "title": "职位偏好",
+      "description": "设置您偏好的职位分类",
+      "classification": "偏好分类",
+      "selectClassification": "选择分类",
+      "save": "保存偏好",
+      "saveSuccess": "偏好保存成功",
+      "saveError": "偏好保存失败"
+    }
   },
   "subscription": {
     "title": "定价方案",

@@ -1,4 +1,4 @@
-import { UserCircleIcon, Cog6ToothIcon, Bars3Icon } from '@heroicons/react/24/solid';
+import { UserCircleIcon, Cog6ToothIcon, Bars3Icon, UserIcon } from '@heroicons/react/24/solid';
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from '@/assets/logo_transparent.png';
@@ -115,6 +115,24 @@ export default function Header({ sidebarOpen = false, onToggle }: HeaderProps) {
                   </div>
                 </div>
                 <div style={dropdownDividerStyle}></div>
+                {(user?.role === 'EMPLOYEE' || user?.role === 'ADMIN') && (
+                  <button
+                    onClick={() => {
+                      navigate('/employee/profile');
+                      setIsDropdownOpen(false);
+                    }}
+                    style={dropdownItemStyle}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#f3f4f6';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }}
+                  >
+                    <UserIcon width={16} height={16} style={{ marginRight: '8px' }} />
+                    {t('navigation.profile')}
+                  </button>
+                )}
                 <button
                   onClick={handleSettings}
                   style={dropdownItemStyle}

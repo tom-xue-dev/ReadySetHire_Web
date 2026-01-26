@@ -19,7 +19,8 @@
     "questions": "Questions",
     "resumeManagement": "Resume Management",
     "jobSearch": "Job Search",
-    "aiResumeRating": "AI Resume Rating"
+    "aiResumeRating": "AI Resume Rating",
+    "profile": "Profile"
   },
   "home": {
     "title": "ReadySetHire",
@@ -285,11 +286,38 @@
     "status": "Status",
     "created": "Created",
     "published": "Published",
-    "saveJob": "Save job",
-    "unsaveJob": "Unsave job",
+    "saveJob": "Save",
+    "unsaveJob": "Unsave",
+    "quickApply": "Quick apply",
     "hideJob": "Hide job",
     "enterKeywords": "Enter keywords",
-    "enterLocation": "Enter suburb, city, or region"
+    "enterLocation": "Enter suburb, city, or region",
+    "companyInfo": "Company",
+    "postedDate": "Posted",
+    "viewAllJobs": "View all jobs"
+  },
+  "profile": {
+    "title": "My Profile",
+    "subtitle": "Manage your resume and job preferences",
+    "resumeSection": {
+      "title": "Resume",
+      "description": "Upload your resume to quickly apply for jobs",
+      "upload": "Upload Resume",
+      "current": "Current Resume",
+      "noResume": "No resume uploaded yet",
+      "uploadFormats": "Supports PDF, DOCX formats",
+      "uploadSuccess": "Resume uploaded successfully",
+      "uploadError": "Failed to upload resume"
+    },
+    "preferencesSection": {
+      "title": "Job Preferences",
+      "description": "Set your preferred job classifications",
+      "classification": "Preferred Classification",
+      "selectClassification": "Select classification",
+      "save": "Save Preferences",
+      "saveSuccess": "Preferences saved successfully",
+      "saveError": "Failed to save preferences"
+    }
   },
   "subscription": {
     "title": "Pricing Plans",

@@ -186,34 +186,6 @@ export async function apiRequest(endpoint: string, method: string = 'GET', body:
 }
 
 
-// Question APIs - Updated for new API format
-export async function getQuestions(interviewId: string | number): Promise<unknown[]> {
-    const response = await apiRequest(`/question/interview/${interviewId}`);
-    return (response as { data?: unknown[] })?.data || [];
-}
-
-export async function createQuestion(question: Record<string, unknown>): Promise<Record<string, unknown> | null> {
-    return apiRequest(`/question`, 'POST', question);
-}
-
-export async function updateQuestion(id: string | number, data: Record<string, unknown>): Promise<Record<string, unknown> | null> {
-    return apiRequest(`/question/${id}`, 'PATCH', data);
-}
-
-export async function deleteQuestion(id: string | number): Promise<Record<string, unknown> | null> {
-    return apiRequest(`/question/${id}`, 'DELETE');
-}
-
-/**
- * Generate questions using LLM based on job description
- * @param {number} interviewId - The interview ID
- * @param {number} count - Number of questions to generate (default: 5)
- * @returns {Promise<object>} - The generated questions response
- */
-export async function generateQuestions(interviewId: string | number, count: number = 5): Promise<Record<string, unknown> | null> {
-    return apiRequest(`/question/generate/${interviewId}`, 'POST', { count });
-}
-
 // Applicants APIs - Updated for new API format
 export async function getAllApplicants(): Promise<unknown[]> {
     const response = await apiRequest(`/applicants`);
@@ -374,13 +346,3 @@ export async function analyzeResume(request: AnalyzeResumeRequest): Promise<Anal
 
 
 
-/**
- * Main function to demonstrate API usage.
- *
- * Creates a new interview, lists all interviews, and retrieves a single interview by ID.
- */
-// @ts-ignore - Function is for demonstration purposes only
-
-export async function bindApplicantToInterviewV2(interviewId: string | number, applicantId: string | number, status: string = 'NOT_STARTED'): Promise<Record<string, unknown> | null> {
-    return apiRequest(`/interviews/${interviewId}/applicants`, 'POST', { applicant_id: applicantId, status });
-}

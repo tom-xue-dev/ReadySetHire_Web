@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { UserCircleIcon, Cog6ToothIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/solid';
+import { UserCircleIcon, Cog6ToothIcon, Bars3Icon, XMarkIcon, UserIcon } from '@heroicons/react/24/solid';
 import { useState, useRef, useEffect } from 'react';
 import { useI18n } from "../../contexts/I18nContext";
 import { useAuth } from "../../pages/auth/AuthContext";
@@ -157,6 +157,18 @@ export default function LandingHeader({ showNavLinks = true }: LandingHeaderProp
                         ({user?.role})
                       </span>
                     </div>
+                    {(user?.role === 'EMPLOYEE' || user?.role === 'ADMIN') && (
+                      <button
+                        onClick={() => {
+                          navigate('/employee/profile');
+                          setIsDropdownOpen(false);
+                        }}
+                        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                      >
+                        <UserIcon width={16} height={16} />
+                        {t('navigation.profile')}
+                      </button>
+                    )}
                     <button
                       onClick={handleSettings}
                       className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"

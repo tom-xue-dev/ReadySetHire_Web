@@ -21,7 +21,7 @@ export default function EmployeeSettings() {
 
       <div className="min-h-screen bg-transparent pt-14">
         {/* Header Section */}
-        <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 relative overflow-hidden shadow-lg">
+        <div className="bg-linear-to-r from-blue-600 via-indigo-600 to-purple-600 relative overflow-hidden shadow-lg">
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="text-center mb-6">
               <div className="flex items-center justify-center gap-3 mb-3">

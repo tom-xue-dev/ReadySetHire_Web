@@ -179,7 +179,7 @@ export default function TrackingJobs() {
 
       <div className="min-h-screen bg-transparent pt-14">
         {/* Header with Search Bar */}
-        <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 relative overflow-hidden shadow-lg">
+        <div className="bg-linear-to-r from-indigo-600 via-purple-600 to-pink-600 relative overflow-hidden shadow-lg">
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="bg-white rounded-lg shadow-xl p-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -291,9 +291,8 @@ export default function TrackingJobs() {
 
         {/* Main Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            {/* Job Listings - Left Side */}
-            <div className="lg:col-span-3">
+            {/* Job Listings */}
+            <div className="w-full">
               <div className="bg-white rounded-lg shadow-sm">
                 <div className="px-6 py-4 border-b border-gray-200">
                   <h2 className="text-lg font-semibold text-gray-900">{t('trackingJobs.recommended')}</h2>
@@ -309,6 +308,7 @@ export default function TrackingJobs() {
                 ) : (
                   <div className="divide-y divide-gray-100">
                     {filteredJobs.map((job) => (
+                      
                       <div
                         key={job.id}
                         className="p-6 hover:bg-gray-50 transition-colors cursor-pointer"
@@ -382,16 +382,6 @@ export default function TrackingJobs() {
                                 <BookmarkIcon className="w-5 h-5" />
                               )}
                             </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                // Hide job functionality
-                              }}
-                              className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-                              title={t('trackingJobs.hideJob')}
-                            >
-                              <XMarkIcon className="w-5 h-5" />
-                            </button>
                           </div>
                         </div>
                       </div>
@@ -401,81 +391,104 @@ export default function TrackingJobs() {
               </div>
             </div>
 
-            {/* Right Sidebar */}
-            <div className="lg:col-span-1">
-              <div className="space-y-6">
-                {/* Saved Searches */}
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('trackingJobs.savedSearches')}</h3>
-                  <p className="text-sm text-gray-600">
-                    {t('trackingJobs.savedSearchesDesc')}
-                  </p>
-                </div>
-
-                {/* Saved Jobs */}
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('trackingJobs.savedJobs')}</h3>
-                  <p className="text-sm text-gray-600">
-                    {t('trackingJobs.savedJobsDesc')}
-                  </p>
-                  {savedJobs.size > 0 && (
-                    <div className="mt-4 text-sm text-pink-600">
-                      {t('trackingJobs.savedCount', { count: savedJobs.size })}
+            {/* Dim background when a job is selected */}
+            {selectedJob && (
+              <div
+                className="fixed inset-0 bg-black/40 z-30"
+                onClick={() => setSelectedJob(null)}
+              />
+            )}
+            {/* Job Details Panel - Fixed Right Side */}
+            {selectedJob && (
+              <div className="fixed top-0 right-0 w-[25vw] min-w-[380px] max-w-[480px] h-screen bg-white shadow-2xl border-l border-gray-200 z-50 overflow-y-auto">
+                <div className="p-6 space-y-4">
+                    <div className="flex items-start justify-between mb-4">
+                      <h3 className="text-xl font-bold text-gray-900">{selectedJob.title}</h3>
+                      <button
+                        onClick={() => setSelectedJob(null)}
+                        className="p-1 text-gray-400 hover:text-gray-600"
+                      >
+                        <XMarkIcon className="w-5 h-5" />
+                      </button>
                     </div>
-                  )}
-                </div>
 
-                {/* Job Details Panel */}
-                {selectedJob && (
-                  <div className="bg-white rounded-lg shadow-sm p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('trackingJobs.jobDetails')}</h3>
-                    <div className="space-y-3 text-sm">
-                      <div>
-                        <span className="font-medium text-gray-700">{t('trackingJobs.title')}:</span>
-                        <p className="text-gray-900">{selectedJob.title}</p>
-                      </div>
-                      <div>
-                        <span className="font-medium text-gray-700">{t('trackingJobs.description')}:</span>
-                        <p className="text-gray-600">{selectedJob.description}</p>
-                      </div>
-                      {selectedJob.requirements && (
-                        <div>
-                          <span className="font-medium text-gray-700">{t('trackingJobs.requirements')}:</span>
-                          <p className="text-gray-600">{selectedJob.requirements}</p>
+                    {selectedJob.user && (
+                      <div className="pb-4 border-b border-gray-200">
+                        <div className="text-sm text-gray-600 mb-1">{t('trackingJobs.companyInfo')}</div>
+                        <div className="font-semibold text-gray-900">
+                          {selectedJob.user.firstName && selectedJob.user.lastName
+                            ? `${selectedJob.user.firstName} ${selectedJob.user.lastName}`
+                            : selectedJob.user.username}
                         </div>
-                      )}
+                      </div>
+                    )}
+
+                    <div className="space-y-3">
                       {selectedJob.location && (
-                        <div>
-                          <span className="font-medium text-gray-700">{t('trackingJobs.location')}:</span>
-                          <p className="text-gray-600">{selectedJob.location}</p>
+                        <div className="flex items-start gap-2">
+                          <span className="text-gray-500">📍</span>
+                          <span className="text-sm text-gray-700">{selectedJob.location}</span>
                         </div>
                       )}
                       {selectedJob.salaryRange && (
-                        <div>
-                          <span className="font-medium text-gray-700">{t('trackingJobs.salaryRange')}:</span>
-                          <p className="text-gray-600">{selectedJob.salaryRange}</p>
+                        <div className="flex items-start gap-2">
+                          <span className="text-gray-500">💰</span>
+                          <span className="text-sm text-gray-700">{selectedJob.salaryRange}</span>
                         </div>
                       )}
-                      <div>
-                        <span className="font-medium text-gray-700">{t('trackingJobs.status')}:</span>
-                        <p className="text-gray-600">{selectedJob.status}</p>
+                      <div className="flex items-start gap-2">
+                        <span className="text-gray-500">📅</span>
+                        <span className="text-sm text-gray-700">
+                          {t('trackingJobs.postedDate')} {formatDate(selectedJob.createdAt)}
+                        </span>
                       </div>
-                      <div>
-                        <span className="font-medium text-gray-700">{t('trackingJobs.created')}:</span>
-                        <p className="text-gray-600">{new Date(selectedJob.createdAt).toLocaleDateString()}</p>
+                    </div>
+
+                    <div className="pt-4 border-t border-gray-200">
+                      <h4 className="font-semibold text-gray-900 mb-2">{t('trackingJobs.description')}</h4>
+                      <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
+                        {selectedJob.description}
+                      </p>
+                    </div>
+
+                    {selectedJob.requirements && (
+                      <div className="pt-4 border-t border-gray-200">
+                        <h4 className="font-semibold text-gray-900 mb-2">{t('trackingJobs.requirements')}</h4>
+                        <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
+                          {selectedJob.requirements}
+                        </p>
                       </div>
-                      {selectedJob.publishedAt && (
-                        <div>
-                          <span className="font-medium text-gray-700">{t('trackingJobs.published')}:</span>
-                          <p className="text-gray-600">{new Date(selectedJob.publishedAt).toLocaleDateString()}</p>
-                        </div>
-                      )}
+                    )}
+
+                    <div className="pt-4 flex gap-2">
+                      <button
+                        onClick={() => {
+                          // Quick apply functionality
+                          window.location.href = `/jobs/${selectedJob.id}/apply`;
+                        }}
+                        className="flex-1 bg-pink-600 hover:bg-pink-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors"
+                      >
+                        {t('trackingJobs.quickApply')}
+                      </button>
+                      <button
+                        onClick={() => toggleSaveJob(selectedJob.id)}
+                        className={`px-4 py-3 rounded-lg border transition-colors ${
+                          savedJobs.has(selectedJob.id)
+                            ? 'bg-pink-50 border-pink-600 text-pink-600'
+                            : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                        }`}
+                        title={savedJobs.has(selectedJob.id) ? t('trackingJobs.unsaveJob') : t('trackingJobs.saveJob')}
+                      >
+                        {savedJobs.has(selectedJob.id) ? (
+                          <BookmarkSolidIcon className="w-5 h-5" />
+                        ) : (
+                          <BookmarkIcon className="w-5 h-5" />
+                        )}
+                      </button>
                     </div>
                   </div>
-                )}
-              </div>
-            </div>
-          </div>
+                </div>
+              )}
         </div>
       </div>
       
