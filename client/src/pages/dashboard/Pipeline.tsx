@@ -108,6 +108,13 @@ export default function Pipeline() {
   const [showJobDropdown, setShowJobDropdown] = useState(false);
   const [activeStageFilter, setActiveStageFilter] = useState<ApplicationStatus | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [showAddCandidateModal, setShowAddCandidateModal] = useState(false);
+  const [candidateForm, setCandidateForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+  });
 
   // Load jobs on mount
   useEffect(() => {
@@ -239,6 +246,60 @@ export default function Pipeline() {
     }
   }
 
+  // Add new candidate
+  async function handleAddCandidate() {
+    if (!candidateForm.email || !selectedJobId) {
+      alert(t('pipeline.fillRequiredFields'));
+      return;
+    }
+
+    try {
+      // First, create or get candidate
+      const candidateResponse = await apiRequest('/candidates', 'POST', {
+        firstName: candidateForm.firstName,
+        lastName: candidateForm.lastName,
+        email: candidateForm.email,
+        phone: candidateForm.phone,
+      });
+
+      if (candidateResponse && 'data' in candidateResponse) {
+        const candidateId = (candidateResponse.data as any).id;
+
+        // Then create job application
+        const applicationPayload = {
+          jobId: selectedJobId,
+          candidateId: candidateId,
+          firstName: candidateForm.firstName,
+          lastName: candidateForm.lastName,
+          email: candidateForm.email,
+          phone: candidateForm.phone,
+          status: 'SUBMITTED',
+        };
+
+        // Create application via public endpoint (simulating application)
+        await apiRequest(`/jobs/${selectedJobId}/apply`, 'POST', applicationPayload);
+
+        // Reload applications
+        const response = await apiRequest(`/jobs/${selectedJobId}/applications`);
+        if (response && 'applications' in response) {
+          setApplications(response.applications as Application[]);
+        }
+
+        // Reset form and close modal
+        setCandidateForm({
+          firstName: '',
+          lastName: '',
+          email: '',
+          phone: '',
+        });
+        setShowAddCandidateModal(false);
+      }
+    } catch (error) {
+      console.error('Failed to add candidate:', error);
+      alert(t('pipeline.addCandidateFailed'));
+    }
+  }
+
   // Main flow stages (excluding rejected/withdrawn for the flow diagram)
   const flowStages: ApplicationStatus[] = [
     'SUBMITTED',
@@ -315,13 +376,11 @@ export default function Pipeline() {
           </div>
 
           <div className="flex items-center gap-3">
-            <button className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm">
-              {t('pipeline.jobSettings')}
-            </button>
-            <button className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm">
-              {t('pipeline.inviteCandidates')}
-            </button>
-            <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium">
+            <button
+              onClick={() => setShowAddCandidateModal(true)}
+              disabled={!selectedJobId}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               {t('pipeline.addCandidate')}
             </button>
           </div>
@@ -435,15 +494,15 @@ export default function Pipeline() {
       </div>
 
       {/* Main Content - Kanban Board */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden" style={{ minHeight: 'calc(100vh - 300px)' }}>
         {/* Kanban Columns */}
-        <div className="flex-1 overflow-x-auto p-4">
+        <div className="flex-1 overflow-auto p-4">
           {loading ? (
             <div className="flex items-center justify-center h-64">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
             </div>
           ) : (
-            <div className="flex gap-4 min-h-[calc(100vh-340px)]">
+            <div className="flex gap-4 items-start">
               {kanbanStages.map(stage => {
                 const config = STAGE_CONFIG.find(s => s.key === stage)!;
                 const stageApps = applicationsByStage[stage];
@@ -451,7 +510,7 @@ export default function Pipeline() {
                 return (
                   <div
                     key={stage}
-                    className="shrink-0 w-72 bg-gray-100 rounded-lg"
+                    className="shrink-0 w-72 bg-gray-100 rounded-lg flex flex-col"
                   >
                     {/* Column Header */}
                     <div className={`px-3 py-2 border-b ${config.borderClass} ${config.bgClass} rounded-t-lg`}>
@@ -463,8 +522,8 @@ export default function Pipeline() {
                       </div>
                     </div>
 
-                    {/* Cards */}
-                    <div className="p-2 space-y-2 max-h-[calc(100vh-400px)] overflow-y-auto">
+                    {/* Cards - 动态高度，根据候选人数量自适应 */}
+                    <div className="p-2 space-y-2">
                       {stageApps.length === 0 ? (
                         <div className="text-center py-8 text-gray-400 text-sm">
                           {t('pipeline.noApplications')}
@@ -631,6 +690,92 @@ export default function Pipeline() {
           </div>
         )}
       </div>
+
+      {/* Add Candidate Modal */}
+      {showAddCandidateModal && (
+        <div className="fixed inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6 shadow-xl border border-gray-200">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">{t('pipeline.addCandidate')}</h2>
+              <button
+                onClick={() => setShowAddCandidateModal(false)}
+                className="p-1 hover:bg-gray-100 rounded"
+              >
+                <XMarkIcon className="w-5 h-5 text-gray-400" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t('pipeline.firstName')} *
+                </label>
+                <input
+                  type="text"
+                  value={candidateForm.firstName}
+                  onChange={(e) => setCandidateForm({ ...candidateForm, firstName: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  placeholder={t('pipeline.firstNamePlaceholder')}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t('pipeline.lastName')} *
+                </label>
+                <input
+                  type="text"
+                  value={candidateForm.lastName}
+                  onChange={(e) => setCandidateForm({ ...candidateForm, lastName: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  placeholder={t('pipeline.lastNamePlaceholder')}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t('pipeline.email')} *
+                </label>
+                <input
+                  type="email"
+                  value={candidateForm.email}
+                  onChange={(e) => setCandidateForm({ ...candidateForm, email: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  placeholder={t('pipeline.emailPlaceholder')}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t('pipeline.phone')}
+                </label>
+                <input
+                  type="tel"
+                  value={candidateForm.phone}
+                  onChange={(e) => setCandidateForm({ ...candidateForm, phone: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  placeholder={t('pipeline.phonePlaceholder')}
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 mt-6">
+              <button
+                onClick={() => setShowAddCandidateModal(false)}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                {t('forms.cancel')}
+              </button>
+              <button
+                onClick={handleAddCandidate}
+                className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+              >
+                {t('forms.add')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
