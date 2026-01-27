@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/pages/auth/AuthContext';
 import { getJobs } from '@/api/job';
+import { useI18n } from '@/contexts/I18nContext';
 
 
 interface DashboardStats {
@@ -21,6 +22,7 @@ interface JobWithStats {
 
 export default function HRDashboard() {
   const { user } = useAuth();
+  const { t } = useI18n();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState<DashboardStats>({
@@ -104,14 +106,14 @@ export default function HRDashboard() {
       <div className="flex items-start justify-between mb-1">
         <h3 className="m-0 text-base font-semibold text-slate-900">{job.title}</h3>
         <span className={`px-2 py-1 rounded text-xs font-medium ${job.status === 'PUBLISHED' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
-          {job.status}
+          {t(`jobs.statusValues.${job.status}`)}
         </span>
       </div>
       <div className="mt-1 mb-3 text-sm text-slate-600 space-y-1">
         {job.location && <div>📍 {job.location}</div>}
         {job.salaryRange && <div>💰 {job.salaryRange}</div>}
       </div>
-      <div className="mt-2 text-xs text-slate-400">Created: {new Date(job.createdAt).toLocaleDateString()}</div>
+      <div className="mt-2 text-xs text-slate-400">{t('dashboard.createdAt', { date: new Date(job.createdAt).toLocaleDateString() })}</div>
     </div>
   );
 
@@ -120,9 +122,9 @@ export default function HRDashboard() {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-1">
-            <h1 className="m-0 text-2xl font-bold text-slate-900">HR Dashboard</h1>
+            <h1 className="m-0 text-2xl font-bold text-slate-900">{t('dashboard.title')}</h1>
           </div>
-          <p className="m-0 text-slate-600">Welcome back, {user?.firstName || user?.username}! Here's your hiring overview.</p>
+          <p className="m-0 text-slate-600">{t('dashboard.welcomeBack', { name: user?.firstName || user?.username || '' })}</p>
         </div>
 
         {error && (
@@ -132,15 +134,15 @@ export default function HRDashboard() {
         )}
 
         {loading ? (
-          <div className="text-center py-10 text-slate-600">Loading dashboard...</div>
+          <div className="text-center py-10 text-slate-600">{t('dashboard.loading')}</div>
         ) : (
           <>
             {/* Stat grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-              <StatCard title="Total Jobs" value={stats.totalJobs} icon="💼" color="#3b82f6" />
-              <StatCard title="Published Jobs" value={stats.publishedJobs} icon="📢" color="#10b981" />
-              <StatCard title="Draft Jobs" value={stats.draftJobs} icon="📝" color="#f59e0b" />
-              <StatCard title="Total Applicants" value={stats.totalApplicants} icon="👥" color="#8b5cf6" />
+              <StatCard title={t('dashboard.stats.totalJobs')} value={stats.totalJobs} icon="💼" color="#3b82f6" />
+              <StatCard title={t('dashboard.stats.publishedJobs')} value={stats.publishedJobs} icon="📢" color="#10b981" />
+              <StatCard title={t('dashboard.stats.draftJobs')} value={stats.draftJobs} icon="📝" color="#f59e0b" />
+              <StatCard title={t('dashboard.stats.totalApplicants')} value={stats.totalApplicants} icon="👥" color="#8b5cf6" />
             </div>
 
             {/* Content grid */}
@@ -148,17 +150,17 @@ export default function HRDashboard() {
               <div className="lg:col-span-2">
                 <div className={`${brand.card} p-6`}>
                   <div className="flex items-center justify-between">
-                    <h3 className="text-base font-semibold text-slate-900 m-0">Recent Jobs</h3>
-                    <button className={brand.btnGhost} onClick={() => (window.location.href = '/jobs')}>View all</button>
+                    <h3 className="text-base font-semibold text-slate-900 m-0">{t('dashboard.recentJobs')}</h3>
+                    <button className={brand.btnGhost} onClick={() => (window.location.href = '/jobs')}>{t('dashboard.viewAll')}</button>
                   </div>
                   <div className="mt-4">
                     {recentJobs.length === 0 ? (
                       <div className="grid place-items-center py-12 text-center">
                         <div className="h-14 w-14 rounded-2xl bg-[#635bff]/10 grid place-items-center text-3xl">💼</div>
-                        <h4 className="mt-4 text-lg font-semibold text-slate-900">No jobs yet</h4>
-                        <p className="mt-1 text-sm text-slate-600 max-w-md">Create your first job posting to get started. Your jobs will appear here once created.</p>
+                        <h4 className="mt-4 text-lg font-semibold text-slate-900">{t('dashboard.empty.title')}</h4>
+                        <p className="mt-1 text-sm text-slate-600 max-w-md">{t('dashboard.empty.subtitle')}</p>
                         <div className="mt-4">
-                          <button className={brand.btn} onClick={() => (window.location.href = '/jobs')}>Create job</button>
+                          <button className={brand.btn} onClick={() => (window.location.href = '/jobs')}>{t('dashboard.empty.createJob')}</button>
                         </div>
                       </div>
                     ) : (
@@ -173,12 +175,12 @@ export default function HRDashboard() {
               </div>
 
               <div className={`${brand.card} p-6`}>
-                <h3 className="text-base font-semibold text-slate-900 m-0">How it works</h3>
+                <h3 className="text-base font-semibold text-slate-900 m-0">{t('dashboard.howItWorks.title')}</h3>
                 <ol className="mt-4 space-y-3 text-sm text-slate-700">
-                  <li className="flex items-start gap-3"><span className="mt-1 h-6 w-6 shrink-0 rounded-full bg-[#635bff]/10 text-[#635bff] grid place-items-center text-xs font-semibold">1</span><div><b>Create a job</b> – define role and requirements.</div></li>
-                  <li className="flex items-start gap-3"><span className="mt-1 h-6 w-6 shrink-0 rounded-full bg-[#635bff]/10 text-[#635bff] grid place-items-center text-xs font-semibold">2</span><div><b>Publish & share</b> – candidates can view and apply.</div></li>
-                  <li className="flex items-start gap-3"><span className="mt-1 h-6 w-6 shrink-0 rounded-full bg-[#635bff]/10 text-[#635bff] grid place-items-center text-xs font-semibold">3</span><div><b>AI resume scoring</b> – AI analyzes resumes against your JD.</div></li>
-                  <li className="flex items-start gap-3"><span className="mt-1 h-6 w-6 shrink-0 rounded-full bg-[#635bff]/10 text-[#635bff] grid place-items-center text-xs font-semibold">4</span><div><b>Manage applicants</b> – track and collaborate with your team.</div></li>
+                  <li className="flex items-start gap-3"><span className="mt-1 h-6 w-6 shrink-0 rounded-full bg-[#635bff]/10 text-[#635bff] grid place-items-center text-xs font-semibold">1</span><div><b>{t('dashboard.howItWorks.step1Title')}</b> – {t('dashboard.howItWorks.step1Desc')}</div></li>
+                  <li className="flex items-start gap-3"><span className="mt-1 h-6 w-6 shrink-0 rounded-full bg-[#635bff]/10 text-[#635bff] grid place-items-center text-xs font-semibold">2</span><div><b>{t('dashboard.howItWorks.step2Title')}</b> – {t('dashboard.howItWorks.step2Desc')}</div></li>
+                  <li className="flex items-start gap-3"><span className="mt-1 h-6 w-6 shrink-0 rounded-full bg-[#635bff]/10 text-[#635bff] grid place-items-center text-xs font-semibold">3</span><div><b>{t('dashboard.howItWorks.step3Title')}</b> – {t('dashboard.howItWorks.step3Desc')}</div></li>
+                  <li className="flex items-start gap-3"><span className="mt-1 h-6 w-6 shrink-0 rounded-full bg-[#635bff]/10 text-[#635bff] grid place-items-center text-xs font-semibold">4</span><div><b>{t('dashboard.howItWorks.step4Title')}</b> – {t('dashboard.howItWorks.step4Desc')}</div></li>
                 </ol>
               </div>
             </div>

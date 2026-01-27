@@ -8,7 +8,19 @@
     "confirmLogout": "Are you sure you want to logout?",
     "copyright": "© 2025 ReadySetHire - Streamlining the hiring process with AI",
     "settings": "Settings",
-    "closeMenu": "Close Menu"
+    "closeMenu": "Close Menu",
+    "openMenu": "Open Menu"
+  },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "date": {
+    "relative": {
+      "justNow": "Just now",
+      "hoursAgo": "{hours}h ago",
+      "daysAgo": "{days}d ago"
+    }
   },
   "navigation": {
     "dashboard": "Dashboard",
@@ -266,6 +278,69 @@
     "editJob": "Edit job",
     "shareLink": "Share link",
     "delete": "Delete...",
+    "publish": "Publish",
+    "close": "Close",
+    "updateTime": "Update Time",
+    "updateTimeOptions": {
+      "all": "All time",
+      "last24h": "Last 24 hours",
+      "last7d": "Last 7 days",
+      "last30d": "Last 30 days"
+    },
+    "sortOptions": {
+      "updatedNewest": "Updated (Newest)",
+      "updatedOldest": "Updated (Oldest)",
+      "createdNewest": "Created (Newest)",
+      "titleAZ": "Title (A-Z)"
+    },
+    "statusValues": {
+      "DRAFT": "Draft",
+      "PUBLISHED": "Published",
+      "CLOSED": "Closed"
+    },
+    "accountId": "Account ID: {id}",
+    "applicantsCount": "Applicants",
+    "confirm": {
+      "deleteJob": "Are you sure you want to delete this job?"
+    },
+    "errors": {
+      "saveFailed": "Failed to save job",
+      "deleteFailed": "Failed to delete job",
+      "publishFailed": "Failed to publish job",
+      "closeFailed": "Failed to close job"
+    },
+    "share": {
+      "copied": "Application link copied to clipboard!",
+      "copyFailed": "Failed to copy link"
+    },
+    "validation": {
+      "titleAndDescriptionRequired": "Title and description are required"
+    },
+    "modal": {
+      "editTitle": "Edit Job",
+      "create": "Create"
+    },
+    "form": {
+      "title": "Title",
+      "description": "Description",
+      "requirements": "Requirements",
+      "location": "Location",
+      "salaryRange": "Salary Range",
+      "titlePlaceholder": "e.g. Senior Software Engineer",
+      "descriptionPlaceholder": "Describe the role and responsibilities...",
+      "requirementsPlaceholder": "List required skills and experience...",
+      "locationPlaceholder": "e.g. Sydney, NSW",
+      "salaryRangePlaceholder": "e.g. $80,000 - $120,000"
+    },
+    "csv": {
+      "title": "Title",
+      "location": "Location",
+      "salaryRange": "Salary Range",
+      "status": "Status",
+      "applicants": "Applicants",
+      "created": "Created",
+      "updated": "Updated"
+    },
     "showingJobs": "Showing {count} jobs",
     "stats": {
       "openJobs": "Open jobs",
@@ -273,6 +348,81 @@
       "inReview": "In review",
       "interviewing": "Interviewing",
       "offers": "Offers"
+    }
+  },
+  "candidates": {
+    "subtitle": "Manage your candidate database",
+    "newCandidate": "New Candidate",
+    "searchPlaceholder": "Search by name, email, or phone...",
+    "empty": "No candidates found",
+    "showing": "Showing {count} candidates",
+    "confirm": {
+      "deleteCandidate": "Are you sure you want to delete this candidate?"
+    },
+    "errors": {
+      "saveFailed": "Failed to save candidate",
+      "deleteFailed": "Failed to delete candidate"
+    },
+    "validation": {
+      "emailRequired": "Email is required",
+      "jobRequired": "Please select a published job"
+    },
+    "stats": {
+      "total": "Total Candidates",
+      "active": "Active",
+      "thisWeek": "This Week",
+      "applications": "Applications"
+    },
+    "table": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "applications": "Applications",
+      "added": "Added",
+      "appliedJob": "Applied Job"
+    },
+    "sortOptions": {
+      "updatedNewest": "Updated (Newest)",
+      "updatedOldest": "Updated (Oldest)",
+      "nameAZ": "Name (A-Z)"
+    },
+    "modal": {
+      "editTitle": "Edit Candidate"
+    },
+    "form": {
+      "job": "Job",
+      "jobPlaceholder": "Select a published job",
+      "jobHint": "New candidates must be linked to a published job (application will be created)."
+    }
+  },
+  "dashboard": {
+    "title": "HR Dashboard",
+    "welcomeBack": "Welcome back, {name}! Here's your hiring overview.",
+    "loading": "Loading dashboard...",
+    "createdAt": "Created: {date}",
+    "stats": {
+      "totalJobs": "Total Jobs",
+      "publishedJobs": "Published Jobs",
+      "draftJobs": "Draft Jobs",
+      "totalApplicants": "Total Applicants"
+    },
+    "recentJobs": "Recent Jobs",
+    "viewAll": "View all",
+    "empty": {
+      "title": "No jobs yet",
+      "subtitle": "Create your first job posting to get started. Your jobs will appear here once created.",
+      "createJob": "Create job"
+    },
+    "howItWorks": {
+      "title": "How it works",
+      "step1Title": "Create a job",
+      "step1Desc": "define role and requirements.",
+      "step2Title": "Publish & share",
+      "step2Desc": "candidates can view and apply.",
+      "step3Title": "AI resume scoring",
+      "step3Desc": "AI analyzes resumes against your JD.",
+      "step4Title": "Manage applicants",
+      "step4Desc": "track and collaborate with your team."
     }
   },
   "savedJobs": {

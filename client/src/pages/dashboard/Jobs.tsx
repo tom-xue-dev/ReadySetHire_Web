@@ -29,7 +29,7 @@ interface Job {
 interface ApplicationStats {
   total: number;
   submitted: number;
-  underReview: number;
+  inReview: number;
   interviewed: number;
   offerExtended: number;
 }
@@ -42,7 +42,7 @@ export default function Jobs() {
   const [applicationStats, setApplicationStats] = useState<ApplicationStats>({
     total: 0,
     submitted: 0,
-    underReview: 0,
+    inReview: 0,
     interviewed: 0,
     offerExtended: 0
   });
@@ -89,7 +89,7 @@ export default function Jobs() {
         setApplicationStats({
           total: data.total || 0,
           submitted: data.byStatus?.SUBMITTED || 0,
-          underReview: data.byStatus?.UNDER_REVIEW || 0,
+          inReview: data.byStatus?.IN_REVIEW || 0,
           interviewed: data.byStatus?.INTERVIEWED || 0,
           offerExtended: data.byStatus?.OFFER_EXTENDED || 0
         });
@@ -142,7 +142,7 @@ export default function Jobs() {
     return {
       openJobs: jobs.filter(j => j.status === 'PUBLISHED').length,
       newApplicants: applicationStats.submitted,
-      inReview: applicationStats.underReview,
+      inReview: applicationStats.inReview,
       interviewing: applicationStats.interviewed,
       offers: applicationStats.offerExtended
     };
@@ -154,12 +154,16 @@ export default function Jobs() {
     const diffMs = now.getTime() - date.getTime();
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     
-    if (diffHours < 1) return 'Just now';
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffHours < 48) return '1d ago';
+    if (diffHours < 1) return t('date.relative.justNow');
+    if (diffHours < 24) return t('date.relative.hoursAgo', { hours: diffHours });
+    if (diffHours < 48) return t('date.relative.daysAgo', { days: 1 });
     const diffDays = Math.floor(diffHours / 24);
-    if (diffDays < 7) return `${diffDays}d ago`;
+    if (diffDays < 7) return t('date.relative.daysAgo', { days: diffDays });
     return date.toLocaleDateString();
+  }
+
+  function getStatusLabel(status: Job['status']) {
+    return t(`jobs.statusValues.${status}`);
   }
 
   function getStatusBadge(status: string) {
@@ -172,12 +176,20 @@ export default function Jobs() {
   }
 
   function exportToCSV() {
-    const headers = ['Title', 'Location', 'Salary Range', 'Status', 'Applicants', 'Created', 'Updated'];
+    const headers = [
+      t('jobs.csv.title'),
+      t('jobs.csv.location'),
+      t('jobs.csv.salaryRange'),
+      t('jobs.csv.status'),
+      t('jobs.csv.applicants'),
+      t('jobs.csv.created'),
+      t('jobs.csv.updated'),
+    ];
     const rows = filteredAndSortedJobs.map(job => [
       job.title,
       job.location || '',
       job.salaryRange || '',
-      job.status,
+      getStatusLabel(job.status),
       job._count?.jobApplications || 0,
       job.createdAt,
       job.updatedAt
@@ -220,7 +232,7 @@ export default function Jobs() {
 
   async function handleSaveJob() {
     if (!jobForm.title || !jobForm.description) {
-      alert('Title and description are required');
+      alert(t('jobs.validation.titleAndDescriptionRequired'));
       return;
     }
 
@@ -241,12 +253,12 @@ export default function Jobs() {
       loadJobs();
     } catch (err) {
       console.error('Failed to save job:', err);
-      alert('Failed to save job');
+      alert(t('jobs.errors.saveFailed'));
     }
   }
 
   async function handleDeleteJob(jobId: number) {
-    if (!window.confirm('Are you sure you want to delete this job?')) return;
+    if (!window.confirm(t('jobs.confirm.deleteJob'))) return;
     
     try {
       await apiRequest(`/jobs/${jobId}`, 'DELETE');
@@ -254,7 +266,7 @@ export default function Jobs() {
       setOpenMenuId(null);
     } catch (err) {
       console.error('Failed to delete job:', err);
-      alert('Failed to delete job');
+      alert(t('jobs.errors.deleteFailed'));
     }
   }
 
@@ -265,7 +277,7 @@ export default function Jobs() {
       setOpenMenuId(null);
     } catch (err) {
       console.error('Failed to publish job:', err);
-      alert('Failed to publish job');
+      alert(t('jobs.errors.publishFailed'));
     }
   }
 
@@ -276,17 +288,17 @@ export default function Jobs() {
       setOpenMenuId(null);
     } catch (err) {
       console.error('Failed to close job:', err);
-      alert('Failed to close job');
+      alert(t('jobs.errors.closeFailed'));
     }
   }
 
   function handleShareJob(jobId: number) {
     const applyUrl = `${window.location.origin}/jobs/${jobId}/apply`;
     navigator.clipboard.writeText(applyUrl).then(() => {
-      alert('Application link copied to clipboard!');
+      alert(t('jobs.share.copied'));
       setOpenMenuId(null);
     }).catch(() => {
-      alert('Failed to copy link');
+      alert(t('jobs.share.copyFailed'));
     });
   }
 
@@ -396,16 +408,16 @@ export default function Jobs() {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Update Time</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('jobs.updateTime')}</label>
                       <select
                         value={updateTimeFilter}
                         onChange={(e) => setUpdateTimeFilter(e.target.value as any)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                       >
-                        <option value="ALL">All time</option>
-                        <option value="1DAY">Last 24 hours</option>
-                        <option value="7DAYS">Last 7 days</option>
-                        <option value="1MONTH">Last 30 days</option>
+                        <option value="ALL">{t('jobs.updateTimeOptions.all')}</option>
+                        <option value="1DAY">{t('jobs.updateTimeOptions.last24h')}</option>
+                        <option value="7DAYS">{t('jobs.updateTimeOptions.last7d')}</option>
+                        <option value="1MONTH">{t('jobs.updateTimeOptions.last30d')}</option>
                       </select>
                     </div>
                   </div>
@@ -433,25 +445,25 @@ export default function Jobs() {
                     onClick={() => { setSortBy('updated'); setSortOrder('desc'); setShowSort(false); }}
                     className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
                   >
-                    Updated (Newest)
+                    {t('jobs.sortOptions.updatedNewest')}
                   </button>
                   <button
                     onClick={() => { setSortBy('updated'); setSortOrder('asc'); setShowSort(false); }}
                     className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
                   >
-                    Updated (Oldest)
+                    {t('jobs.sortOptions.updatedOldest')}
                   </button>
                   <button
                     onClick={() => { setSortBy('created'); setSortOrder('desc'); setShowSort(false); }}
                     className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
                   >
-                    Created (Newest)
+                    {t('jobs.sortOptions.createdNewest')}
                   </button>
                   <button
                     onClick={() => { setSortBy('title'); setSortOrder('asc'); setShowSort(false); }}
                     className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
                   >
-                    Title (A-Z)
+                    {t('jobs.sortOptions.titleAZ')}
                   </button>
                 </div>
               </>
@@ -534,13 +546,13 @@ export default function Jobs() {
                     </td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex px-2 py-1 rounded text-xs font-medium ${getStatusBadge(job.status)}`}>
-                        {job.status}
+                        {getStatusLabel(job.status)}
                       </span>
                     </td>
                     <td className="px-6 py-4">
                       <div>
-                        <div className="font-semibold text-gray-900">0</div>
-                        <div className="text-xs text-gray-500">+0 new (7d)</div>
+                        <div className="font-semibold text-gray-900">{job._count?.jobApplications ?? 0}</div>
+                        <div className="text-xs text-gray-500">{t('jobs.applicantsCount')}</div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -550,7 +562,7 @@ export default function Jobs() {
                             ? `${job.user.firstName} ${job.user.lastName}`
                             : job.user?.username || user?.username}
                         </div>
-                        <div className="text-xs text-gray-500">A/iay</div>
+                        <div className="text-xs text-gray-500">{t('jobs.accountId', { id: job.userId })}</div>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">
@@ -591,14 +603,14 @@ export default function Jobs() {
                                     className="w-full px-4 py-2 text-left text-sm text-green-600 hover:bg-green-50 flex items-center gap-2"
                                   >
                                     <span>📢</span>
-                                    Publish
+                                    {t('jobs.publish')}
                                   </button>
                                   <button 
                                     onClick={() => handleCloseJob(job.id)}
                                     className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
                                   >
                                     <span>🔒</span>
-                                    Close
+                                    {t('jobs.close')}
                                   </button>
                                 </>
                               )}
@@ -617,7 +629,7 @@ export default function Jobs() {
                                     className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
                                   >
                                     <span>🔒</span>
-                                    Close
+                                    {t('jobs.close')}
                                   </button>
                                 </>
                               )}
@@ -644,9 +656,9 @@ export default function Jobs() {
           <div className="px-6 py-3 border-t border-gray-200 flex items-center justify-between text-sm text-gray-600">
             <div>{t('jobs.showingJobs', { count: filteredAndSortedJobs.length })}</div>
             <div className="flex items-center gap-2">
-              <button className="px-3 py-1 rounded hover:bg-gray-100">Previous</button>
+              <button className="px-3 py-1 rounded hover:bg-gray-100">{t('pagination.previous')}</button>
               <button className="px-3 py-1 bg-indigo-600 text-white rounded">1</button>
-              <button className="px-3 py-1 rounded hover:bg-gray-100">Next</button>
+              <button className="px-3 py-1 rounded hover:bg-gray-100">{t('pagination.next')}</button>
             </div>
           </div>
         </div>
@@ -657,64 +669,64 @@ export default function Jobs() {
             <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
               <div className="p-6 border-b border-gray-200">
                 <h2 className="text-xl font-semibold text-gray-900">
-                  {editingJob ? 'Edit Job' : t('jobs.newJob')}
+                  {editingJob ? t('jobs.modal.editTitle') : t('jobs.newJob')}
                 </h2>
               </div>
               
               <div className="p-6 space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Title *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('jobs.form.title')} *</label>
                   <input
                     type="text"
                     value={jobForm.title}
                     onChange={(e) => setJobForm({ ...jobForm, title: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                    placeholder="e.g. Senior Software Engineer"
+                    placeholder={t('jobs.form.titlePlaceholder')}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Description *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('jobs.form.description')} *</label>
                   <textarea
                     value={jobForm.description}
                     onChange={(e) => setJobForm({ ...jobForm, description: e.target.value })}
                     rows={5}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                    placeholder="Describe the role and responsibilities..."
+                    placeholder={t('jobs.form.descriptionPlaceholder')}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Requirements</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('jobs.form.requirements')}</label>
                   <textarea
                     value={jobForm.requirements}
                     onChange={(e) => setJobForm({ ...jobForm, requirements: e.target.value })}
                     rows={4}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                    placeholder="List required skills and experience..."
+                    placeholder={t('jobs.form.requirementsPlaceholder')}
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">{t('jobs.form.location')}</label>
                     <input
                       type="text"
                       value={jobForm.location}
                       onChange={(e) => setJobForm({ ...jobForm, location: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                      placeholder="e.g. Sydney, NSW"
+                      placeholder={t('jobs.form.locationPlaceholder')}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Salary Range</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">{t('jobs.form.salaryRange')}</label>
                     <input
                       type="text"
                       value={jobForm.salaryRange}
                       onChange={(e) => setJobForm({ ...jobForm, salaryRange: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                      placeholder="e.g. $80,000 - $120,000"
+                      placeholder={t('jobs.form.salaryRangePlaceholder')}
                     />
                   </div>
                 </div>
@@ -725,13 +737,13 @@ export default function Jobs() {
                   onClick={() => { setShowJobModal(false); setEditingJob(null); }}
                   className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                 >
-                  Cancel
+                  {t('forms.cancel')}
                 </button>
                 <button
                   onClick={handleSaveJob}
                   className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
                 >
-                  {editingJob ? 'Update' : 'Create'}
+                  {editingJob ? t('forms.save') : t('jobs.modal.create')}
                 </button>
               </div>
             </div>
