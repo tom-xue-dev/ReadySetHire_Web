@@ -16,7 +16,21 @@ router.get('/candidates', auth_1.authenticateToken, async (req, res) => {
                     select: {
                         applications: true
                     }
-                }
+                },
+                applications: {
+                    orderBy: { createdAt: 'desc' },
+                    take: 1,
+                    include: {
+                        job: {
+                            select: {
+                                id: true,
+                                title: true,
+                                status: true,
+                                location: true,
+                            }
+                        }
+                    }
+                },
             },
             orderBy: {
                 createdAt: 'desc'

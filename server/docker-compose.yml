@@ -39,7 +39,7 @@ services:
       LOG_LEVEL: debug
       # Ollama service configuration
       OLLAMA_BASE_URL: http://ollama:11434/v1
-      OLLAMA_MODEL: qwen2.5:7b
+      OLLAMA_MODEL: deepseek-r1:7b
     ports:
       - "3000:3000"
     depends_on:

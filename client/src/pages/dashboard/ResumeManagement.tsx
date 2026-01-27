@@ -106,7 +106,7 @@ export default function ResumeManagement() {
     for (const a of apps) {
       const s = String(a.status || 'SUBMITTED');
       if (s === 'SUBMITTED') counts.new++;
-      else if (s === 'UNDER_REVIEW' || s === 'SHORTLISTED') counts.screening++;
+      else if (s === 'IN_REVIEW' || s === 'SHORTLISTED') counts.screening++;
       else if (s === 'INTERVIEW_SCHEDULED' || s === 'INTERVIEWED') counts.interview++;
       else if (s === 'OFFER_EXTENDED' || s === 'HIRED') counts.offer++;
     }

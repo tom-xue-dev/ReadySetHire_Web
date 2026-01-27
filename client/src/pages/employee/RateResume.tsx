@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   SparklesIcon,
   DocumentArrowUpIcon,
@@ -17,8 +17,9 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import LandingHeader from '@/components/layout/LandingHeader';
 import LandingFooter from '@/components/layout/LandingFooter';
-import { analyzeResume, type AnalysisResult as APIAnalysisResult } from '@/api/api';
+import { analyzeResume, getSavedJobs, type AnalysisResult as APIAnalysisResult } from '@/api/api';
 import { useI18n } from '@/contexts/I18nContext';
+import { useAuth } from '@/pages/auth/AuthContext';
 
 type InputMethod = 'select' | 'paste' | 'upload';
 type AnalysisTab = 'overview' | 'requirements' | 'skills' | 'interview';
@@ -44,8 +45,25 @@ interface ResumeInput {
 
 type AnalysisResult = APIAnalysisResult;
 
+type SavedJobJob = {
+  id: number;
+  title: string;
+  description: string;
+  requirements?: string | null;
+  location?: string | null;
+  salaryRange?: string | null;
+  status?: string;
+};
+
+type SavedJobEntry = {
+  id: number;
+  savedAt: string;
+  job: SavedJobJob;
+};
+
 export default function RateResume() {
   const { t, language } = useI18n();
+  const { user } = useAuth();
   
   const [jdInput, setJdInput] = useState<JDInput>({
     method: 'select',
@@ -55,6 +73,8 @@ export default function RateResume() {
     language: language === 'zh' ? '中文' : 'English',
   });
 
+  
+  
   const [resumeInput, setResumeInput] = useState<ResumeInput>({
     method: 'upload',
     text: '',
@@ -66,6 +86,28 @@ export default function RateResume() {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [activeTab, setActiveTab] = useState<AnalysisTab>('overview');
   const [error, setError] = useState<string | null>(null);
+
+  const [savedJobs, setSavedJobs] = useState<SavedJobEntry[]>([]);
+
+  const savedJobsList: SavedJobJob[] = useMemo(() => {
+    return savedJobs
+      .map((s) => s.job)
+      .filter((job): job is SavedJobJob => !!job && typeof job.id === 'number');
+  }, [savedJobs]);
+
+  useEffect(() => {
+    async function loadSavedJobs() {
+      if (!user?.id) return;
+      try {
+        const data = await getSavedJobs(Number(user.id));
+        setSavedJobs((data as SavedJobEntry[]) || []);
+      } catch (e) {
+        console.error('Failed to load saved jobs:', e);
+        setSavedJobs([]);
+      }
+    }
+    loadSavedJobs();
+  }, [user?.id]);
 
   const handleAnalyze = async () => {
     if (!jdInput.text || !resumeInput.text) {
@@ -191,7 +233,7 @@ export default function RateResume() {
               </Button>
             </div>
             <div className="text-xs text-gray-500">
-              {t('rateResume.model')}：<span className="font-mono">ollama/qwen2.5:7b</span> | {t('rateResume.expectedOutput')}：{t('rateResume.structuredReport')}
+              {t('rateResume.model')}：<span className="font-mono">ollama/deepseek-r1:7b</span> | {t('rateResume.expectedOutput')}：{t('rateResume.structuredReport')}
             </div>
           </div>
         </div>
@@ -256,15 +298,20 @@ export default function RateResume() {
                 <select
                   value={jdInput.selectedJobId || ''}
                   onChange={(e) => {
-                    setJdInput({ ...jdInput, selectedJobId: e.target.value });
-                    // TODO: Load JD from selected job
+                    const selectedJobId = e.target.value;
+                    const selectedJob = savedJobsList.find((job) => String(job.id) === selectedJobId);
+                    setJdInput({
+                      ...jdInput,
+                      selectedJobId,
+                      text: selectedJob?.description || '',
+                    });
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="">{t('rateResume.jd.selectPlaceholder')}</option>
-                  <option value="1">高级前端工程师 - React</option>
-                  <option value="2">全栈开发工程师 - Node.js</option>
-                  <option value="3">产品经理 - B端产品</option>
+                  {savedJobsList.map((job) => (
+                    <option key={job.id} value={String(job.id)}>{job.title}</option>
+                  ))}
                 </select>
               </div>
             )}
