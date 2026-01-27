@@ -13,6 +13,7 @@
     "db:reset": "npx prisma migrate reset",
     "db:studio": "npx prisma studio",
     "db:create-admin": "tsx scripts/create-admin.ts",
+    "db:init-jobs": "tsx scripts/init-jobs.ts",
     "test": "jest",
     "test:unit": "jest --config jest.unit.config.js",
     "test:integration": "cross-env NODE_ENV=test jest src/__tests__/integration",
@@ -28,13 +29,7 @@
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
     "format": "prettier --write src/**/*.ts",
-    "format:check": "prettier --check src/**/*.ts",
-    "docker:build": "docker build -t readysethire-backend .",
-    "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down",
-    "docker:logs": "docker-compose logs -f",
-    "docker:restart": "docker-compose restart",
-    "docker:clean": "docker-compose down -v --remove-orphans"
+    "format:check": "prettier --check src/**/*.ts"
   },
   "dependencies": {
     "@huggingface/transformers": "^3.7.3",

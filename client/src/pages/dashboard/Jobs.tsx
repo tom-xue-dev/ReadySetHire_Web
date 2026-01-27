@@ -1,437 +1,743 @@
-import { useEffect, useMemo, useState } from 'react'; 
-import { BriefcaseIcon } from '@heroicons/react/24/outline';
-import { SimpleConnectionIndicator, SimpleConnectionGuard } from '@/components/common/SimpleConnectionStatus';
-import PageShell from '@/components/layout/PageShell';
-import JobForm from '@/components/form/JobForm';
-import type { Job } from '@/types';
-import { getJobs, createJob, updateJob, deleteJob, publishJob } from '@/api/job';
-import Modal from '@/components/ui/Modal';
-import { DetailPanel } from '@/components/layout/DetailPanel';
-import { Button } from '@/components/ui/Button';
-import { ListSearchBar } from '@/components/ui/ListSearchBar';
-import { Card } from '@/components/ui/Card';
+import { useEffect, useState, useMemo } from 'react';
+import { BriefcaseIcon, MagnifyingGlassIcon, FunnelIcon, EllipsisVerticalIcon, ArrowsUpDownIcon } from '@heroicons/react/24/outline';
+import { useI18n } from '@/contexts/I18nContext';
+import { useAuth } from '@/pages/auth/AuthContext';
+import { getJobs } from '@/api/job';
+import { apiRequest } from '@/api/api';
+
+interface Job {
+  id: number;
+  title: string;
+  description: string;
+  requirements?: string;
+  location?: string;
+  salaryRange?: string;
+  status: 'DRAFT' | 'PUBLISHED' | 'CLOSED';
+  userId: number;
+  createdAt: string;
+  updatedAt: string;
+  user?: {
+    firstName?: string;
+    lastName?: string;
+    username: string;
+  };
+  _count?: {
+    jobApplications: number;
+  };
+}
+
+interface ApplicationStats {
+  total: number;
+  submitted: number;
+  underReview: number;
+  interviewed: number;
+  offerExtended: number;
+}
+
 export default function Jobs() {
+  const { t } = useI18n();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [jobs, setJobs] = useState<Job[]>([]);
-  const [showForm, setShowForm] = useState(false);
+  const [applicationStats, setApplicationStats] = useState<ApplicationStats>({
+    total: 0,
+    submitted: 0,
+    underReview: 0,
+    interviewed: 0,
+    offerExtended: 0
+  });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'DRAFT' | 'PUBLISHED' | 'CLOSED'>('ALL');
+  const [updateTimeFilter, setUpdateTimeFilter] = useState<'ALL' | '1DAY' | '7DAYS' | '1MONTH'>('ALL');
+  const [sortBy, setSortBy] = useState<'updated' | 'created' | 'title'>('updated');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
+  const [showSort, setShowSort] = useState(false);
+  const [showJobModal, setShowJobModal] = useState(false);
   const [editingJob, setEditingJob] = useState<Job | null>(null);
-  const [formError, setFormError] = useState<string | null>(null);
-  const [q, setQ] = useState('');
-  const [status, setStatus] = useState<'ALL' | 'PUBLISHED' | 'DRAFT' | 'ARCHIVED' | 'CLOSED'>('ALL');
-  const [detailsJob, setDetailsJob] = useState<Job | null>(null);
-  const [shareJob, setShareJob] = useState<Job | null>(null);
-  const [copyMsg, setCopyMsg] = useState<string | null>(null);
+  const [jobForm, setJobForm] = useState({
+    title: '',
+    description: '',
+    requirements: '',
+    location: '',
+    salaryRange: ''
+  });
 
   useEffect(() => {
-    load();
+    loadJobs();
+    loadApplicationStats();
   }, []);
 
-  async function load() {
+  async function loadJobs() {
     setLoading(true);
-    setError(null);
     try {
       const data = await getJobs();
       setJobs(data as Job[]);
-    } catch (err: any) {
-      setError(err?.message ?? 'Failed to load jobs');
+    } catch (err) {
+      console.error('Failed to load jobs:', err);
     } finally {
       setLoading(false);
     }
   }
 
-  async function handleSubmit(jobData: Job) {
-    setFormError(null);
+  async function loadApplicationStats() {
     try {
-      if (editingJob?.id) {
-        await updateJob(editingJob.id, jobData);
-      } else {
-        await createJob(jobData);
+      const response = await apiRequest('/job-applications/stats');
+      if (response && typeof response === 'object') {
+        const data = response as any;
+        setApplicationStats({
+          total: data.total || 0,
+          submitted: data.byStatus?.SUBMITTED || 0,
+          underReview: data.byStatus?.UNDER_REVIEW || 0,
+          interviewed: data.byStatus?.INTERVIEWED || 0,
+          offerExtended: data.byStatus?.OFFER_EXTENDED || 0
+        });
       }
-      setShowForm(false);
-      setEditingJob(null);
-      await load(); // Reload the list
-    } catch (err: any) {
-      setFormError(err?.message ?? 'Failed to save job');
+    } catch (err) {
+      console.error('Failed to load application stats:', err);
     }
   }
 
-  async function handlePublish(job: Job) {
-    try {
-      if ((job.status as any) !== 'PUBLISHED' && job.id) {
-        await publishJob(job.id);
-        await load();
+  const filteredAndSortedJobs = useMemo(() => {
+    let filtered = jobs.filter(job => {
+      const matchesSearch = !searchQuery || 
+        job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        job.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        job.location?.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesStatus = statusFilter === 'ALL' || job.status === statusFilter;
+      
+      let matchesTime = true;
+      if (updateTimeFilter !== 'ALL') {
+        const updatedDate = new Date(job.updatedAt);
+        const now = new Date();
+        const diffMs = now.getTime() - updatedDate.getTime();
+        const diffDays = diffMs / (1000 * 60 * 60 * 24);
+        
+        if (updateTimeFilter === '1DAY') matchesTime = diffDays <= 1;
+        else if (updateTimeFilter === '7DAYS') matchesTime = diffDays <= 7;
+        else if (updateTimeFilter === '1MONTH') matchesTime = diffDays <= 30;
       }
-      setShareJob(job);
-    } catch (err: any) {
-      setError(err?.message ?? 'Failed to publish job');
-    }
-  }
+      
+      return matchesSearch && matchesStatus && matchesTime;
+    });
 
-  function getPublicLinks(jobId: number) {
-    const origin = window.location.origin;
+    filtered.sort((a, b) => {
+      let comparison = 0;
+      if (sortBy === 'updated') {
+        comparison = new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
+      } else if (sortBy === 'created') {
+        comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      } else if (sortBy === 'title') {
+        comparison = a.title.localeCompare(b.title);
+      }
+      return sortOrder === 'desc' ? -comparison : comparison;
+    });
+
+    return filtered;
+  }, [jobs, searchQuery, statusFilter, updateTimeFilter, sortBy, sortOrder]);
+
+  const stats = useMemo(() => {
     return {
-      details: `${origin}/jobs/${jobId}`,
-      apply: `${origin}/jobs/${jobId}/apply`
+      openJobs: jobs.filter(j => j.status === 'PUBLISHED').length,
+      newApplicants: applicationStats.submitted,
+      inReview: applicationStats.underReview,
+      interviewing: applicationStats.interviewed,
+      offers: applicationStats.offerExtended
     };
+  }, [jobs, applicationStats]);
+
+  function formatDate(dateString: string) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    
+    if (diffHours < 1) return 'Just now';
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffHours < 48) return '1d ago';
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString();
   }
 
-  async function copyToClipboard(text: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopyMsg('Link copied');
-      setTimeout(() => setCopyMsg(null), 1500);
-    } catch (_e) {
-      setCopyMsg('Copy failed');
-      setTimeout(() => setCopyMsg(null), 1500);
+  function getStatusBadge(status: string) {
+    const styles: Record<string, string> = {
+      PUBLISHED: 'bg-green-100 text-green-700',
+      DRAFT: 'bg-gray-100 text-gray-700',
+      CLOSED: 'bg-red-100 text-red-700',
+    };
+    return styles[status] || 'bg-gray-100 text-gray-700';
+  }
+
+  function exportToCSV() {
+    const headers = ['Title', 'Location', 'Salary Range', 'Status', 'Applicants', 'Created', 'Updated'];
+    const rows = filteredAndSortedJobs.map(job => [
+      job.title,
+      job.location || '',
+      job.salaryRange || '',
+      job.status,
+      job._count?.jobApplications || 0,
+      job.createdAt,
+      job.updatedAt
+    ]);
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `jobs_export_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+  }
+
+  function openJobModal(job?: Job) {
+    if (job) {
+      setEditingJob(job);
+      setJobForm({
+        title: job.title,
+        description: job.description,
+        requirements: job.requirements || '',
+        location: job.location || '',
+        salaryRange: job.salaryRange || ''
+      });
+    } else {
+      setEditingJob(null);
+      setJobForm({
+        title: '',
+        description: '',
+        requirements: '',
+        location: '',
+        salaryRange: ''
+      });
     }
+    setShowJobModal(true);
   }
 
-  async function handleDelete(jobId: number) {
-    if (!window.confirm('Are you sure you want to delete this job?')) {
+  async function handleSaveJob() {
+    if (!jobForm.title || !jobForm.description) {
+      alert('Title and description are required');
       return;
     }
-    
+
     try {
-      await deleteJob(jobId);
-      await load(); // Reload the list
-    } catch (err: any) {
-      setError(err?.message ?? 'Failed to delete job');
+      const jobData = {
+        ...jobForm,
+        userId: user?.id
+      };
+
+      if (editingJob) {
+        await apiRequest(`/jobs/${editingJob.id}`, 'PATCH', jobData as any);
+      } else {
+        await apiRequest('/jobs', 'POST', jobData as any);
+      }
+
+      setShowJobModal(false);
+      setEditingJob(null);
+      loadJobs();
+    } catch (err) {
+      console.error('Failed to save job:', err);
+      alert('Failed to save job');
     }
   }
 
-  function handleEdit(job: Job) {
-    setEditingJob(job);
-    setShowForm(true);
+  async function handleDeleteJob(jobId: number) {
+    if (!window.confirm('Are you sure you want to delete this job?')) return;
+    
+    try {
+      await apiRequest(`/jobs/${jobId}`, 'DELETE');
+      loadJobs();
+      setOpenMenuId(null);
+    } catch (err) {
+      console.error('Failed to delete job:', err);
+      alert('Failed to delete job');
+    }
   }
 
-  function handleCancel() {
-    setShowForm(false);
-    setEditingJob(null);
-    setFormError(null);
+  async function handlePublishJob(jobId: number) {
+    try {
+      await apiRequest(`/jobs/${jobId}/publish`, 'PATCH');
+      loadJobs();
+      setOpenMenuId(null);
+    } catch (err) {
+      console.error('Failed to publish job:', err);
+      alert('Failed to publish job');
+    }
   }
 
-  // status color helpers not used in current UI
+  async function handleCloseJob(jobId: number) {
+    try {
+      await apiRequest(`/jobs/${jobId}`, 'PATCH', { status: 'CLOSED' } as any);
+      loadJobs();
+      setOpenMenuId(null);
+    } catch (err) {
+      console.error('Failed to close job:', err);
+      alert('Failed to close job');
+    }
+  }
 
-  const filtered = useMemo(() => {
-    const ql = q.trim().toLowerCase();
-    return jobs.filter(j => {
-      const byText = !ql || `${j.title} ${j.description ?? ''} ${j.location ?? ''}`.toLowerCase().includes(ql);
-      const byStatus = status === 'ALL' || (j.status as any) === status;
-      return byText && byStatus;
+  function handleShareJob(jobId: number) {
+    const applyUrl = `${window.location.origin}/jobs/${jobId}/apply`;
+    navigator.clipboard.writeText(applyUrl).then(() => {
+      alert('Application link copied to clipboard!');
+      setOpenMenuId(null);
+    }).catch(() => {
+      alert('Failed to copy link');
     });
-  }, [jobs, q, status]);
+  }
 
   return (
-    <SimpleConnectionGuard>
-      <PageShell
-        icon={<BriefcaseIcon className="w-6 h-6 text-indigo-600" />}
-        title="Jobs"
-        subtitle="Create, publish, and manage your open roles."
-        right={(
-          <div className="flex items-center gap-3">
-            <SimpleConnectionIndicator />
-            <Button
-              type="button"
-              onClick={() => setShowForm(true)}
-              className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700"
-            >
-              New Job
-            </Button>
-          </div>
-        )}
-        className="px-4 pb-8"
-      >
-        <div className="space-y-4 pb-0">
-          {error && (
-            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-              {error}
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <BriefcaseIcon className="w-8 h-8 text-indigo-600" />
+              <h1 className="text-3xl font-bold text-gray-900">{t('jobs.title')}</h1>
             </div>
-          )}
-
-          <div className="grid gap-4 lg:grid-cols-4">
-            <Card className="w-full max-w-none p-6 lg:col-span-3">
-              <div className="flex flex-col gap-4">
-                <div className="flex flex-col gap-3 md:flex-row md:items-center">
-                  <ListSearchBar
-                    value={q}
-                    onChange={setQ}
-                    placeholder="Search title, description, location…"
-                    className="flex-1"
-                  />
-                  <div className="flex flex-wrap items-center gap-2">
-                    <div className="inline-flex items-center gap-2 rounded-full bg-gray-50 px-3 py-1 text-xs text-gray-600">
-                      <span>Filters</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setQ('');
-                        setStatus('ALL');
-                      }}
-                      className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700"
-                    >
-                      Reset
-                    </button>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-medium text-gray-600">Status</span>
-                    <div className="flex flex-wrap gap-2">
-                      {(['ALL', 'PUBLISHED', 'DRAFT', 'ARCHIVED', 'CLOSED'] as const).map((s) => (
-                        <button
-                          key={s}
-                          type="button"
-                          onClick={() => setStatus(s)}
-                          className={`rounded-full border px-2 py-1 text-xs transition ${
-                            status === s
-                              ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                              : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
-                          }`}
-                        >
-                          {s}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="w-full max-w-none p-6 lg:col-span-1">
-              <div className="flex items-center justify-between gap-2">
-                <div>
-                  <div className="text-xs font-medium text-gray-600">Totals</div>
-                  <div className="text-sm font-semibold text-gray-900">
-                    {jobs.length} jobs
-                  </div>
-                </div>
-              </div>
-              <div className="mt-4 space-y-2 text-xs">
-                <div className="flex items-center justify-between rounded-lg bg-emerald-50 px-3 py-2">
-                  <span className="text-gray-700">Published</span>
-                  <span className="font-semibold text-emerald-700">
-                    {jobs.filter((j) => (j.status as any) === 'PUBLISHED').length}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2">
-                  <span className="text-gray-700">Draft</span>
-                  <span className="font-semibold text-gray-800">
-                    {jobs.filter((j) => (j.status as any) === 'DRAFT').length}
-                  </span>
-                </div>
-              </div>
-            </Card>
+            <p className="text-gray-600">{t('jobs.subtitle')}</p>
           </div>
+          <button 
+            onClick={() => openJobModal()}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+          >
+            {t('jobs.newJob')}
+          </button>
+        </div>
 
-          <div className="mt-2 rounded-xl border border-zinc-200 bg-white shadow-sm">
-            {loading ? (
-              <div className="flex items-center justify-center py-12 text-sm text-zinc-500">
-                Loading jobs…
-              </div>
-            ) : filtered.length === 0 ? (
-              <div className="grid place-items-center gap-3 py-12 text-center text-sm text-zinc-500">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-2xl">
-                  <BriefcaseIcon className="h-8 w-8 text-indigo-500" />
-                </div>
-                <div className="text-base font-semibold text-zinc-800">No jobs found</div>
-                <p className="max-w-md text-xs text-zinc-500">
-                  Create a new job to start collecting applications. Published jobs will appear here.
-                </p>
-              </div>
-            ) : (
+        {/* Stats Cards */}
+        <div className="grid grid-cols-5 gap-4 mb-8">
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-gray-600">{t('jobs.stats.openJobs')}</span>
+              <BriefcaseIcon className="w-5 h-5 text-gray-400" />
+            </div>
+            <div className="text-3xl font-bold text-gray-900">{stats.openJobs}</div>
+          </div>
+          
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-gray-600">{t('jobs.stats.newApplicants')}</span>
+              <span className="text-xs text-gray-500">(?%)</span>
+            </div>
+            <div className="text-3xl font-bold text-gray-900">{stats.newApplicants}</div>
+          </div>
+          
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-gray-600">{t('jobs.stats.inReview')}</span>
+              <span className="text-gray-400">❄️</span>
+            </div>
+            <div className="text-3xl font-bold text-gray-900">{stats.inReview}</div>
+          </div>
+          
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-gray-600">{t('jobs.stats.interviewing')}</span>
+              <span className="text-gray-400">💬</span>
+            </div>
+            <div className="text-3xl font-bold text-gray-900">{stats.interviewing}</div>
+          </div>
+          
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-gray-600">{t('jobs.stats.offers')}</span>
+              <span className="text-gray-400">📄</span>
+            </div>
+            <div className="text-3xl font-bold text-gray-900">{stats.offers}</div>
+          </div>
+        </div>
+
+        {/* Search and Filters */}
+        <div className="flex items-center gap-3 mb-6">
+          <div className="relative flex-1">
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={t('jobs.searchPlaceholder')}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            />
+          </div>
+          
+          <div className="relative">
+            <button 
+              onClick={() => {
+                setShowFilters(!showFilters);
+                setShowSort(false);
+              }}
+              className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+            >
+              <FunnelIcon className="w-4 h-4" />
+              {t('jobs.filters')}
+            </button>
+            {showFilters && (
               <>
-                <div className="px-4 py-3 border-b bg-white text-sm text-zinc-500">
-                  {filtered.length} result(s)
-                </div>
-                <div className="divide-y divide-gray-100">
-                  {filtered.map((job) => (
-                    <div
-                      key={job.id}
-                      className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between hover:bg-gray-50 cursor-pointer"
-                      onClick={() => setDetailsJob(job)}
-                    >
-                      <div className="flex flex-1 flex-col gap-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <div className="text-sm font-semibold text-zinc-900">{job.title}</div>
-                          <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-700">
-                            {job.status as any}
-                          </span>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-500">
-                          {job.location && <span>📍 {job.location}</span>}
-                          {job.salary && (
-                            <>
-                              <span>•</span>
-                              <span>💰 {job.salary}</span>
-                            </>
-                          )}
-                          {job.company && (
-                            <>
-                              <span>•</span>
-                              <span>{job.company}</span>
-                            </>
-                          )}
-                        </div>
-                        {job.description && (
-                          <p className="text-xs text-zinc-600 line-clamp-2">
-                            {job.description}
-                          </p>
-                        )}
-                      </div>
-                      <div className="flex flex-none flex-wrap items-center justify-start gap-2 text-xs sm:justify-end">
-                        <button
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            handlePublish(job);
-                          }}
-                          className={`px-3 py-1.5 rounded-lg border text-xs font-medium text-white ${
-                            (job.status as any) === 'PUBLISHED'
-                              ? 'bg-emerald-600 hover:bg-emerald-700 border-emerald-600'
-                              : 'bg-indigo-600 hover:bg-indigo-700 border-indigo-600'
-                          }`}
-                          title={
-                            (job.status as any) === 'PUBLISHED'
-                              ? 'Share public link'
-                              : 'Publish and share'
-                          }
-                        >
-                          {(job.status as any) === 'PUBLISHED' ? 'Share' : 'Publish'}
-                        </button>
-                        {(job.status as any) === 'PUBLISHED' && (
-                          <button
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              window.open(`/jobs/${job.id}`, '_blank');
-                            }}
-                            className="px-3 py-1.5 rounded-lg border text-xs font-medium text-zinc-700 hover:bg-zinc-50"
-                          >
-                            View
-                          </button>
-                        )}
-                        <button
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            handleEdit(job);
-                          }}
-                          className="px-3 py-1.5 rounded-lg border text-xs font-medium text-zinc-700 hover:bg-zinc-50"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            handleDelete(job.id!);
-                          }}
-                          className="px-3 py-1.5 rounded-lg border text-xs font-medium text-red-600 border-red-300 hover:bg-red-50"
-                        >
-                          Delete
-                        </button>
-                      </div>
+                <div className="fixed inset-0 z-10" onClick={() => setShowFilters(false)} />
+                <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 p-4 z-20">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('jobs.status')}</label>
+                      <select
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value as any)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      >
+                        <option value="ALL">{t('jobs.all')}</option>
+                        <option value="DRAFT">{t('jobs.draft')}</option>
+                        <option value="PUBLISHED">{t('jobs.open')}</option>
+                        <option value="CLOSED">{t('jobs.closed')}</option>
+                      </select>
                     </div>
-                  ))}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Update Time</label>
+                      <select
+                        value={updateTimeFilter}
+                        onChange={(e) => setUpdateTimeFilter(e.target.value as any)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      >
+                        <option value="ALL">All time</option>
+                        <option value="1DAY">Last 24 hours</option>
+                        <option value="7DAYS">Last 7 days</option>
+                        <option value="1MONTH">Last 30 days</option>
+                      </select>
+                    </div>
+                  </div>
                 </div>
               </>
             )}
           </div>
+
+          <div className="relative">
+            <button 
+              onClick={() => {
+                setShowSort(!showSort);
+                setShowFilters(false);
+              }}
+              className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+            >
+              <ArrowsUpDownIcon className="w-4 h-4" />
+              {t('jobs.sort')}
+            </button>
+            {showSort && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setShowSort(false)} />
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
+                  <button
+                    onClick={() => { setSortBy('updated'); setSortOrder('desc'); setShowSort(false); }}
+                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Updated (Newest)
+                  </button>
+                  <button
+                    onClick={() => { setSortBy('updated'); setSortOrder('asc'); setShowSort(false); }}
+                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Updated (Oldest)
+                  </button>
+                  <button
+                    onClick={() => { setSortBy('created'); setSortOrder('desc'); setShowSort(false); }}
+                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Created (Newest)
+                  </button>
+                  <button
+                    onClick={() => { setSortBy('title'); setSortOrder('asc'); setShowSort(false); }}
+                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Title (A-Z)
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+
+          <button 
+            onClick={exportToCSV}
+            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+          >
+            {t('jobs.export')}
+          </button>
         </div>
 
-        {showForm && (
-          <Modal open={showForm} onClose={handleCancel}>
-            <div style={{ padding: '24px' }}>
-              <h2 style={{ margin: '0 0 24px 0', fontSize: '20px', fontWeight: '600', color: '#1f2937' }}>
-                {editingJob ? 'Edit Job' : 'Create New Job'}
-              </h2>
-              {formError && (
-                <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', padding: '12px', borderRadius: '6px', marginBottom: '16px', fontSize: '14px' }}>
-                  {formError}
-                </div>
+        {/* Status Filter Tabs */}
+        <div className="flex items-center gap-2 mb-6">
+          {(['ALL', 'DRAFT', 'OPEN', 'CLOSED'] as const).map((status) => (
+            <button
+              key={status}
+              onClick={() =>
+                setStatusFilter(status === 'OPEN' ? 'PUBLISHED' : status)
+              }
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                (status === 'OPEN' && statusFilter === 'PUBLISHED') ||
+                (status !== 'OPEN' && statusFilter === status)
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              {t(`jobs.${status.toLowerCase()}`)}
+            </button>
+          ))}
+        </div>
+
+
+        {/* Jobs Table */}
+        <div className="bg-white rounded-lg border border-gray-200 overflow-visible">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="px-6 py-3 text-left">
+                  <input type="checkbox" className="rounded border-gray-300" />
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">{t('jobs.role')}</th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">{t('jobs.status')}</th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">{t('jobs.applicants')}</th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">{t('jobs.hiringManager')}</th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">{t('jobs.updated')}</th>
+                <th className="px-6 py-3"></th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
+                    {t('trackingJobs.loading')}
+                  </td>
+                </tr>
+              ) : filteredAndSortedJobs.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
+                    {t('trackingJobs.noJobs')}
+                  </td>
+                </tr>
+              ) : (
+                filteredAndSortedJobs.map((job) => (
+                  <tr key={job.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4">
+                      <input type="checkbox" className="rounded border-gray-300" />
+                    </td>
+                    <td className="px-6 py-4">
+                      <div>
+                        <div className="font-semibold text-gray-900">{job.title}</div>
+                        <div className="text-sm text-gray-500 mt-1">
+                          {job.location && <span>📍 {job.location}</span>}
+                          {job.location && job.salaryRange && <span> • </span>}
+                          {job.salaryRange && <span>{job.salaryRange}</span>}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex px-2 py-1 rounded text-xs font-medium ${getStatusBadge(job.status)}`}>
+                        {job.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div>
+                        <div className="font-semibold text-gray-900">0</div>
+                        <div className="text-xs text-gray-500">+0 new (7d)</div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div>
+                        <div className="text-sm text-gray-900">
+                          {job.user?.firstName && job.user?.lastName
+                            ? `${job.user.firstName} ${job.user.lastName}`
+                            : job.user?.username || user?.username}
+                        </div>
+                        <div className="text-xs text-gray-500">A/iay</div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      {formatDate(job.updatedAt)}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="relative">
+                        <button
+                          onClick={() => setOpenMenuId(openMenuId === job.id ? null : job.id)}
+                          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                        >
+                          <EllipsisVerticalIcon className="w-5 h-5 text-gray-600" />
+                        </button>
+                        
+                        {openMenuId === job.id && (
+                          <>
+                            <div
+                              className="fixed inset-0 z-10"
+                              onClick={() => setOpenMenuId(null)}
+                            />
+                            <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-40">
+                              <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                                <span>👁️</span>
+                                {t('jobs.viewPipeline')}
+                              </button>
+                              <button 
+                                onClick={() => { openJobModal(job); setOpenMenuId(null); }}
+                                className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                              >
+                                <span>✏️</span>
+                                {t('jobs.editJob')}
+                              </button>
+                              
+                              {job.status === 'DRAFT' && (
+                                <>
+                                  <button 
+                                    onClick={() => handlePublishJob(job.id)}
+                                    className="w-full px-4 py-2 text-left text-sm text-green-600 hover:bg-green-50 flex items-center gap-2"
+                                  >
+                                    <span>📢</span>
+                                    Publish
+                                  </button>
+                                  <button 
+                                    onClick={() => handleCloseJob(job.id)}
+                                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                                  >
+                                    <span>🔒</span>
+                                    Close
+                                  </button>
+                                </>
+                              )}
+                              
+                              {job.status === 'PUBLISHED' && (
+                                <>
+                                  <button 
+                                    onClick={() => handleShareJob(job.id)}
+                                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                                  >
+                                    <span>🔗</span>
+                                    {t('jobs.shareLink')}
+                                  </button>
+                                  <button 
+                                    onClick={() => handleCloseJob(job.id)}
+                                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                                  >
+                                    <span>🔒</span>
+                                    Close
+                                  </button>
+                                </>
+                              )}
+                              
+                              <button 
+                                onClick={() => handleDeleteJob(job.id)}
+                                className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                              >
+                                <span>🗑️</span>
+                                {t('jobs.delete')}
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
               )}
-              <JobForm initial={editingJob || undefined} onSubmit={handleSubmit} onCancel={handleCancel} />
+            </tbody>
+          </table>
+          
+          {/* Footer */}
+          <div className="px-6 py-3 border-t border-gray-200 flex items-center justify-between text-sm text-gray-600">
+            <div>{t('jobs.showingJobs', { count: filteredAndSortedJobs.length })}</div>
+            <div className="flex items-center gap-2">
+              <button className="px-3 py-1 rounded hover:bg-gray-100">Previous</button>
+              <button className="px-3 py-1 bg-indigo-600 text-white rounded">1</button>
+              <button className="px-3 py-1 rounded hover:bg-gray-100">Next</button>
             </div>
-          </Modal>
+          </div>
+        </div>
+
+        {/* Job Modal */}
+        {showJobModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+              <div className="p-6 border-b border-gray-200">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  {editingJob ? 'Edit Job' : t('jobs.newJob')}
+                </h2>
+              </div>
+              
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Title *</label>
+                  <input
+                    type="text"
+                    value={jobForm.title}
+                    onChange={(e) => setJobForm({ ...jobForm, title: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    placeholder="e.g. Senior Software Engineer"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Description *</label>
+                  <textarea
+                    value={jobForm.description}
+                    onChange={(e) => setJobForm({ ...jobForm, description: e.target.value })}
+                    rows={5}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    placeholder="Describe the role and responsibilities..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Requirements</label>
+                  <textarea
+                    value={jobForm.requirements}
+                    onChange={(e) => setJobForm({ ...jobForm, requirements: e.target.value })}
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    placeholder="List required skills and experience..."
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                    <input
+                      type="text"
+                      value={jobForm.location}
+                      onChange={(e) => setJobForm({ ...jobForm, location: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                      placeholder="e.g. Sydney, NSW"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Salary Range</label>
+                    <input
+                      type="text"
+                      value={jobForm.salaryRange}
+                      onChange={(e) => setJobForm({ ...jobForm, salaryRange: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                      placeholder="e.g. $80,000 - $120,000"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6 border-t border-gray-200 flex items-center justify-end gap-3">
+                <button
+                  onClick={() => { setShowJobModal(false); setEditingJob(null); }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveJob}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                >
+                  {editingJob ? 'Update' : 'Create'}
+                </button>
+              </div>
+            </div>
+          </div>
         )}
-
-        <DetailPanel
-          open={!!detailsJob}
-          title={detailsJob?.title ?? ''}
-          onClose={() => setDetailsJob(null)}
-          footer={detailsJob ? (
-            <>
-              <button onClick={() => { setDetailsJob(null); handleEdit(detailsJob); }} className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50">Edit</button>
-              <button onClick={() => { if (detailsJob?.id) handlePublish(detailsJob); }} className="rounded-lg border px-3 py-2 text-sm bg-indigo-600 text-white hover:bg-indigo-700">{(detailsJob.status as any) === 'PUBLISHED' ? 'Share' : 'Publish'}</button>
-              {(detailsJob?.status as any) === 'PUBLISHED' && (
-                <button onClick={() => { if (detailsJob?.id) window.open(`/jobs/${detailsJob.id}`, '_blank'); }} className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50">View</button>
-              )}
-              {detailsJob?.id && (
-                <button onClick={() => { const id = detailsJob.id!; setDetailsJob(null); handleDelete(id); }} className="rounded-lg border border-red-300 px-3 py-2 text-sm text-red-600 hover:bg-red-50">Delete</button>
-              )}
-            </>
-          ) : undefined}
-        >
-          {detailsJob && (
-            <div className="space-y-4">
-              <div className="text-sm text-gray-600 flex flex-wrap items-center gap-3">
-                {detailsJob.location && <span>📍 {detailsJob.location}</span>}
-                {detailsJob.salary && <span>💰 {detailsJob.salary}</span>}
-                {detailsJob.status && <span className="ml-auto inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs">{detailsJob.status as any}</span>}
-              </div>
-
-              {detailsJob.description && (
-                <section className="rounded-xl border p-4">
-                  <h3 className="font-medium mb-1">Job Description</h3>
-                  <p className="text-sm text-gray-800 whitespace-pre-wrap">{detailsJob.description}</p>
-                </section>
-              )}
-
-              {detailsJob.requirements && (
-                <section className="rounded-xl border p-4">
-                  <h3 className="font-medium mb-1">Requirements</h3>
-                  <p className="text-sm text-gray-800 whitespace-pre-wrap">{detailsJob.requirements}</p>
-                </section>
-              )}
-
-              {(detailsJob.company || detailsJob.department) && (
-                <section className="rounded-xl border p-4">
-                  <h3 className="font-medium mb-1">Company</h3>
-                  <div className="text-sm text-gray-800">{detailsJob.company ?? '—'} {detailsJob.department ? `· ${detailsJob.department}` : ''}</div>
-                </section>
-              )}
-            </div>
-          )}
-        </DetailPanel>
-
-        {shareJob && shareJob.id && (
-          <Modal open={!!shareJob} onClose={() => setShareJob(null)}>
-            <div style={{ padding: '24px' }}>
-              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 600, color: '#111827' }}>Share your job</h3>
-              <p style={{ margin: '8px 0 16px 0', color: '#4b5563', fontSize: '14px' }}>Send candidates a public link to view details or apply.</p>
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <div className="text-sm text-zinc-500 w-24">Details</div>
-                  <input readOnly value={getPublicLinks(shareJob.id).details} className="flex-1 px-3 py-2 rounded-lg border bg-zinc-50" />
-                  <button onClick={() => copyToClipboard(getPublicLinks(shareJob.id!).details)} className="px-3 py-2 rounded-lg border text-sm hover:bg-zinc-50">Copy</button>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="text-sm text-zinc-500 w-24">Apply</div>
-                  <input readOnly value={getPublicLinks(shareJob.id).apply} className="flex-1 px-3 py-2 rounded-lg border bg-zinc-50" />
-                  <button onClick={() => copyToClipboard(getPublicLinks(shareJob.id!).apply)} className="px-3 py-2 rounded-lg border text-sm hover:bg-zinc-50">Copy</button>
-                </div>
-              </div>
-              <div className="mt-4 flex items-center justify-between">
-                <div className="text-sm text-emerald-600 h-5">{copyMsg || ''}</div>
-                <div className="flex gap-2">
-                  <button onClick={() => { window.open(getPublicLinks(shareJob.id!).details, '_blank'); }} className="px-3 py-2 rounded-lg border text-sm hover:bg-zinc-50">Open details</button>
-                  <button onClick={() => { window.open(getPublicLinks(shareJob.id!).apply, '_blank'); }} className="px-3 py-2 rounded-lg border text-sm hover:bg-zinc-50">Open apply</button>
-                  <button onClick={() => setShareJob(null)} className="px-3 py-2 rounded-lg bg-indigo-600 text-white text-sm hover:bg-indigo-700">Done</button>
-                </div>
-              </div>
-            </div>
-          </Modal>
-        )}
-      </PageShell>
-    </SimpleConnectionGuard>
+      </div>
+    </div>
   );
 }

@@ -5,13 +5,7 @@ CREATE TYPE "public"."UserRole" AS ENUM ('ADMIN', 'RECRUITER', 'EMPLOYEE');
 CREATE TYPE "public"."JobStatus" AS ENUM ('DRAFT', 'PUBLISHED', 'CLOSED');
 
 -- CreateEnum
-CREATE TYPE "public"."InterviewStatus" AS ENUM ('DRAFT', 'PUBLISHED', 'ARCHIVED', 'NOT_STARTED', 'COMPLETED');
-
--- CreateEnum
 CREATE TYPE "public"."Title" AS ENUM ('MR', 'MS', 'DR');
-
--- CreateEnum
-CREATE TYPE "public"."Difficulty" AS ENUM ('EASY', 'INTERMEDIATE', 'ADVANCED');
 
 -- CreateEnum
 CREATE TYPE "public"."ApplicationStatus" AS ENUM ('SUBMITTED', 'UNDER_REVIEW', 'SHORTLISTED', 'INTERVIEW_SCHEDULED', 'INTERVIEWED', 'OFFER_EXTENDED', 'HIRED', 'REJECTED', 'WITHDRAWN');
@@ -49,67 +43,24 @@ CREATE TABLE "public"."jobs" (
 );
 
 -- CreateTable
-CREATE TABLE "public"."interviews" (
+CREATE TABLE "public"."candidates" (
     "id" SERIAL NOT NULL,
-    "title" TEXT NOT NULL,
-    "job_role" TEXT NOT NULL,
-    "description" TEXT,
-    "status" "public"."InterviewStatus" NOT NULL DEFAULT 'DRAFT',
     "user_id" INTEGER NOT NULL,
-    "job_id" INTEGER,
+    "first_name" TEXT,
+    "last_name" TEXT,
+    "email" TEXT NOT NULL,
+    "phone" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "interviews_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "public"."questions" (
-    "id" SERIAL NOT NULL,
-    "interview_id" INTEGER NOT NULL,
-    "question" TEXT NOT NULL,
-    "difficulty" "public"."Difficulty" NOT NULL DEFAULT 'EASY',
-    "user_id" INTEGER NOT NULL,
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "questions_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "public"."applicants" (
-    "id" SERIAL NOT NULL,
-    "interview_id" INTEGER,
-    "firstname" TEXT NOT NULL,
-    "surname" TEXT NOT NULL,
-    "phone_number" TEXT,
-    "email_address" TEXT NOT NULL,
-    "interview_status" "public"."InterviewStatus" NOT NULL DEFAULT 'NOT_STARTED',
-    "user_id" INTEGER NOT NULL,
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "applicants_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "public"."applicant_answers" (
-    "id" SERIAL NOT NULL,
-    "interview_id" INTEGER NOT NULL,
-    "question_id" INTEGER NOT NULL,
-    "applicant_id" INTEGER NOT NULL,
-    "answer" TEXT,
-    "user_id" INTEGER NOT NULL,
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "applicant_answers_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "candidates_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "public"."job_applications" (
     "id" SERIAL NOT NULL,
     "job_id" INTEGER NOT NULL,
+    "candidate_id" INTEGER NOT NULL,
     "first_name" TEXT NOT NULL,
     "last_name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
@@ -146,11 +97,24 @@ CREATE TABLE "public"."resumes" (
     CONSTRAINT "resumes_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "public"."saved_jobs" (
+    "id" SERIAL NOT NULL,
+    "user_id" INTEGER NOT NULL,
+    "job_id" INTEGER NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "saved_jobs_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "users_username_key" ON "public"."users"("username");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "public"."users"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "candidates_user_id_email_key" ON "public"."candidates"("user_id", "email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "job_applications_tracking_token_key" ON "public"."job_applications"("tracking_token");
@@ -164,38 +128,23 @@ CREATE INDEX "job_applications_email_idx" ON "public"."job_applications"("email"
 -- CreateIndex
 CREATE INDEX "job_applications_tracking_token_idx" ON "public"."job_applications"("tracking_token");
 
+-- CreateIndex
+CREATE INDEX "job_applications_candidate_id_idx" ON "public"."job_applications"("candidate_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "saved_jobs_user_id_job_id_key" ON "public"."saved_jobs"("user_id", "job_id");
+
+-- CreateIndex
+CREATE INDEX "saved_jobs_user_id_idx" ON "public"."saved_jobs"("user_id");
+
+-- CreateIndex
+CREATE INDEX "saved_jobs_job_id_idx" ON "public"."saved_jobs"("job_id");
+
 -- AddForeignKey
 ALTER TABLE "public"."jobs" ADD CONSTRAINT "jobs_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."interviews" ADD CONSTRAINT "interviews_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "public"."interviews" ADD CONSTRAINT "interviews_job_id_fkey" FOREIGN KEY ("job_id") REFERENCES "public"."jobs"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "public"."questions" ADD CONSTRAINT "questions_interview_id_fkey" FOREIGN KEY ("interview_id") REFERENCES "public"."interviews"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "public"."questions" ADD CONSTRAINT "questions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "public"."applicants" ADD CONSTRAINT "applicants_interview_id_fkey" FOREIGN KEY ("interview_id") REFERENCES "public"."interviews"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "public"."applicants" ADD CONSTRAINT "applicants_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "public"."applicant_answers" ADD CONSTRAINT "applicant_answers_interview_id_fkey" FOREIGN KEY ("interview_id") REFERENCES "public"."interviews"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "public"."applicant_answers" ADD CONSTRAINT "applicant_answers_question_id_fkey" FOREIGN KEY ("question_id") REFERENCES "public"."questions"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "public"."applicant_answers" ADD CONSTRAINT "applicant_answers_applicant_id_fkey" FOREIGN KEY ("applicant_id") REFERENCES "public"."applicants"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "public"."applicant_answers" ADD CONSTRAINT "applicant_answers_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."candidates" ADD CONSTRAINT "candidates_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."job_applications" ADD CONSTRAINT "job_applications_job_id_fkey" FOREIGN KEY ("job_id") REFERENCES "public"."jobs"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -203,4 +152,15 @@ ALTER TABLE "public"."job_applications" ADD CONSTRAINT "job_applications_job_id_
 -- AddForeignKey
 ALTER TABLE "public"."job_applications" ADD CONSTRAINT "job_applications_resume_id_fkey" FOREIGN KEY ("resume_id") REFERENCES "public"."resumes"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
-Insert into public.users (username, email, password_hash, first_name, last_name, role, created_at, updated_at) values ('admin', 'admin@example.com', 'admin', 'Admin', 'Admin', 'ADMIN', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+-- AddForeignKey
+ALTER TABLE "public"."job_applications" ADD CONSTRAINT "job_applications_candidate_id_fkey" FOREIGN KEY ("candidate_id") REFERENCES "public"."candidates"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."saved_jobs" ADD CONSTRAINT "saved_jobs_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."saved_jobs" ADD CONSTRAINT "saved_jobs_job_id_fkey" FOREIGN KEY ("job_id") REFERENCES "public"."jobs"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- Insert default admin user
+INSERT INTO public.users (username, email, password_hash, first_name, last_name, role) 
+VALUES ('admin', 'admin@example.com', 'admin', 'Admin', 'Admin', 'ADMIN');

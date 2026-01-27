@@ -1,4 +1,4 @@
-import { UserCircleIcon, Cog6ToothIcon, Bars3Icon } from '@heroicons/react/24/solid';
+import { UserCircleIcon, Cog6ToothIcon, Bars3Icon, UserIcon } from '@heroicons/react/24/solid';
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from '@/assets/logo_transparent.png';
@@ -24,7 +24,7 @@ export default function Header({ sidebarOpen = false, onToggle }: HeaderProps) {
       navigate('/');
     } else if (user?.role === 'EMPLOYEE') {
       // Employee -> go to tracking-jobs
-      navigate('/tracking-jobs');
+      navigate('/employee/tracking-jobs');
     } else {
       // Recruiter/Admin -> go to dashboard
       navigate('/dashboard');
@@ -32,7 +32,12 @@ export default function Header({ sidebarOpen = false, onToggle }: HeaderProps) {
   };
 
   const handleSettings = () => {
-    navigate('/settings');
+    // EMPLOYEE 和 ADMIN 跳转到独立的 settings 页面，RECRUITER 跳转到 dashboard settings
+    if (user?.role === 'EMPLOYEE' || user?.role === 'ADMIN') {
+      navigate('/employee/settings');
+    } else {
+      navigate('/settings');
+    }
     setIsDropdownOpen(false);
   };
 
@@ -110,6 +115,24 @@ export default function Header({ sidebarOpen = false, onToggle }: HeaderProps) {
                   </div>
                 </div>
                 <div style={dropdownDividerStyle}></div>
+                {(user?.role === 'EMPLOYEE' || user?.role === 'ADMIN') && (
+                  <button
+                    onClick={() => {
+                      navigate('/employee/profile');
+                      setIsDropdownOpen(false);
+                    }}
+                    style={dropdownItemStyle}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#f3f4f6';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }}
+                  >
+                    <UserIcon width={16} height={16} style={{ marginRight: '8px' }} />
+                    {t('navigation.profile')}
+                  </button>
+                )}
                 <button
                   onClick={handleSettings}
                   style={dropdownItemStyle}

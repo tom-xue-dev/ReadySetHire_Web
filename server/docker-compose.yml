@@ -37,11 +37,16 @@ services:
       JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
       LOG_LEVEL: debug
+      # Ollama service configuration
+      OLLAMA_BASE_URL: http://ollama:11434/v1
+      OLLAMA_MODEL: qwen2.5:7b
     ports:
       - "3000:3000"
     depends_on:
       postgres:
         condition: service_healthy
+      ollama:
+        condition: service_started
     networks:
       - readysethire-network
     healthcheck:
@@ -54,12 +59,21 @@ services:
   ollama:
     image: ollama/ollama
     container_name: ollama
+    restart: unless-stopped
     ports:
       - "11434:11434"
     volumes:
       - ollama-data:/root/.ollama
+    networks:
+      - readysethire-network
     entrypoint: ["/bin/bash", "-c"]
     command: ["ollama serve & sleep 5 && ollama pull deepseek-r1:7b && tail -f /dev/null"]
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
 
 volumes:

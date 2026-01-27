@@ -4,7 +4,7 @@ import prisma from './database';
 // Local type to avoid dependency on generated Prisma enum during linting
 type ApplicationStatus =
   | 'SUBMITTED'
-  | 'UNDER_REVIEW'
+  | 'IN_REVIEW'
   | 'SHORTLISTED'
   | 'INTERVIEW_SCHEDULED'
   | 'INTERVIEWED'
@@ -15,6 +15,7 @@ type ApplicationStatus =
 
 export interface CreateJobApplicationData {
   jobId: number;
+  candidateId?: number;
   firstName: string;
   lastName: string;
   email: string;
@@ -53,6 +54,22 @@ export class JobApplicationService {
         throw new Error('This job is not currently accepting applications');
       }
 
+      // Handle candidateId - create or find candidate
+      let candidateId = data.candidateId;
+      if (!candidateId) {
+        // If no candidateId provided, create a candidate with userId from job owner
+        const candidate = await prisma.candidate.create({
+          data: {
+            firstName: data.firstName,
+            lastName: data.lastName,
+            email: data.email,
+            phone: data.phone,
+            userId: job.userId, // Use job owner's userId
+          },
+        });
+        candidateId = candidate.id;
+      }
+
       // Generate unique tracking token
       const trackingToken = this.generateTrackingToken();
 
@@ -60,6 +77,7 @@ export class JobApplicationService {
       const application = await (prisma as any).jobApplication.create({
         data: {
           jobId: data.jobId,
+          candidateId: candidateId,
           firstName: data.firstName,
           lastName: data.lastName,
           email: data.email,

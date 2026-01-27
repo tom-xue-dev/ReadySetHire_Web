@@ -12,13 +12,17 @@
   },
   "navigation": {
     "dashboard": "仪表板",
-    "interviews": "面试",
+    "jobPostings": "职位发布",
+    "candidates": "候选人",
+    "pipeline": "招聘流程",
+    "subscription": "订阅",
     "jobs": "职位发布",
     "applicants": "申请人",
-    "subscription": "订阅",
-    "questions": "问题",
     "resumeManagement": "简历管理",
-    "menu": "菜单"
+    "menu": "菜单",
+    "jobSearch": "职位搜索",
+    "aiResumeRating": "AI简历评分",
+    "profile": "个人资料"
   },
   "home": {
     "title": "ReadySetHire",
@@ -176,5 +180,352 @@
       "description": "配置通知偏好设置"
     },
     "comingSoon": "即将推出"
+  },
+  "rateResume": {
+    "title": "JD & 简历匹配分析",
+    "subtitle": "使用AI智能分析岗位描述与候选人简历的匹配度",
+    "model": "模型",
+    "expectedOutput": "预计输出",
+    "structuredReport": "结构化报告",
+    "analyzeButton": "一键分析",
+    "analyzing": "分析中...",
+    "saveReport": "保存为报告",
+    "reset": "重置",
+    "savingFeature": "保存功能开发中",
+    "jd": {
+      "title": "JD（岗位描述）",
+      "selectJob": "选择保存的职位",
+      "pasteText": "粘贴文本",
+      "uploadFile": "上传文件",
+      "selectPlaceholder": "请选择职位",
+      "textPlaceholder": "粘贴岗位描述文本...",
+      "uploadPrompt": "点击上传或拖拽文件到此处",
+      "uploadFormats": "支持 PDF, DOCX, TXT 格式",
+      "selectFile": "选择文件"
+    },
+    "resume": {
+      "title": "候选人简历",
+      "upload": "上传简历",
+      "paste": "粘贴简历",
+      "select": "选择候选人",
+      "uploadPrompt": "点击上传或拖拽文件到此处",
+      "uploadFormats": "支持 PDF, DOCX 格式",
+      "textPlaceholder": "粘贴简历文本...",
+      "selectPlaceholder": "请选择候选人",
+      "anonymize": "匿名化处理（隐藏手机号/邮箱/地址）",
+      "compliance": "合规检查（不做性别/年龄等敏感推断）"
+    },
+    "analysis": {
+      "title": "分析结果",
+      "tabOverview": "总览",
+      "tabRequirements": "硬条件检查",
+      "tabSkills": "技能矩阵",
+      "tabInterview": "面试建议",
+      "matchScore": "匹配分数",
+      "conclusion": {
+        "strongHire": "强烈推荐",
+        "hire": "推荐",
+        "leanHire": "倾向推荐",
+        "leanNo": "倾向不推荐",
+        "no": "不推荐"
+      },
+      "topStrengths": "最强证据",
+      "topGaps": "最大缺口",
+      "risks": "风险提醒",
+      "severityHigh": "高",
+      "severityMedium": "中",
+      "severityLow": "低",
+      "skill": "技能/要求",
+      "candidateEvidence": "候选人证据",
+      "matchLevel": "匹配度",
+      "questionPurpose": "目的",
+      "expectedAnswer": "期望答案特征"
+    },
+    "errors": {
+      "missingInput": "请先输入岗位描述和简历文本"
+    }
+  },
+  "jobs": {
+    "title": "职位",
+    "subtitle": "创建、发布和管理您的开放职位。",
+    "newJob": "新建职位",
+    "searchPlaceholder": "按标题、部门、地点搜索职位...",
+    "filters": "筛选",
+    "sort": "排序",
+    "export": "导出",
+    "all": "全部",
+    "open": "开放",
+    "paused": "暂停",
+    "draft": "草稿",
+    "closed": "已关闭",
+    "role": "职位",
+    "status": "状态",
+    "applicants": "申请人",
+    "hiringManager": "招聘负责人",
+    "updated": "更新时间",
+    "viewPipeline": "查看流程",
+    "editJob": "编辑职位",
+    "shareLink": "分享链接",
+    "delete": "删除...",
+    "showingJobs": "显示 {count} 个职位",
+    "stats": {
+      "openJobs": "开放职位",
+      "newApplicants": "新申请人",
+      "inReview": "审核中",
+      "interviewing": "面试中",
+      "offers": "已发Offer"
+    }
+  },
+  "savedJobs": {
+    "title": "收藏的职位",
+    "viewAll": "查看全部 ({count})",
+    "noSavedJobs": "暂无收藏的职位",
+    "saved": "已收藏",
+    "applied": "已申请",
+    "remove": "删除",
+    "removedSuccess": "已从收藏列表中移除",
+    "removedError": "移除失败",
+    "empty": "暂无收藏的职位"
+  },
+  "trackingJobs": {
+    "jobTitle": "职位名称",
+    "location": "地点",
+    "minSalary": "最低薪资 ($)",
+    "maxSalary": "最高薪资 ($)",
+    "postedWithin": "发布时间",
+    "anyTime": "任何时间",
+    "last24h": "最近24小时",
+    "last7d": "最近7天",
+    "last30d": "最近30天",
+    "search": "搜索",
+    "clearFilters": "清除所有筛选",
+    "moreOptions": "更多选项",
+    "lessOptions": "收起选项",
+    "recommended": "推荐职位",
+    "jobsFound": "找到 {count} 个职位",
+    "loading": "加载中...",
+    "noJobs": "未找到职位",
+    "newToYou": "新职位",
+    "savedSearches": "保存的搜索",
+    "savedSearchesDesc": "使用搜索结果下方的保存搜索按钮来保存您的搜索，并接收每个新职位。",
+    "savedJobs": "保存的职位",
+    "savedJobsDesc": "使用每个职位列表上的保存按钮以便稍后查看。您可以在所有设备上访问它们。",
+    "savedCount": "已保存 {count} 个职位",
+    "jobDetails": "职位详情",
+    "title": "标题",
+    "description": "描述",
+    "requirements": "要求",
+    "salaryRange": "薪资范围",
+    "status": "状态",
+    "created": "创建时间",
+    "published": "发布时间",
+    "saveJob": "保存",
+    "unsaveJob": "取消保存",
+    "quickApply": "快速申请",
+    "hideJob": "隐藏职位",
+    "enterKeywords": "输入关键词",
+    "enterLocation": "输入地点、城市或地区",
+    "companyInfo": "公司",
+    "postedDate": "发布于",
+    "viewAllJobs": "查看所有职位"
+  },
+  "profile": {
+    "title": "我的资料",
+    "subtitle": "管理您的简历和职位偏好",
+    "resumeSection": {
+      "title": "简历",
+      "description": "上传您的简历以快速申请职位",
+      "upload": "上传简历",
+      "current": "当前简历",
+      "noResume": "尚未上传简历",
+      "uploadFormats": "支持 PDF、DOCX 格式",
+      "uploadSuccess": "简历上传成功",
+      "uploadError": "简历上传失败"
+    },
+    "preferencesSection": {
+      "title": "职位偏好",
+      "description": "设置您偏好的职位分类",
+      "classification": "偏好分类",
+      "selectClassification": "选择分类",
+      "save": "保存偏好",
+      "saveSuccess": "偏好保存成功",
+      "saveError": "偏好保存失败"
+    }
+  },
+  "subscription": {
+    "title": "定价方案",
+    "subtitle": "ReadySetHire 帮助您吸引、评估和招聘优秀人才，提供清晰的招聘流程、自动化工具和企业级安全保障。",
+    "billingLabel": "按月计费",
+    "billingNote": "无隐藏费用，随时可取消",
+    "processing": "处理中...",
+    "errorCheckout": "无法启动结账流程",
+    "popularBadge": "最受欢迎",
+    "recommended": "推荐",
+    "included": "包含内容",
+    "seats": "用户席位",
+    "support": "客服支持",
+    "plans": {
+      "basic": {
+        "name": "Basic",
+        "subtitle": "适合个人HR或小型团队",
+        "button": "开始使用 Basic",
+        "features": {
+          "unlimitedScoring": "Unlimited AI简历评分",
+          "basicAnalysis": "基础简历分析",
+          "emailNotifications": "邮件通知",
+          "basicAnalytics": "基础数据分析"
+        },
+        "seats": "1个席位",
+        "support": "邮件支持"
+      },
+      "professional": {
+        "name": "Professional",
+        "subtitle": "适合快速成长的招聘团队",
+        "button": "升级到 Professional",
+        "features": {
+          "allBasic": "Basic计划所有功能",
+          "batchScoring": "每月10次批量AI评分",
+          "teamCollaboration": "团队协作功能",
+          "advancedAnalytics": "高级数据分析",
+          "prioritySupport": "优先客服支持"
+        },
+        "seats": "最多5个席位",
+        "support": "优先支持"
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "subtitle": "适合大规模招聘需求",
+        "button": "升级到 Enterprise",
+        "features": {
+          "allProfessional": "Professional计划所有功能",
+          "unlimitedBatch": "不限量批量AI评分",
+          "customModels": "自定义评分模型",
+          "dedicatedManager": "专属客户经理",
+          "enterpriseSLA": "企业级SLA保障",
+          "apiAccess": "API访问权限"
+        },
+        "seats": "不限席位",
+        "support": "专属经理"
+      }
+    },
+    "highlights": {
+      "security": {
+        "title": "企业级安全",
+        "description": "传输和静态加密，细粒度权限控制和审计日志"
+      },
+      "speed": {
+        "title": "更快速招聘",
+        "description": "自动化工具和结构化流程减少协调工作"
+      },
+      "teams": {
+        "title": "为真实团队设计",
+        "description": "内置协作、角色和报告功能，无需电子表格"
+      }
+    }
+  },
+  "pipeline": {
+    "title": "招聘流程",
+    "selectJob": "选择职位",
+    "candidates": "位候选人",
+    "addCandidate": "添加候选人",
+    "hiringFlow": "招聘流程",
+    "stageDistribution": "所选职位的阶段分布",
+    "clickToFilter": "点击阶段可筛选看板",
+    "searchPlaceholder": "按姓名、邮箱搜索候选人...",
+    "noApplications": "暂无候选人",
+    "currentStatus": "当前状态",
+    "moveToStage": "移动到阶段",
+    "notes": "备注",
+    "moveStage": "移动阶段",
+    "updating": "更新中...",
+    "firstName": "名",
+    "lastName": "姓",
+    "email": "邮箱",
+    "phone": "电话",
+    "firstNamePlaceholder": "输入名",
+    "lastNamePlaceholder": "输入姓",
+    "emailPlaceholder": "输入邮箱地址",
+    "phonePlaceholder": "输入电话号码",
+    "fillRequiredFields": "请填写所有必填字段",
+    "addCandidateFailed": "添加候选人失败",
+    "stages": {
+      "SUBMITTED": "已申请",
+      "IN_REVIEW": "筛选中",
+      "SHORTLISTED": "入围",
+      "INTERVIEW_SCHEDULED": "面试",
+      "INTERVIEWED": "已面试",
+      "OFFER_EXTENDED": "已发Offer",
+      "HIRED": "已录用",
+      "REJECTED": "已拒绝",
+      "WITHDRAWN": "已撤回"
+    },
+    "stageDesc": {
+      "SUBMITTED": "新申请",
+      "IN_REVIEW": "简历筛选",
+      "SHORTLISTED": "通过筛选",
+      "INTERVIEW_SCHEDULED": "已安排",
+      "INTERVIEWED": "已完成",
+      "OFFER_EXTENDED": "已发送",
+      "HIRED": "已接受",
+      "REJECTED": "已拒绝",
+      "WITHDRAWN": "已撤回"
+    }
+  },
+  "employeeSubscription": {
+    "title": "AI简历评分方案",
+    "subtitle": "选择适合您求职需求的方案。获取AI驱动的简历评分，让您的简历与职位要求完美匹配。",
+    "billingNote": "一次性支付，无需订阅",
+    "processing": "处理中...",
+    "errorCheckout": "无法启动结账流程",
+    "recommendedBadge": "超值推荐",
+    "included": "包含内容",
+    "validity": "有效期",
+    "model": "AI模型",
+    "accuracy": "准确度",
+    "plans": {
+      "trial": {
+        "name": "体验版",
+        "subtitle": "适合初次尝试服务的用户",
+        "button": "购买体验版",
+        "features": {
+          "unlimited": "不限量AI简历评分",
+          "basicModel": "标准AI模型",
+          "instantResults": "即时获取结果",
+          "validity": "3天有效期"
+        },
+        "validity": "3天",
+        "model": "标准版",
+        "accuracy": "良好"
+      },
+      "premium": {
+        "name": "高级版",
+        "subtitle": "认真求职者的最佳选择",
+        "button": "购买高级版",
+        "features": {
+          "unlimited": "不限量AI简历评分",
+          "advancedModel": "高级AI模型",
+          "higherAccuracy": "更高准确度评分",
+          "priorityProcessing": "优先处理",
+          "validity": "30天有效期"
+        },
+        "validity": "30天",
+        "model": "高级版",
+        "accuracy": "优秀"
+      }
+    },
+    "highlights": {
+      "instant": {
+        "title": "即时分析",
+        "description": "AI驱动匹配，秒级获取简历评分"
+      },
+      "accurate": {
+        "title": "高度精准",
+        "description": "先进算法提供精确的职位-简历匹配分数"
+      },
+      "unlimited": {
+        "title": "不限使用",
+        "description": "在套餐有效期内无限次评分简历"
+      }
+    }
   }
 }

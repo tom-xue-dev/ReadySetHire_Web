@@ -12,12 +12,16 @@
   },
   "navigation": {
     "dashboard": "Dashboard",
-    "interviews": "Interviews",
+    "jobPostings": "Job Postings",
+    "candidates": "Candidates",
+    "pipeline": "Pipeline",
+    "subscription": "Subscription",
     "jobs": "Job Postings",
     "applicants": "Applicants",
-    "subscription": "Subscription",
-    "questions": "Questions",
-    "resumeManagement": "Resume Management"
+    "resumeManagement": "Resume Management",
+    "jobSearch": "Job Search",
+    "aiResumeRating": "AI Resume Rating",
+    "profile": "Profile"
   },
   "home": {
     "title": "ReadySetHire",
@@ -175,5 +179,352 @@
       "description": "Configure notification preferences"
     },
     "comingSoon": "Coming Soon"
+  },
+  "rateResume": {
+    "title": "JD & Resume Matching Analysis",
+    "subtitle": "Use AI to intelligently analyze job description and candidate resume matching",
+    "model": "Model",
+    "expectedOutput": "Expected Output",
+    "structuredReport": "Structured Report",
+    "analyzeButton": "Analyze",
+    "analyzing": "Analyzing...",
+    "saveReport": "Save Report",
+    "reset": "Reset",
+    "savingFeature": "Save feature coming soon",
+    "jd": {
+      "title": "JD (Job Description)",
+      "selectJob": "Select Saved Job",
+      "pasteText": "Paste Text",
+      "uploadFile": "Upload File",
+      "selectPlaceholder": "Please select a job",
+      "textPlaceholder": "Paste job description text...",
+      "uploadPrompt": "Click to upload or drag file here",
+      "uploadFormats": "Supports PDF, DOCX, TXT formats",
+      "selectFile": "Select File"
+    },
+    "resume": {
+      "title": "Candidate Resume",
+      "upload": "Upload Resume",
+      "paste": "Paste Resume",
+      "select": "Select Candidate",
+      "uploadPrompt": "Click to upload or drag file here",
+      "uploadFormats": "Supports PDF, DOCX formats",
+      "textPlaceholder": "Paste resume text...",
+      "selectPlaceholder": "Please select a candidate",
+      "anonymize": "Anonymize (hide phone/email/address)",
+      "compliance": "Compliance check (no gender/age sensitive inference)"
+    },
+    "analysis": {
+      "title": "Analysis Result",
+      "tabOverview": "Overview",
+      "tabRequirements": "Requirements Check",
+      "tabSkills": "Skills Matrix",
+      "tabInterview": "Interview Suggestions",
+      "matchScore": "Match Score",
+      "conclusion": {
+        "strongHire": "Strong Hire",
+        "hire": "Hire",
+        "leanHire": "Lean Hire",
+        "leanNo": "Lean No",
+        "no": "No"
+      },
+      "topStrengths": "Top Strengths",
+      "topGaps": "Top Gaps",
+      "risks": "Risk Alerts",
+      "severityHigh": "High",
+      "severityMedium": "Medium",
+      "severityLow": "Low",
+      "skill": "Skill/Requirement",
+      "candidateEvidence": "Candidate Evidence",
+      "matchLevel": "Match Level",
+      "questionPurpose": "Purpose",
+      "expectedAnswer": "Expected Answer"
+    },
+    "errors": {
+      "missingInput": "Please enter both job description and resume text"
+    }
+  },
+  "jobs": {
+    "title": "Jobs",
+    "subtitle": "Create, publish, and manage your open roles.",
+    "newJob": "New Job",
+    "searchPlaceholder": "Search jobs by title, department, location...",
+    "filters": "Filters",
+    "sort": "Sort",
+    "export": "Export",
+    "all": "All",
+    "open": "Open",
+    "paused": "Paused",
+    "draft": "Draft",
+    "closed": "Closed",
+    "role": "Role",
+    "status": "Status",
+    "applicants": "Applicants",
+    "hiringManager": "Hiring manager",
+    "updated": "Updated",
+    "viewPipeline": "View pipeline",
+    "editJob": "Edit job",
+    "shareLink": "Share link",
+    "delete": "Delete...",
+    "showingJobs": "Showing {count} jobs",
+    "stats": {
+      "openJobs": "Open jobs",
+      "newApplicants": "New applicants",
+      "inReview": "In review",
+      "interviewing": "Interviewing",
+      "offers": "Offers"
+    }
+  },
+  "savedJobs": {
+    "title": "Saved Jobs",
+    "viewAll": "View all ({count})",
+    "noSavedJobs": "No saved jobs yet",
+    "saved": "Saved",
+    "applied": "Applied",
+    "remove": "Remove",
+    "removedSuccess": "Job removed from saved list",
+    "removedError": "Failed to remove job",
+    "empty": "No saved jobs yet"
+  },
+  "trackingJobs": {
+    "jobTitle": "Job Title",
+    "location": "Location",
+    "minSalary": "Min Salary ($)",
+    "maxSalary": "Max Salary ($)",
+    "postedWithin": "Posted Within",
+    "anyTime": "Any time",
+    "last24h": "Last 24 hours",
+    "last7d": "Last 7 days",
+    "last30d": "Last 30 days",
+    "search": "SEARCH",
+    "clearFilters": "Clear all filters",
+    "moreOptions": "More options",
+    "lessOptions": "Less options",
+    "recommended": "Recommended",
+    "jobsFound": "{count} job(s) found",
+    "loading": "Loading jobs...",
+    "noJobs": "No jobs found",
+    "newToYou": "New to you",
+    "savedSearches": "Saved searches",
+    "savedSearchesDesc": "Use the Save search button below the search results to save your search and receive every new job.",
+    "savedJobs": "Saved jobs",
+    "savedJobsDesc": "Use the Save button on each job listing to save it for later. You can then access them on all your devices.",
+    "savedCount": "{count} job(s) saved",
+    "jobDetails": "Job Details",
+    "title": "Title",
+    "description": "Description",
+    "requirements": "Requirements",
+    "salaryRange": "Salary Range",
+    "status": "Status",
+    "created": "Created",
+    "published": "Published",
+    "saveJob": "Save",
+    "unsaveJob": "Unsave",
+    "quickApply": "Quick apply",
+    "hideJob": "Hide job",
+    "enterKeywords": "Enter keywords",
+    "enterLocation": "Enter suburb, city, or region",
+    "companyInfo": "Company",
+    "postedDate": "Posted",
+    "viewAllJobs": "View all jobs"
+  },
+  "profile": {
+    "title": "My Profile",
+    "subtitle": "Manage your resume and job preferences",
+    "resumeSection": {
+      "title": "Resume",
+      "description": "Upload your resume to quickly apply for jobs",
+      "upload": "Upload Resume",
+      "current": "Current Resume",
+      "noResume": "No resume uploaded yet",
+      "uploadFormats": "Supports PDF, DOCX formats",
+      "uploadSuccess": "Resume uploaded successfully",
+      "uploadError": "Failed to upload resume"
+    },
+    "preferencesSection": {
+      "title": "Job Preferences",
+      "description": "Set your preferred job classifications",
+      "classification": "Preferred Classification",
+      "selectClassification": "Select classification",
+      "save": "Save Preferences",
+      "saveSuccess": "Preferences saved successfully",
+      "saveError": "Failed to save preferences"
+    }
+  },
+  "subscription": {
+    "title": "Pricing Plans",
+    "subtitle": "ReadySetHire helps you attract, evaluate, and hire with a clean pipeline, automation, and enterprise-grade security.",
+    "billingLabel": "Monthly billing",
+    "billingNote": "No hidden fees. Cancel anytime.",
+    "processing": "Processing...",
+    "errorCheckout": "Unable to start checkout",
+    "popularBadge": "Most Popular",
+    "recommended": "Recommended",
+    "included": "Included",
+    "seats": "Seats",
+    "support": "Support",
+    "plans": {
+      "basic": {
+        "name": "Basic",
+        "subtitle": "For individual HR or small teams",
+        "button": "Start Basic",
+        "features": {
+          "unlimitedScoring": "Unlimited AI resume scoring",
+          "basicAnalysis": "Basic resume analysis",
+          "emailNotifications": "Email notifications",
+          "basicAnalytics": "Basic analytics"
+        },
+        "seats": "1 seat",
+        "support": "Email support"
+      },
+      "professional": {
+        "name": "Professional",
+        "subtitle": "For fast-growing hiring teams",
+        "button": "Upgrade to Professional",
+        "features": {
+          "allBasic": "All Basic features",
+          "batchScoring": "10 batch AI scoring per month",
+          "teamCollaboration": "Team collaboration",
+          "advancedAnalytics": "Advanced analytics",
+          "prioritySupport": "Priority support"
+        },
+        "seats": "Up to 5 seats",
+        "support": "Priority support"
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "subtitle": "For large-scale hiring needs",
+        "button": "Upgrade to Enterprise",
+        "features": {
+          "allProfessional": "All Professional features",
+          "unlimitedBatch": "Unlimited batch AI scoring",
+          "customModels": "Custom scoring models",
+          "dedicatedManager": "Dedicated account manager",
+          "enterpriseSLA": "Enterprise SLA guarantee",
+          "apiAccess": "API access"
+        },
+        "seats": "Unlimited seats",
+        "support": "Dedicated manager"
+      }
+    },
+    "highlights": {
+      "security": {
+        "title": "Enterprise-grade security",
+        "description": "Encryption in transit & at rest, granular permissions, and audit logs"
+      },
+      "speed": {
+        "title": "Faster time-to-hire",
+        "description": "Automations and structured pipelines reduce coordination overhead"
+      },
+      "teams": {
+        "title": "Designed for real teams",
+        "description": "Built-in collaboration, roles, and reporting—no spreadsheets required"
+      }
+    }
+  },
+  "pipeline": {
+    "title": "Pipeline",
+    "selectJob": "Select a job",
+    "candidates": "candidates",
+    "addCandidate": "Add candidate",
+    "hiringFlow": "Hiring flow",
+    "stageDistribution": "Stage distribution for the selected job",
+    "clickToFilter": "Click a stage to filter the Kanban",
+    "searchPlaceholder": "Search candidates by name, email...",
+    "noApplications": "No candidates",
+    "currentStatus": "Current Status",
+    "moveToStage": "Move to Stage",
+    "notes": "Notes",
+    "moveStage": "Move Stage",
+    "updating": "Updating...",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email",
+    "phone": "Phone",
+    "firstNamePlaceholder": "Enter first name",
+    "lastNamePlaceholder": "Enter last name",
+    "emailPlaceholder": "Enter email address",
+    "phonePlaceholder": "Enter phone number",
+    "fillRequiredFields": "Please fill in all required fields",
+    "addCandidateFailed": "Failed to add candidate",
+    "stages": {
+      "SUBMITTED": "Applied",
+      "IN_REVIEW": "Screening",
+      "SHORTLISTED": "Shortlisted",
+      "INTERVIEW_SCHEDULED": "Interview",
+      "INTERVIEWED": "Interviewed",
+      "OFFER_EXTENDED": "Offer",
+      "HIRED": "Hired",
+      "REJECTED": "Rejected",
+      "WITHDRAWN": "Withdrawn"
+    },
+    "stageDesc": {
+      "SUBMITTED": "New applications",
+      "IN_REVIEW": "Resume review",
+      "SHORTLISTED": "Passed screening",
+      "INTERVIEW_SCHEDULED": "Scheduled",
+      "INTERVIEWED": "Completed",
+      "OFFER_EXTENDED": "Offer sent",
+      "HIRED": "Accepted",
+      "REJECTED": "Rejected",
+      "WITHDRAWN": "Withdrawn"
+    }
+  },
+  "employeeSubscription": {
+    "title": "AI Resume Scoring Plans",
+    "subtitle": "Choose the plan that fits your job search needs. Get AI-powered resume scoring to match your profile with job requirements.",
+    "billingNote": "One-time payment. No subscription required.",
+    "processing": "Processing...",
+    "errorCheckout": "Unable to start checkout",
+    "recommendedBadge": "Best Value",
+    "included": "What's Included",
+    "validity": "Validity",
+    "model": "AI Model",
+    "accuracy": "Accuracy",
+    "plans": {
+      "trial": {
+        "name": "Trial",
+        "subtitle": "Perfect for trying out the service",
+        "button": "Get Trial Plan",
+        "features": {
+          "unlimited": "Unlimited AI resume scoring",
+          "basicModel": "Standard AI model",
+          "instantResults": "Instant results",
+          "validity": "Valid for 3 days"
+        },
+        "validity": "3 days",
+        "model": "Standard",
+        "accuracy": "Good"
+      },
+      "premium": {
+        "name": "Premium",
+        "subtitle": "Best for serious job seekers",
+        "button": "Get Premium Plan",
+        "features": {
+          "unlimited": "Unlimited AI resume scoring",
+          "advancedModel": "Advanced AI model",
+          "higherAccuracy": "Higher accuracy scoring",
+          "priorityProcessing": "Priority processing",
+          "validity": "Valid for 30 days"
+        },
+        "validity": "30 days",
+        "model": "Advanced",
+        "accuracy": "Excellent"
+      }
+    },
+    "highlights": {
+      "instant": {
+        "title": "Instant Analysis",
+        "description": "Get your resume score in seconds with AI-powered matching"
+      },
+      "accurate": {
+        "title": "Highly Accurate",
+        "description": "Advanced algorithms provide precise job-resume matching scores"
+      },
+      "unlimited": {
+        "title": "Unlimited Usage",
+        "description": "Score as many resumes as you need during your plan period"
+      }
+    }
   }
 }

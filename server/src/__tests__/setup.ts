@@ -15,10 +15,9 @@ export const testPrisma = new PrismaClient({
 // Clean up after each test
 afterEach(async () => {
   // Clean up test data in reverse order of dependencies
-  await testPrisma.applicantAnswer.deleteMany();
-  await testPrisma.applicant.deleteMany();
-  await testPrisma.question.deleteMany();
-  await testPrisma.interview.deleteMany();
+  await testPrisma.jobApplication.deleteMany();
+  await testPrisma.savedJob.deleteMany();
+  await testPrisma.candidate.deleteMany();
   await testPrisma.job.deleteMany();
   await testPrisma.user.deleteMany();
 });

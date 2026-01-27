@@ -11,10 +11,19 @@ import HRDashboard from "./pages/dashboard/HRDashboard.tsx";
 import Layout from "./components/layout/layout.tsx";
 import Subscription from "./pages/dashboard/Subscription.tsx";
 import Jobs from "./pages/dashboard/Jobs.tsx";
+import Candidates from "./pages/dashboard/Candidates.tsx";
+import Pipeline from "./pages/dashboard/Pipeline.tsx";
 import ResumeManagement from "./pages/dashboard/ResumeManagement.tsx";
-import TrackingJobs from "./pages/dashboard/TrackingJobs.tsx";
+import Settings from "./pages/dashboard/Settings.tsx";
 import PublicJobDetails from "./pages/PublicJobDetails.tsx";
 import PublicJobApplication from "./pages/PublicJobApplication.tsx";
+// Employee pages
+import TrackingJobs from "./pages/employee/TrackingJobs.tsx";
+import RateResume from "./pages/employee/RateResume.tsx";
+import EmployeeSettings from "./pages/employee/EmployeeSettings.tsx";
+import EmployeeSubscription from "./pages/employee/EmployeeSubscription.tsx";
+import EmployeeProfile from "./pages/employee/EmployeeProfile.tsx";
+import SavedJobs from "./pages/employee/SavedJobs.tsx";
 function AppContent() {
   const { showAuthNotification, hideAuthNotification } = useAuth();
   
@@ -37,10 +46,44 @@ function AppContent() {
           <Route path="/jobs/:jobId" element={<PublicJobDetails />} />
           <Route path="/jobs/:jobId/apply" element={<PublicJobApplication />} />
           
-          {/* TrackingJobs - Standalone route with role protection */}
-          <Route path="/tracking-jobs" element={
+          {/* Employee Routes - Standalone routes with role protection */}
+          <Route path="/employee/tracking-jobs" element={
             <ProtectedRoute requiredRole="EMPLOYEE">
               <TrackingJobs />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/employee/rate-resume" element={
+            <ProtectedRoute requiredRoles={['ADMIN', 'EMPLOYEE']}>
+              <RateResume />
+            </ProtectedRoute>
+          } />
+          
+          {/* Employee Settings - Standalone route for EMPLOYEE and ADMIN */}
+          <Route path="/employee/settings" element={
+            <ProtectedRoute requiredRoles={['ADMIN', 'EMPLOYEE']}>
+              <EmployeeSettings />
+            </ProtectedRoute>
+          } />
+          
+          {/* Employee Subscription - Standalone route for EMPLOYEE and ADMIN */}
+          <Route path="/employee/subscription" element={
+            <ProtectedRoute requiredRoles={['ADMIN', 'EMPLOYEE']}>
+              <EmployeeSubscription />
+            </ProtectedRoute>
+          } />
+          
+          {/* Employee Profile - Standalone route for EMPLOYEE and ADMIN */}
+          <Route path="/employee/profile" element={
+            <ProtectedRoute requiredRoles={['ADMIN', 'EMPLOYEE']}>
+              <EmployeeProfile />
+            </ProtectedRoute>
+          } />
+          
+          {/* Employee Saved Jobs - Standalone route for EMPLOYEE and ADMIN */}
+          <Route path="/employee/saved-jobs" element={
+            <ProtectedRoute requiredRoles={['ADMIN', 'EMPLOYEE']}>
+              <SavedJobs />
             </ProtectedRoute>
           } />
           
@@ -52,7 +95,10 @@ function AppContent() {
                   <Route path="/dashboard" element={<HRDashboard />} />
                   <Route path="/subscription" element={<Subscription />} />
                   <Route path="/jobs" element={<Jobs />} />
+                  <Route path="/candidates" element={<Candidates />} />
+                  <Route path="/pipeline" element={<Pipeline />} />
                   <Route path="/resume-management" element={<ResumeManagement />} />
+                  <Route path="/settings" element={<Settings />} />
                 </Routes>
               </Layout>
             </ProtectedRoute>

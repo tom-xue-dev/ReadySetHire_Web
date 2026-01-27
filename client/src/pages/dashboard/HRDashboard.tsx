@@ -1,26 +1,22 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/pages/auth/AuthContext';
-import { getInterviews } from '@/api/interview';
-import { getApplicantsByInterview } from '@/api/api';
+import { getJobs } from '@/api/job';
 
 
 interface DashboardStats {
-  totalInterviews: number;
-  publishedInterviews: number;
-  draftInterviews: number;
+  totalJobs: number;
+  publishedJobs: number;
+  draftJobs: number;
   totalApplicants: number;
-  completedInterviews: number;
-  pendingInterviews: number;
 }
 
-interface InterviewWithStats {
+interface JobWithStats {
   id: number;
   title: string;
-  jobRole: string;
   status: string;
   createdAt: string;
-  applicantCount: number;
-  completedCount: number;
+  location?: string;
+  salaryRange?: string;
 }
 
 export default function HRDashboard() {
@@ -28,14 +24,12 @@ export default function HRDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState<DashboardStats>({
-    totalInterviews: 0,
-    publishedInterviews: 0,
-    draftInterviews: 0,
-    totalApplicants: 0,
-    completedInterviews: 0,
-    pendingInterviews: 0
+    totalJobs: 0,
+    publishedJobs: 0,
+    draftJobs: 0,
+    totalApplicants: 0
   });
-  const [recentInterviews, setRecentInterviews] = useState<InterviewWithStats[]>([]);
+  const [recentJobs, setRecentJobs] = useState<JobWithStats[]>([]);
 
   useEffect(() => {
     loadDashboardData();
@@ -46,69 +40,30 @@ export default function HRDashboard() {
     setError(null);
     
     try {
-      const interviews = await getInterviews();
+      const jobs = await getJobs();
       
-      // Calculate stats
-      const totalInterviews = interviews.length;
-      const publishedInterviews = interviews.filter((iv: any) => iv.status === 'PUBLISHED').length;
-      const draftInterviews = interviews.filter((iv: any) => iv.status === 'DRAFT').length;
+      const totalJobs = jobs.length;
+      const publishedJobs = jobs.filter((job: any) => job.status === 'PUBLISHED').length;
+      const draftJobs = jobs.filter((job: any) => job.status === 'DRAFT').length;
       
-      // Get applicant counts for each interview
-      const interviewsWithStats: InterviewWithStats[] = [];
-      let totalApplicants = 0;
-      let completedInterviews = 0;
-      
-      for (const interview of interviews) {
-        if (!interview.id) {
-          continue;
-        }
-        try {
-          const applicants = await getApplicantsByInterview(interview.id);
-          const applicantCount = applicants.length;
-          const completedCount = applicants.filter((app: any) => 
-            app.interviewStatus === 'COMPLETED' || app.status === 'COMPLETED'
-          ).length;
-          
-          totalApplicants += applicantCount;
-          if (completedCount > 0) completedInterviews++;
-          
-          const interviewWithExtra = interview as typeof interview & { createdAt?: string; created_at?: string };
-          interviewsWithStats.push({
-            id: interview.id,
-            title: interview.title,
-            jobRole: interview.jobRole || 'N/A',
-            status: interview.status,
-            createdAt: interviewWithExtra.createdAt || interviewWithExtra.created_at || new Date().toISOString(),
-            applicantCount,
-            completedCount
-          });
-        } catch (err) {
-          console.warn(`Failed to load applicants for interview ${interview.id}:`, err);
-          const interviewWithExtra = interview as typeof interview & { createdAt?: string; created_at?: string };
-          interviewsWithStats.push({
-            id: interview.id,
-            title: interview.title,
-            jobRole: interview.jobRole || 'N/A',
-            status: interview.status,
-            createdAt: interviewWithExtra.createdAt || interviewWithExtra.created_at || new Date().toISOString(),
-            applicantCount: 0,
-            completedCount: 0
-          });
-        }
-      }
+      const jobsWithStats: JobWithStats[] = jobs.map((job: any) => ({
+        id: job.id,
+        title: job.title,
+        status: job.status,
+        createdAt: job.createdAt || job.created_at || new Date().toISOString(),
+        location: job.location,
+        salaryRange: job.salaryRange
+      }));
       
       setStats({
-        totalInterviews,
-        publishedInterviews,
-        draftInterviews,
-        totalApplicants,
-        completedInterviews,
-        pendingInterviews: totalInterviews - completedInterviews
+        totalJobs,
+        publishedJobs,
+        draftJobs,
+        totalApplicants: 0
       });
       
-      // Sort by creation date (newest first) and take first 5
-      setRecentInterviews(
-        interviewsWithStats
+      setRecentJobs(
+        jobsWithStats
           .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
           .slice(0, 5)
       );
@@ -144,20 +99,19 @@ export default function HRDashboard() {
     </div>
   );
 
-  const InterviewCard = ({ interview }: { interview: InterviewWithStats }) => (
+  const JobCard = ({ job }: { job: JobWithStats }) => (
     <div className={`${brand.card} p-4`}>
       <div className="flex items-start justify-between mb-1">
-        <h3 className="m-0 text-base font-semibold text-slate-900">{interview.title}</h3>
-        <span className={`px-2 py-1 rounded text-xs font-medium ${interview.status === 'PUBLISHED' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
-          {interview.status}
+        <h3 className="m-0 text-base font-semibold text-slate-900">{job.title}</h3>
+        <span className={`px-2 py-1 rounded text-xs font-medium ${job.status === 'PUBLISHED' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+          {job.status}
         </span>
       </div>
-      <p className="mt-1 mb-3 text-sm text-slate-600">{interview.jobRole}</p>
-      <div className="flex items-center justify-between text-sm text-slate-600">
-        <span>👥 {interview.applicantCount} applicants</span>
-        <span>✅ {interview.completedCount} completed</span>
+      <div className="mt-1 mb-3 text-sm text-slate-600 space-y-1">
+        {job.location && <div>📍 {job.location}</div>}
+        {job.salaryRange && <div>💰 {job.salaryRange}</div>}
       </div>
-      <div className="mt-2 text-xs text-slate-400">Created: {new Date(interview.createdAt).toLocaleDateString()}</div>
+      <div className="mt-2 text-xs text-slate-400">Created: {new Date(job.createdAt).toLocaleDateString()}</div>
     </div>
   );
 
@@ -183,10 +137,10 @@ export default function HRDashboard() {
           <>
             {/* Stat grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-              <StatCard title="Total Interviews" value={stats.totalInterviews} icon="🎯" color="#3b82f6" />
-              <StatCard title="Published Interviews" value={stats.publishedInterviews} icon="📢" color="#10b981" />
-              <StatCard title="Total Applicants" value={stats.totalApplicants} icon="👥" color="#f59e0b" />
-              <StatCard title="Completed" value={stats.completedInterviews} icon="✅" color="#8b5cf6" />
+              <StatCard title="Total Jobs" value={stats.totalJobs} icon="💼" color="#3b82f6" />
+              <StatCard title="Published Jobs" value={stats.publishedJobs} icon="📢" color="#10b981" />
+              <StatCard title="Draft Jobs" value={stats.draftJobs} icon="📝" color="#f59e0b" />
+              <StatCard title="Total Applicants" value={stats.totalApplicants} icon="👥" color="#8b5cf6" />
             </div>
 
             {/* Content grid */}
@@ -194,23 +148,23 @@ export default function HRDashboard() {
               <div className="lg:col-span-2">
                 <div className={`${brand.card} p-6`}>
                   <div className="flex items-center justify-between">
-                    <h3 className="text-base font-semibold text-slate-900 m-0">Recent Interviews</h3>
-                    <button className={brand.btnGhost} onClick={() => (window.location.href = '/interviews')}>View all</button>
+                    <h3 className="text-base font-semibold text-slate-900 m-0">Recent Jobs</h3>
+                    <button className={brand.btnGhost} onClick={() => (window.location.href = '/jobs')}>View all</button>
                   </div>
                   <div className="mt-4">
-                    {recentInterviews.length === 0 ? (
+                    {recentJobs.length === 0 ? (
                       <div className="grid place-items-center py-12 text-center">
-                        <div className="h-14 w-14 rounded-2xl bg-[#635bff]/10 grid place-items-center text-3xl">🎯</div>
-                        <h4 className="mt-4 text-lg font-semibold text-slate-900">No interviews yet</h4>
-                        <p className="mt-1 text-sm text-slate-600 max-w-md">Create your first interview to get started. Your interviews will appear here once published.</p>
+                        <div className="h-14 w-14 rounded-2xl bg-[#635bff]/10 grid place-items-center text-3xl">💼</div>
+                        <h4 className="mt-4 text-lg font-semibold text-slate-900">No jobs yet</h4>
+                        <p className="mt-1 text-sm text-slate-600 max-w-md">Create your first job posting to get started. Your jobs will appear here once created.</p>
                         <div className="mt-4">
-                          <button className={brand.btn} onClick={() => (window.location.href = '/interviews')}>Create interview</button>
+                          <button className={brand.btn} onClick={() => (window.location.href = '/jobs')}>Create job</button>
                         </div>
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {recentInterviews.map((interview) => (
-                          <InterviewCard key={interview.id} interview={interview} />
+                        {recentJobs.map((job) => (
+                          <JobCard key={job.id} job={job} />
                         ))}
                       </div>
                     )}
@@ -221,10 +175,10 @@ export default function HRDashboard() {
               <div className={`${brand.card} p-6`}>
                 <h3 className="text-base font-semibold text-slate-900 m-0">How it works</h3>
                 <ol className="mt-4 space-y-3 text-sm text-slate-700">
-                  <li className="flex items-start gap-3"><span className="mt-1 h-6 w-6 shrink-0 rounded-full bg-[#635bff]/10 text-[#635bff] grid place-items-center text-xs font-semibold">1</span><div><b>Create an interview</b> – choose question templates or write your own.</div></li>
-                  <li className="flex items-start gap-3"><span className="mt-1 h-6 w-6 shrink-0 rounded-full bg-[#635bff]/10 text-[#635bff] grid place-items-center text-xs font-semibold">2</span><div><b>Publish & invite</b> – candidates answer by voice, securely stored.</div></li>
-                  <li className="flex items-start gap-3"><span className="mt-1 h-6 w-6 shrink-0 rounded-full bg-[#635bff]/10 text-[#635bff] grid place-items-center text-xs font-semibold">3</span><div><b>Auto‑transcribe & score</b> – AI extracts key skills against your JD.</div></li>
-                  <li className="flex items-start gap-3"><span className="mt-1 h-6 w-6 shrink-0 rounded-full bg-[#635bff]/10 text-[#635bff] grid place-items-center text-xs font-semibold">4</span><div><b>Share insights</b> – collaborate with your team and move faster.</div></li>
+                  <li className="flex items-start gap-3"><span className="mt-1 h-6 w-6 shrink-0 rounded-full bg-[#635bff]/10 text-[#635bff] grid place-items-center text-xs font-semibold">1</span><div><b>Create a job</b> – define role and requirements.</div></li>
+                  <li className="flex items-start gap-3"><span className="mt-1 h-6 w-6 shrink-0 rounded-full bg-[#635bff]/10 text-[#635bff] grid place-items-center text-xs font-semibold">2</span><div><b>Publish & share</b> – candidates can view and apply.</div></li>
+                  <li className="flex items-start gap-3"><span className="mt-1 h-6 w-6 shrink-0 rounded-full bg-[#635bff]/10 text-[#635bff] grid place-items-center text-xs font-semibold">3</span><div><b>AI resume scoring</b> – AI analyzes resumes against your JD.</div></li>
+                  <li className="flex items-start gap-3"><span className="mt-1 h-6 w-6 shrink-0 rounded-full bg-[#635bff]/10 text-[#635bff] grid place-items-center text-xs font-semibold">4</span><div><b>Manage applicants</b> – track and collaborate with your team.</div></li>
                 </ol>
               </div>
             </div>

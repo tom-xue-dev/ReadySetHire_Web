@@ -186,34 +186,6 @@ export async function apiRequest(endpoint: string, method: string = 'GET', body:
 }
 
 
-// Question APIs - Updated for new API format
-export async function getQuestions(interviewId: string | number): Promise<unknown[]> {
-    const response = await apiRequest(`/question/interview/${interviewId}`);
-    return (response as { data?: unknown[] })?.data || [];
-}
-
-export async function createQuestion(question: Record<string, unknown>): Promise<Record<string, unknown> | null> {
-    return apiRequest(`/question`, 'POST', question);
-}
-
-export async function updateQuestion(id: string | number, data: Record<string, unknown>): Promise<Record<string, unknown> | null> {
-    return apiRequest(`/question/${id}`, 'PATCH', data);
-}
-
-export async function deleteQuestion(id: string | number): Promise<Record<string, unknown> | null> {
-    return apiRequest(`/question/${id}`, 'DELETE');
-}
-
-/**
- * Generate questions using LLM based on job description
- * @param {number} interviewId - The interview ID
- * @param {number} count - Number of questions to generate (default: 5)
- * @returns {Promise<object>} - The generated questions response
- */
-export async function generateQuestions(interviewId: string | number, count: number = 5): Promise<Record<string, unknown> | null> {
-    return apiRequest(`/question/generate/${interviewId}`, 'POST', { count });
-}
-
 // Applicants APIs - Updated for new API format
 export async function getAllApplicants(): Promise<unknown[]> {
     const response = await apiRequest(`/applicants`);
@@ -333,17 +305,58 @@ export async function createCheckoutSession(): Promise<Record<string, unknown> |
     return apiRequest(`/billing/create-checkout-session`, 'POST', {});
 }
 
+// Saved Jobs APIs
+export async function getSavedJobs(employeeId: number): Promise<unknown[]> {
+    const response = await apiRequest(`/employees/${employeeId}/saved-jobs`);
+    return (response as { data?: unknown[] })?.data || [];
+}
 
+export async function saveJob(employeeId: number, jobId: number): Promise<Record<string, unknown> | null> {
+    return apiRequest(`/employees/${employeeId}/saved-jobs/${jobId}`, 'PUT', {});
+}
 
+export async function unsaveJob(employeeId: number, jobId: number): Promise<Record<string, unknown> | null> {
+    return apiRequest(`/employees/${employeeId}/saved-jobs/${jobId}`, 'DELETE');
+}
 
+// Resume Rating APIs
+export interface AnalyzeResumeRequest {
+    jdText: string;
+    resumeText: string;
+    settings?: {
+        level?: string;
+        mustHaveWeight?: number;
+        language?: string;
+        anonymize?: boolean;
+    };
+}
+
+export interface AnalysisResult {
+    score: number;
+    conclusion: 'STRONG_HIRE' | 'HIRE' | 'LEAN_HIRE' | 'LEAN_NO' | 'NO';
+    topStrengths: Array<{ point: string; evidence: string }>;
+    topGaps: Array<{ gap: string; severity: 'high' | 'medium' | 'low' }>;
+    risks: string[];
+    hardRequirements: Array<{ requirement: string; status: 'pass' | 'warning' | 'fail'; evidence: string }>;
+    skillsMatrix: Array<{ skill: string; candidateEvidence: string; match: number }>;
+    interviewQuestions: Array<{ question: string; purpose: string; goodAnswer: string }>;
+}
 
 /**
- * Main function to demonstrate API usage.
- *
- * Creates a new interview, lists all interviews, and retrieves a single interview by ID.
+ * Analyze JD and resume match using AI
+ * @param {AnalyzeResumeRequest} request - The analysis request containing JD and resume text
+ * @returns {Promise<AnalysisResult>} - The analysis result
  */
-// @ts-ignore - Function is for demonstration purposes only
-
-export async function bindApplicantToInterviewV2(interviewId: string | number, applicantId: string | number, status: string = 'NOT_STARTED'): Promise<Record<string, unknown> | null> {
-    return apiRequest(`/interviews/${interviewId}/applicants`, 'POST', { applicant_id: applicantId, status });
+export async function analyzeResume(request: AnalyzeResumeRequest): Promise<AnalysisResult> {
+    // 使用更长的超时时间（2分钟），因为 LLM 推理需要时间
+    const response = await apiRequest('/resume-rating/analyze', 'POST', request as unknown as Record<string, unknown>, 120000);
+    if (response && typeof response === 'object' && 'data' in response) {
+        return response.data as AnalysisResult;
+    }
+    throw new Error('Invalid response format from resume analysis API');
 }
+
+
+
+
+
