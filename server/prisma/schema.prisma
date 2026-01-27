@@ -22,10 +22,12 @@ model User {
   firstName    String?  @map("first_name")
   lastName     String?  @map("last_name")
   role         UserRole @default(RECRUITER)
+  companyId    Int?     @map("company_id")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
   // Relations
+  company     Company?         @relation(fields: [companyId], references: [id], onDelete: SetNull)
   jobs        Job[]
   candidates  Candidate[]
   savedJobs   SavedJob[]
@@ -42,12 +44,14 @@ model Job {
   salaryRange  String?   @map("salary_range")
   status       JobStatus @default(DRAFT)
   userId       Int       @map("user_id")
+  companyId    Int?      @map("company_id")
   publishedAt  DateTime? @map("published_at")
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")
 
   // Relations
   user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company         Company?         @relation(fields: [companyId], references: [id], onDelete: SetNull)
   jobApplications JobApplication[]
   savedBy         SavedJob[]
 
@@ -134,6 +138,19 @@ model SavedJob {
   @@index([userId])
   @@index([jobId])
   @@map("saved_jobs")
+}
+
+model Company {
+  id        Int      @id @default(autoincrement())
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  users User[]
+  jobs  Job[]
+
+  @@map("companies")
 }
 
 

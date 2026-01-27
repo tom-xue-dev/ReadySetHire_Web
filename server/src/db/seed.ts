@@ -5,12 +5,27 @@ const prisma = new PrismaClient();
 async function seed() {
   console.log('🌱 Starting database seed...');
   try {
+    // Create companies
+    const company1 = await prisma.company.create({
+      data: {
+        name: 'TechCorp Australia',
+      },
+    });
+
+    const company2 = await prisma.company.create({
+      data: {
+        name: 'Innovate Solutions',
+      },
+    });
+
+    console.log('✅ Companies created');
+
     // Create users
     const admin = await prisma.user.create({
       data: {
         username: 'admin',
         email: 'admin@readysethire.com',
-        passwordHash: '$2b$10$K7L/8Y3NTAQ/Gub52dvpDOhfUiuR.Ax9Q7L8rXYYQJf7/hZ7.Z.Bq', // password: admin123
+        passwordHash: '$2b$10$K7L/8Y3NTAQ/Gub52dvpDOhfUiuR.Ax9Q7L8rXYYQJf7/hZ7.Z.Bq',
         firstName: 'Admin',
         lastName: 'User',
         role: 'ADMIN',
@@ -21,10 +36,11 @@ async function seed() {
       data: {
         username: 'recruiter1',
         email: 'recruiter1@readysethire.com',
-        passwordHash: '$2b$10$K7L/8Y3NTAQ/Gub52dvpDOhfUiuR.Ax9Q7L8rXYYQJf7/hZ7.Z.Bq', // password: admin123
+        passwordHash: '$2b$10$K7L/8Y3NTAQ/Gub52dvpDOhfUiuR.Ax9Q7L8rXYYQJf7/hZ7.Z.Bq',
         firstName: 'Sarah',
         lastName: 'Johnson',
         role: 'RECRUITER',
+        companyId: company1.id,
       },
     });
 
@@ -32,10 +48,11 @@ async function seed() {
       data: {
         username: 'recruiter2',
         email: 'recruiter2@readysethire.com',
-        passwordHash: '$2b$10$K7L/8Y3NTAQ/Gub52dvpDOhfUiuR.Ax9Q7L8rXYYQJf7/hZ7.Z.Bq', // password: admin123
+        passwordHash: '$2b$10$K7L/8Y3NTAQ/Gub52dvpDOhfUiuR.Ax9Q7L8rXYYQJf7/hZ7.Z.Bq',
         firstName: 'Michael',
         lastName: 'Chen',
         role: 'RECRUITER',
+        companyId: company2.id,
       },
     });
 
@@ -43,9 +60,7 @@ async function seed() {
       data: {
         username: 'employee1',
         email: 'employee1@readysethire.com',
-        passwordHash: '$2b$10$K7L/8Y3NTAQ/Gub52dvpDOhfUiuR.Ax9Q7L8rXYYQJf7/hZ7.Z.Bq', // password: admin123
-        firstName: 'John',
-        lastName: 'Doe',
+        passwordHash: '$2b$10$K7L/8Y3NTAQ/Gub52dvpDOhfUiuR.Ax9Q7L8rXYYQJf7/hZ7.Z.Bq',
         role: 'EMPLOYEE',
       },
     });
@@ -62,6 +77,7 @@ async function seed() {
         salaryRange: '$80,000 - $120,000',
         status: 'PUBLISHED',
         userId: recruiter1.id,
+        companyId: company1.id,
         publishedAt: new Date(),
       },
     });
@@ -75,6 +91,7 @@ async function seed() {
         salaryRange: '$90,000 - $130,000',
         status: 'PUBLISHED',
         userId: recruiter2.id,
+        companyId: company2.id,
         publishedAt: new Date(),
       },
     });
@@ -88,6 +105,7 @@ async function seed() {
         salaryRange: '$100,000 - $140,000',
         status: 'PUBLISHED',
         userId: recruiter1.id,
+        companyId: company1.id,
         publishedAt: new Date(),
       },
     });
@@ -101,6 +119,7 @@ async function seed() {
         salaryRange: '$110,000 - $150,000',
         status: 'PUBLISHED',
         userId: recruiter2.id,
+        companyId: company2.id,
         publishedAt: new Date(),
       },
     });

@@ -16,6 +16,7 @@ interface RegisterFormData {
   confirmPassword: string;
   firstName: string;
   lastName: string;
+  companyName: string;
   role:  'RECRUITER' | 'EMPLOYEE';
 }
 
@@ -27,6 +28,7 @@ export default function Register() {
     confirmPassword: '',
     firstName: '',
     lastName: '',
+    companyName: '',
     role: 'RECRUITER'
   });
 
@@ -34,13 +36,26 @@ export default function Register() {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => {
+      // Role switch: clear recruiter-only fields when selecting EMPLOYEE
+      if (name === 'role') {
+        const nextRole = value as RegisterFormData['role'];
+        if (nextRole === 'EMPLOYEE') {
+          return {
+            ...prev,
+            role: nextRole,
+            firstName: '',
+            lastName: '',
+            companyName: '',
+          };
+        }
+        return { ...prev, role: nextRole };
+      }
+
+      return { ...prev, [name]: value } as RegisterFormData;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -60,6 +75,19 @@ export default function Register() {
       return;
     }
 
+    if (formData.role === 'RECRUITER') {
+      if (!formData.firstName.trim() || !formData.lastName.trim()) {
+        setError('First name and last name are required for recruiters');
+        setLoading(false);
+        return;
+      }
+      if (!formData.companyName.trim()) {
+        setError('Company name is required for recruiters');
+        setLoading(false);
+        return;
+      }
+    }
+
     try {
       const res = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
@@ -68,8 +96,9 @@ export default function Register() {
           username: formData.username,
           email: formData.email,
           password: formData.password,
-          firstName: formData.firstName,
-          lastName: formData.lastName,
+          firstName: formData.role === 'RECRUITER' ? formData.firstName : undefined,
+          lastName: formData.role === 'RECRUITER' ? formData.lastName : undefined,
+          companyName: formData.role === 'RECRUITER' ? formData.companyName : undefined,
           role: formData.role,
         }),
       });
@@ -94,26 +123,6 @@ export default function Register() {
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && <ErrorBox message={error} />}
-
-          {/* Name Row */}
-          <div className="flex items-center gap-2 w-full">
-            <Input
-              wrapperClassName="flex-1"
-              label="First Name"
-              name="firstName"
-              value={formData.firstName}
-              onChange={handleChange}
-              required
-            />
-            <Input
-              wrapperClassName="flex-1"
-              label="Last Name"
-              name="lastName"
-              value={formData.lastName}
-              onChange={handleChange}
-              required
-            />
-          </div>
 
           <Input
             label="Username"
@@ -141,6 +150,38 @@ export default function Register() {
             <option value="RECRUITER">Recruiter</option>
             <option value="EMPLOYEE">Employee</option>
           </Select>
+
+          {formData.role === 'RECRUITER' && (
+            <>
+              {/* Name Row (Recruiter only) */}
+              <div className="flex items-center gap-2 w-full">
+                <Input
+                  wrapperClassName="flex-1"
+                  label="First Name"
+                  name="firstName"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  required
+                />
+                <Input
+                  wrapperClassName="flex-1"
+                  label="Last Name"
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <Input
+                label="Company Name"
+                name="companyName"
+                value={formData.companyName}
+                onChange={handleChange}
+                required
+              />
+            </>
+          )}
 
           <Input
             label="Password"

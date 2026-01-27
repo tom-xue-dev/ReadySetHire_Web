@@ -181,7 +181,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 // Register endpoint
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { username, email, password, firstName, lastName, role } = req.body;
+    const { username, email, password, firstName, lastName, role, companyName } = req.body;
 
     if (!username || !email || !password) {
       res.status(400).json({ error: 'Username, email, and password are required' });
@@ -197,14 +197,44 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    const normalizedRole: 'ADMIN' | 'RECRUITER' | 'EMPLOYEE' = role || 'RECRUITER';
+
+    // Recruiter: require first/last + company name
+    let companyId: number | null | undefined = undefined;
+    if (normalizedRole === 'RECRUITER') {
+      if (!firstName || !lastName) {
+        res.status(400).json({ error: 'First name and last name are required for recruiters' });
+        return;
+      }
+      if (!companyName || !String(companyName).trim()) {
+        res.status(400).json({ error: 'Company name is required for recruiters' });
+        return;
+      }
+
+      const name = String(companyName).trim();
+      const existingCompany = await (userService.prisma as any).company.findFirst({
+        where: { name: { equals: name, mode: 'insensitive' } },
+      });
+
+      if (existingCompany) {
+        companyId = existingCompany.id;
+      } else {
+        const createdCompany = await (userService.prisma as any).company.create({
+          data: { name },
+        });
+        companyId = createdCompany.id;
+      }
+    }
+
     // Use UserService to create user with hashed password
     const user = await userService.createUser({
       username,
       email,
       password,
-      firstName,
-      lastName,
-      role: role || 'RECRUITER'
+      firstName: normalizedRole === 'RECRUITER' ? firstName : undefined,
+      lastName: normalizedRole === 'RECRUITER' ? lastName : undefined,
+      companyId: normalizedRole === 'RECRUITER' ? companyId : undefined,
+      role: normalizedRole
     });
 
     const token = JWTUtils.generateToken({

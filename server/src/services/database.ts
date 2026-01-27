@@ -113,6 +113,7 @@ export class UserService extends BaseService<any> {
     password: string;
     firstName?: string;
     lastName?: string;
+    companyId?: number | null;
     role?: 'ADMIN' | 'RECRUITER' | 'EMPLOYEE';
   }) {
     const { password, ...data } = userData;

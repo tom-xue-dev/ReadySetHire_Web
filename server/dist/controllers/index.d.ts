@@ -10,5 +10,6 @@ export declare class JobController extends CRUDController<any> {
     getByUserId(req: Request, res: Response): Promise<void>;
     getPublished(req: Request, res: Response): Promise<void>;
     publish(req: Request, res: Response): Promise<void>;
+    delete(req: Request, res: Response): Promise<void>;
 }
 //# sourceMappingURL=index.d.ts.map

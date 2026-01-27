@@ -113,4 +113,52 @@ export class JobController extends CRUDController<any> {
       res.status(500).json({ error: 'Failed to publish job' });
     }
   }
+
+  async delete(req: Request, res: Response): Promise<void> {
+    try {
+      const jobId = parseInt(req.params.id);
+      if (isNaN(jobId)) {
+        res.status(400).json({ error: 'Invalid ID format' });
+        return;
+      }
+
+      const job = await this.jobService.findUnique({ id: jobId });
+      if (!job) {
+        res.status(404).json({ error: 'Job not found' });
+        return;
+      }
+
+      const companyId = job.companyId;
+
+      await this.jobService.delete({ id: jobId });
+
+      if (companyId) {
+        const applications = await (this.jobService.prisma as any).jobApplication.findMany({
+          where: { jobId },
+          include: { candidate: true, job: true }
+        });
+
+        for (const app of applications) {
+          const candidateId = app.candidateId;
+          const remainingApplications = await (this.jobService.prisma as any).jobApplication.findMany({
+            where: {
+              candidateId,
+              job: { companyId }
+            }
+          });
+
+          if (remainingApplications.length === 0) {
+            await (this.jobService.prisma as any).candidate.delete({
+              where: { id: candidateId }
+            }).catch(() => {});
+          }
+        }
+      }
+
+      res.status(204).send();
+    } catch (error) {
+      console.error('Error deleting job:', error);
+      res.status(500).json({ error: 'Failed to delete job' });
+    }
+  }
 }

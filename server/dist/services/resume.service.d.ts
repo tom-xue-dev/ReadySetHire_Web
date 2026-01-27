@@ -41,6 +41,7 @@ export declare class ResumeService {
         applications: ({
             job: {
                 id: number;
+                companyId: number | null;
                 createdAt: Date;
                 updatedAt: Date;
                 title: string;
