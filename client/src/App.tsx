@@ -12,6 +12,7 @@ import Layout from "./components/layout/layout.tsx";
 import Subscription from "./pages/dashboard/Subscription.tsx";
 import Jobs from "./pages/dashboard/Jobs.tsx";
 import Candidates from "./pages/dashboard/Candidates.tsx";
+import Pipeline from "./pages/dashboard/Pipeline.tsx";
 import ResumeManagement from "./pages/dashboard/ResumeManagement.tsx";
 import Settings from "./pages/dashboard/Settings.tsx";
 import PublicJobDetails from "./pages/PublicJobDetails.tsx";
@@ -95,7 +96,7 @@ function AppContent() {
                   <Route path="/subscription" element={<Subscription />} />
                   <Route path="/jobs" element={<Jobs />} />
                   <Route path="/candidates" element={<Candidates />} />
-                  <Route path="/pipeline" element={<div className="p-8 text-center text-gray-500">Pipeline - Coming Soon</div>} />
+                  <Route path="/pipeline" element={<Pipeline />} />
                   <Route path="/resume-management" element={<ResumeManagement />} />
                   <Route path="/settings" element={<Settings />} />
                 </Routes>

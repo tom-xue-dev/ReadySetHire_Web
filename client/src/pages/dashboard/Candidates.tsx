@@ -343,12 +343,6 @@ export default function Candidates() {
           >
             {t('jobs.export')}
           </button>
-          <button 
-            onClick={() => openCandidateModal()}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors"
-          >
-            New Candidate
-          </button>
         </div>
 
         {/* Candidates Table */}

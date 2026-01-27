@@ -258,6 +258,38 @@ export default function Jobs() {
     }
   }
 
+  async function handlePublishJob(jobId: number) {
+    try {
+      await apiRequest(`/jobs/${jobId}/publish`, 'PATCH');
+      loadJobs();
+      setOpenMenuId(null);
+    } catch (err) {
+      console.error('Failed to publish job:', err);
+      alert('Failed to publish job');
+    }
+  }
+
+  async function handleCloseJob(jobId: number) {
+    try {
+      await apiRequest(`/jobs/${jobId}`, 'PATCH', { status: 'CLOSED' } as any);
+      loadJobs();
+      setOpenMenuId(null);
+    } catch (err) {
+      console.error('Failed to close job:', err);
+      alert('Failed to close job');
+    }
+  }
+
+  function handleShareJob(jobId: number) {
+    const applyUrl = `${window.location.origin}/jobs/${jobId}/apply`;
+    navigator.clipboard.writeText(applyUrl).then(() => {
+      alert('Application link copied to clipboard!');
+      setOpenMenuId(null);
+    }).catch(() => {
+      alert('Failed to copy link');
+    });
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-6 py-8">
@@ -432,12 +464,6 @@ export default function Jobs() {
           >
             {t('jobs.export')}
           </button>
-          <button 
-            onClick={() => openJobModal()}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors"
-          >
-            {t('jobs.newJob')}
-          </button>
         </div>
 
         {/* Status Filter Tabs */}
@@ -462,7 +488,7 @@ export default function Jobs() {
 
 
         {/* Jobs Table */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-lg border border-gray-200 overflow-visible">
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
@@ -508,7 +534,7 @@ export default function Jobs() {
                     </td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex px-2 py-1 rounded text-xs font-medium ${getStatusBadge(job.status)}`}>
-                        {job.status === 'PUBLISHED' ? 'Open' : job.status}
+                        {job.status}
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -545,7 +571,7 @@ export default function Jobs() {
                               className="fixed inset-0 z-10"
                               onClick={() => setOpenMenuId(null)}
                             />
-                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-40">
+                            <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-40">
                               <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
                                 <span>👁️</span>
                                 {t('jobs.viewPipeline')}
@@ -557,10 +583,45 @@ export default function Jobs() {
                                 <span>✏️</span>
                                 {t('jobs.editJob')}
                               </button>
-                              <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
-                                <span>🔗</span>
-                                {t('jobs.shareLink')}
-                              </button>
+                              
+                              {job.status === 'DRAFT' && (
+                                <>
+                                  <button 
+                                    onClick={() => handlePublishJob(job.id)}
+                                    className="w-full px-4 py-2 text-left text-sm text-green-600 hover:bg-green-50 flex items-center gap-2"
+                                  >
+                                    <span>📢</span>
+                                    Publish
+                                  </button>
+                                  <button 
+                                    onClick={() => handleCloseJob(job.id)}
+                                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                                  >
+                                    <span>🔒</span>
+                                    Close
+                                  </button>
+                                </>
+                              )}
+                              
+                              {job.status === 'PUBLISHED' && (
+                                <>
+                                  <button 
+                                    onClick={() => handleShareJob(job.id)}
+                                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                                  >
+                                    <span>🔗</span>
+                                    {t('jobs.shareLink')}
+                                  </button>
+                                  <button 
+                                    onClick={() => handleCloseJob(job.id)}
+                                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                                  >
+                                    <span>🔒</span>
+                                    Close
+                                  </button>
+                                </>
+                              )}
+                              
                               <button 
                                 onClick={() => handleDeleteJob(job.id)}
                                 className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"

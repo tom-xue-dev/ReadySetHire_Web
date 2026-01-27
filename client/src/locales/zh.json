@@ -423,6 +423,46 @@
       }
     }
   },
+  "pipeline": {
+    "title": "招聘流程",
+    "selectJob": "选择职位",
+    "candidates": "位候选人",
+    "jobSettings": "职位设置",
+    "inviteCandidates": "邀请候选人",
+    "addCandidate": "添加候选人",
+    "hiringFlow": "招聘流程",
+    "stageDistribution": "所选职位的阶段分布",
+    "clickToFilter": "点击阶段可筛选看板",
+    "searchPlaceholder": "按姓名、邮箱搜索候选人...",
+    "noApplications": "暂无候选人",
+    "currentStatus": "当前状态",
+    "moveToStage": "移动到阶段",
+    "notes": "备注",
+    "moveStage": "移动阶段",
+    "updating": "更新中...",
+    "stages": {
+      "SUBMITTED": "已申请",
+      "IN_REVIEW": "筛选中",
+      "SHORTLISTED": "入围",
+      "INTERVIEW_SCHEDULED": "面试",
+      "INTERVIEWED": "已面试",
+      "OFFER_EXTENDED": "已发Offer",
+      "HIRED": "已录用",
+      "REJECTED": "已拒绝",
+      "WITHDRAWN": "已撤回"
+    },
+    "stageDesc": {
+      "SUBMITTED": "新申请",
+      "IN_REVIEW": "简历筛选",
+      "SHORTLISTED": "通过筛选",
+      "INTERVIEW_SCHEDULED": "已安排",
+      "INTERVIEWED": "已完成",
+      "OFFER_EXTENDED": "已发送",
+      "HIRED": "已接受",
+      "REJECTED": "已拒绝",
+      "WITHDRAWN": "已撤回"
+    }
+  },
   "employeeSubscription": {
     "title": "AI简历评分方案",
     "subtitle": "选择适合您求职需求的方案。获取AI驱动的简历评分，让您的简历与职位要求完美匹配。",

@@ -422,6 +422,46 @@
       }
     }
   },
+  "pipeline": {
+    "title": "Pipeline",
+    "selectJob": "Select a job",
+    "candidates": "candidates",
+    "jobSettings": "Job settings",
+    "inviteCandidates": "Invite candidates",
+    "addCandidate": "Add candidate",
+    "hiringFlow": "Hiring flow",
+    "stageDistribution": "Stage distribution for the selected job",
+    "clickToFilter": "Click a stage to filter the Kanban",
+    "searchPlaceholder": "Search candidates by name, email...",
+    "noApplications": "No candidates",
+    "currentStatus": "Current Status",
+    "moveToStage": "Move to Stage",
+    "notes": "Notes",
+    "moveStage": "Move Stage",
+    "updating": "Updating...",
+    "stages": {
+      "SUBMITTED": "Applied",
+      "IN_REVIEW": "Screening",
+      "SHORTLISTED": "Shortlisted",
+      "INTERVIEW_SCHEDULED": "Interview",
+      "INTERVIEWED": "Interviewed",
+      "OFFER_EXTENDED": "Offer",
+      "HIRED": "Hired",
+      "REJECTED": "Rejected",
+      "WITHDRAWN": "Withdrawn"
+    },
+    "stageDesc": {
+      "SUBMITTED": "New applications",
+      "IN_REVIEW": "Resume review",
+      "SHORTLISTED": "Passed screening",
+      "INTERVIEW_SCHEDULED": "Scheduled",
+      "INTERVIEWED": "Completed",
+      "OFFER_EXTENDED": "Offer sent",
+      "HIRED": "Accepted",
+      "REJECTED": "Rejected",
+      "WITHDRAWN": "Withdrawn"
+    }
+  },
   "employeeSubscription": {
     "title": "AI Resume Scoring Plans",
     "subtitle": "Choose the plan that fits your job search needs. Get AI-powered resume scoring to match your profile with job requirements.",
