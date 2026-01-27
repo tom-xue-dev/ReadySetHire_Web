@@ -12,11 +12,12 @@
   },
   "navigation": {
     "dashboard": "仪表板",
-    "interviews": "面试",
+    "jobPostings": "职位发布",
+    "candidates": "候选人",
+    "pipeline": "招聘流程",
+    "subscription": "订阅",
     "jobs": "职位发布",
     "applicants": "申请人",
-    "subscription": "订阅",
-    "questions": "问题",
     "resumeManagement": "简历管理",
     "menu": "菜单",
     "jobSearch": "职位搜索",
@@ -242,6 +243,37 @@
     },
     "errors": {
       "missingInput": "请先输入岗位描述和简历文本"
+    }
+  },
+  "jobs": {
+    "title": "职位",
+    "subtitle": "创建、发布和管理您的开放职位。",
+    "newJob": "新建职位",
+    "searchPlaceholder": "按标题、部门、地点搜索职位...",
+    "filters": "筛选",
+    "sort": "排序",
+    "export": "导出",
+    "all": "全部",
+    "open": "开放",
+    "paused": "暂停",
+    "draft": "草稿",
+    "closed": "已关闭",
+    "role": "职位",
+    "status": "状态",
+    "applicants": "申请人",
+    "hiringManager": "招聘负责人",
+    "updated": "更新时间",
+    "viewPipeline": "查看流程",
+    "editJob": "编辑职位",
+    "shareLink": "分享链接",
+    "delete": "删除...",
+    "showingJobs": "显示 {count} 个职位",
+    "stats": {
+      "openJobs": "开放职位",
+      "newApplicants": "新申请人",
+      "inReview": "审核中",
+      "interviewing": "面试中",
+      "offers": "已发Offer"
     }
   },
   "savedJobs": {

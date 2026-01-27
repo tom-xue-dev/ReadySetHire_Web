@@ -139,7 +139,7 @@ model SavedJob {
 
 enum ApplicationStatus {
   SUBMITTED       // Initial submission
-  UNDER_REVIEW    // Being reviewed by recruiter
+  IN_REVIEW    // Being reviewed by recruiter
   SHORTLISTED     // Passed initial screening
   INTERVIEW_SCHEDULED  // Interview scheduled
   INTERVIEWED     // Interview completed

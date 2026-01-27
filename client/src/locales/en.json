@@ -12,11 +12,12 @@
   },
   "navigation": {
     "dashboard": "Dashboard",
-    "interviews": "Interviews",
+    "jobPostings": "Job Postings",
+    "candidates": "Candidates",
+    "pipeline": "Pipeline",
+    "subscription": "Subscription",
     "jobs": "Job Postings",
     "applicants": "Applicants",
-    "subscription": "Subscription",
-    "questions": "Questions",
     "resumeManagement": "Resume Management",
     "jobSearch": "Job Search",
     "aiResumeRating": "AI Resume Rating",
@@ -241,6 +242,37 @@
     },
     "errors": {
       "missingInput": "Please enter both job description and resume text"
+    }
+  },
+  "jobs": {
+    "title": "Jobs",
+    "subtitle": "Create, publish, and manage your open roles.",
+    "newJob": "New Job",
+    "searchPlaceholder": "Search jobs by title, department, location...",
+    "filters": "Filters",
+    "sort": "Sort",
+    "export": "Export",
+    "all": "All",
+    "open": "Open",
+    "paused": "Paused",
+    "draft": "Draft",
+    "closed": "Closed",
+    "role": "Role",
+    "status": "Status",
+    "applicants": "Applicants",
+    "hiringManager": "Hiring manager",
+    "updated": "Updated",
+    "viewPipeline": "View pipeline",
+    "editJob": "Edit job",
+    "shareLink": "Share link",
+    "delete": "Delete...",
+    "showingJobs": "Showing {count} jobs",
+    "stats": {
+      "openJobs": "Open jobs",
+      "newApplicants": "New applicants",
+      "inReview": "In review",
+      "interviewing": "Interviewing",
+      "offers": "Offers"
     }
   },
   "savedJobs": {
