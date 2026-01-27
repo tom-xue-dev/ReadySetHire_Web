@@ -36,7 +36,7 @@ class JobApplicationController {
     async submitApplication(req, res) {
         try {
             const { jobId } = req.params;
-            const { firstName, lastName, email, phone, coverLetter, linkedinUrl, portfolioUrl, yearsExperience, } = req.body;
+            const { candidateId, firstName, lastName, email, phone, coverLetter, linkedinUrl, portfolioUrl, yearsExperience, } = req.body;
             // Validate required fields
             if (!firstName || !lastName || !email) {
                 return res.status(400).json({
@@ -68,6 +68,7 @@ class JobApplicationController {
             // Create application
             const application = await jobApplication_service_1.jobApplicationService.createApplication({
                 jobId: parseInt(jobId),
+                candidateId: candidateId ? parseInt(candidateId) : undefined,
                 firstName,
                 lastName,
                 email,

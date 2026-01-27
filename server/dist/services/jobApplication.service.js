@@ -22,12 +22,28 @@ class JobApplicationService {
             if (job.status !== 'PUBLISHED') {
                 throw new Error('This job is not currently accepting applications');
             }
+            // Handle candidateId - create or find candidate
+            let candidateId = data.candidateId;
+            if (!candidateId) {
+                // If no candidateId provided, create a candidate with userId from job owner
+                const candidate = await database_1.default.candidate.create({
+                    data: {
+                        firstName: data.firstName,
+                        lastName: data.lastName,
+                        email: data.email,
+                        phone: data.phone,
+                        userId: job.userId, // Use job owner's userId
+                    },
+                });
+                candidateId = candidate.id;
+            }
             // Generate unique tracking token
             const trackingToken = this.generateTrackingToken();
             // Create application
             const application = await database_1.default.jobApplication.create({
                 data: {
                     jobId: data.jobId,
+                    candidateId: candidateId,
                     firstName: data.firstName,
                     lastName: data.lastName,
                     email: data.email,

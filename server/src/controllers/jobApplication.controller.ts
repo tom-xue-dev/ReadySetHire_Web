@@ -35,6 +35,7 @@ export class JobApplicationController {
     try {
       const { jobId } = req.params;
       const {
+        candidateId,
         firstName,
         lastName,
         email,
@@ -84,6 +85,7 @@ export class JobApplicationController {
       // Create application
       const application = await jobApplicationService.createApplication({
         jobId: parseInt(jobId),
+        candidateId: candidateId ? parseInt(candidateId) : undefined,
         firstName,
         lastName,
         email,

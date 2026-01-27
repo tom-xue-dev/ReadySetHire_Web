@@ -37,6 +37,16 @@ router.post('/candidates', auth_1.authenticateToken, async (req, res) => {
         if (!email) {
             return res.status(400).json({ error: 'Email is required' });
         }
+        // Check if candidate already exists for this user
+        const existingCandidate = await prisma.candidate.findFirst({
+            where: {
+                email,
+                userId: req.user?.id
+            }
+        });
+        if (existingCandidate) {
+            return res.status(200).json({ data: existingCandidate });
+        }
         const candidate = await prisma.candidate.create({
             data: {
                 firstName: firstName || null,
@@ -46,10 +56,14 @@ router.post('/candidates', auth_1.authenticateToken, async (req, res) => {
                 userId: req.user?.id
             }
         });
-        return res.status(201).json(candidate);
+        return res.status(201).json({ data: candidate });
     }
     catch (error) {
         console.error('Error creating candidate:', error);
+        // Handle unique constraint violation
+        if (error.code === 'P2002') {
+            return res.status(409).json({ error: 'Candidate with this email already exists' });
+        }
         return res.status(500).json({ error: error.message || 'Failed to create candidate' });
     }
 });
