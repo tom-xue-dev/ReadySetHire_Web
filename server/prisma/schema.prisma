@@ -28,6 +28,7 @@ model User {
   // Relations
   jobs        Job[]
   candidates  Candidate[]
+  savedJobs   SavedJob[]
 
   @@map("users")
 }
@@ -48,6 +49,7 @@ model Job {
   // Relations
   user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   jobApplications JobApplication[]
+  savedBy         SavedJob[]
 
   @@map("jobs")
 }

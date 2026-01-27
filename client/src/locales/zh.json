@@ -244,6 +244,17 @@
       "missingInput": "请先输入岗位描述和简历文本"
     }
   },
+  "savedJobs": {
+    "title": "收藏的职位",
+    "viewAll": "查看全部 ({count})",
+    "noSavedJobs": "暂无收藏的职位",
+    "saved": "已收藏",
+    "applied": "已申请",
+    "remove": "删除",
+    "removedSuccess": "已从收藏列表中移除",
+    "removedError": "移除失败",
+    "empty": "暂无收藏的职位"
+  },
   "trackingJobs": {
     "jobTitle": "职位名称",
     "location": "地点",

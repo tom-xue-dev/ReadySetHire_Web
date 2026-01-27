@@ -30,12 +30,6 @@
     "lint:fix": "eslint src/**/*.ts --fix",
     "format": "prettier --write src/**/*.ts",
     "format:check": "prettier --check src/**/*.ts",
-    "docker:build": "docker build -t readysethire-backend .",
-    "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down",
-    "docker:logs": "docker-compose logs -f",
-    "docker:restart": "docker-compose restart",
-    "docker:clean": "docker-compose down -v --remove-orphans"
   },
   "dependencies": {
     "@huggingface/transformers": "^3.7.3",

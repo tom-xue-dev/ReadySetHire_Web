@@ -243,6 +243,17 @@
       "missingInput": "Please enter both job description and resume text"
     }
   },
+  "savedJobs": {
+    "title": "Saved Jobs",
+    "viewAll": "View all ({count})",
+    "noSavedJobs": "No saved jobs yet",
+    "saved": "Saved",
+    "applied": "Applied",
+    "remove": "Remove",
+    "removedSuccess": "Job removed from saved list",
+    "removedError": "Failed to remove job",
+    "empty": "No saved jobs yet"
+  },
   "trackingJobs": {
     "jobTitle": "Job Title",
     "location": "Location",

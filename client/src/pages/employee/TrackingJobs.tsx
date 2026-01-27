@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { BookmarkIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
-import { apiRequest } from '@/api/api';
+import { apiRequest, getSavedJobs, saveJob, unsaveJob } from '@/api/api';
+import { useAuth } from '@/pages/auth/AuthContext';
 import LandingHeader from '@/components/layout/LandingHeader';
 import LandingFooter from '@/components/layout/LandingFooter';
 import { useI18n } from '@/contexts/I18nContext';
+import { useNavigate } from 'react-router-dom';
 
 interface Job {
   id: number;
@@ -29,13 +31,16 @@ interface Job {
 
 export default function TrackingJobs() {
   const { t } = useI18n();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [searchLocation, setSearchLocation] = useState('');
   const [searchStatus, setSearchStatus] = useState<string>('ALL');
-  const [savedJobs, setSavedJobs] = useState<Set<number>>(new Set());
+  const [savedJobsList, setSavedJobsList] = useState<any[]>([]);
+  const [savedJobIds, setSavedJobIds] = useState<Set<number>>(new Set());
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [minSalary, setMinSalary] = useState('');
@@ -44,6 +49,9 @@ export default function TrackingJobs() {
 
   useEffect(() => {
     loadJobs();
+    if (user?.id) {
+      loadSavedJobs();
+    }
   }, []);
 
   async function loadJobs() {
@@ -131,16 +139,38 @@ export default function TrackingJobs() {
     });
   }, [jobs, searchKeyword, searchLocation, minSalary, maxSalary, postedWithin]);
 
-  function toggleSaveJob(jobId: number) {
-    setSavedJobs((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(jobId)) {
-        newSet.delete(jobId);
+  async function loadSavedJobs() {
+    if (!user?.id) return;
+    try {
+      const saved = await getSavedJobs(user.id);
+      setSavedJobsList(saved);
+      const jobIds = new Set(saved.map((s: any) => s.job?.id).filter(Boolean));
+      setSavedJobIds(jobIds);
+    } catch (err) {
+      console.error('Failed to load saved jobs:', err);
+    }
+  }
+
+  async function toggleSaveJob(jobId: number) {
+    if (!user?.id) return;
+    
+    try {
+      if (savedJobIds.has(jobId)) {
+        await unsaveJob(user.id, jobId);
+        setSavedJobIds((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(jobId);
+          return newSet;
+        });
+        setSavedJobsList(prev => prev.filter((s: any) => s.job?.id !== jobId));
       } else {
-        newSet.add(jobId);
+        await saveJob(user.id, jobId);
+        setSavedJobIds((prev) => new Set(prev).add(jobId));
+        await loadSavedJobs();
       }
-      return newSet;
-    });
+    } catch (err) {
+      console.error('Failed to toggle save job:', err);
+    }
   }
 
   function clearAllFilters() {
@@ -291,8 +321,10 @@ export default function TrackingJobs() {
 
         {/* Main Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className={`grid gap-6 ${selectedJob ? "pr-112" : ""}`} style={{ gridTemplateColumns: "2fr 1fr" }}>
+
             {/* Job Listings */}
-            <div className="w-full">
+            <div>
               <div className="bg-white rounded-lg shadow-sm">
                 <div className="px-6 py-4 border-b border-gray-200">
                   <h2 className="text-lg font-semibold text-gray-900">{t('trackingJobs.recommended')}</h2>
@@ -374,9 +406,9 @@ export default function TrackingJobs() {
                                 toggleSaveJob(job.id);
                               }}
                               className="p-2 text-gray-400 hover:text-pink-600 transition-colors"
-                              title={savedJobs.has(job.id) ? t('trackingJobs.unsaveJob') : t('trackingJobs.saveJob')}
+                              title={savedJobIds.has(job.id) ? t('trackingJobs.unsaveJob') : t('trackingJobs.saveJob')}
                             >
-                              {savedJobs.has(job.id) ? (
+                              {savedJobIds.has(job.id) ? (
                                 <BookmarkSolidIcon className="w-5 h-5 text-pink-600" />
                               ) : (
                                 <BookmarkIcon className="w-5 h-5" />
@@ -391,7 +423,59 @@ export default function TrackingJobs() {
               </div>
             </div>
 
-            {/* Dim background when a job is selected */}
+          {/* Saved Jobs Sidebar */}
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                {t('savedJobs.title')}
+              </h3>
+
+              {savedJobsList.length > 0 ? (
+                /* 有收藏 */
+                <div className="space-y-4">
+                  {savedJobsList.slice(0, 3).map((saved: any) => (
+                    <div
+                      key={saved.id}
+                      className="border border-gray-200 rounded-lg p-4 hover:border-pink-400 transition-colors"
+                    >
+                      <h4 className="font-semibold text-gray-900 mb-1">
+                        {saved.job?.title}
+                      </h4>
+                      <p className="text-sm text-gray-600 mb-2">
+                        {saved.job?.user?.firstName && saved.job?.user?.lastName
+                          ? `${saved.job.user.firstName} ${saved.job.user.lastName}`
+                          : saved.job?.user?.username}
+                      </p>
+                      <div className="text-xs text-gray-500 space-y-1">
+                        {saved.job?.location && <div>📍 {saved.job.location}</div>}
+                        {saved.job?.salaryRange && <div>💰 {saved.job.salaryRange}</div>}
+                        <div>📅 {formatDate(saved.job?.createdAt || saved.savedAt)}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                /* 没有收藏：占位状态 */
+                <div className="text-sm text-gray-500 text-center py-8">
+                  <div className="mb-2">⭐</div>
+                  <p>{t('savedJobs.empty')}</p>
+                </div>
+              )}
+
+              {/* 查看全部 */}
+              <button
+                onClick={() => navigate('/employee/saved-jobs')}
+                className="mt-4 w-full text-center text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                disabled={savedJobsList.length === 0}
+              >
+                {t('savedJobs.viewAll', { count: savedJobsList.length })} →
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+          {/* Dim background when a job is selected */}
             {selectedJob && (
               <div
                 className="fixed inset-0 bg-black/40 z-30"
@@ -473,13 +557,13 @@ export default function TrackingJobs() {
                       <button
                         onClick={() => toggleSaveJob(selectedJob.id)}
                         className={`px-4 py-3 rounded-lg border transition-colors ${
-                          savedJobs.has(selectedJob.id)
+                          savedJobIds.has(selectedJob.id)
                             ? 'bg-pink-50 border-pink-600 text-pink-600'
                             : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
                         }`}
-                        title={savedJobs.has(selectedJob.id) ? t('trackingJobs.unsaveJob') : t('trackingJobs.saveJob')}
+                        title={savedJobIds.has(selectedJob.id) ? t('trackingJobs.unsaveJob') : t('trackingJobs.saveJob')}
                       >
-                        {savedJobs.has(selectedJob.id) ? (
+                        {savedJobIds.has(selectedJob.id) ? (
                           <BookmarkSolidIcon className="w-5 h-5" />
                         ) : (
                           <BookmarkIcon className="w-5 h-5" />

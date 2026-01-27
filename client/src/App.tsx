@@ -21,6 +21,7 @@ import RateResume from "./pages/employee/RateResume.tsx";
 import EmployeeSettings from "./pages/employee/EmployeeSettings.tsx";
 import EmployeeSubscription from "./pages/employee/EmployeeSubscription.tsx";
 import EmployeeProfile from "./pages/employee/EmployeeProfile.tsx";
+import SavedJobs from "./pages/employee/SavedJobs.tsx";
 function AppContent() {
   const { showAuthNotification, hideAuthNotification } = useAuth();
   
@@ -74,6 +75,13 @@ function AppContent() {
           <Route path="/employee/profile" element={
             <ProtectedRoute requiredRoles={['ADMIN', 'EMPLOYEE']}>
               <EmployeeProfile />
+            </ProtectedRoute>
+          } />
+          
+          {/* Employee Saved Jobs - Standalone route for EMPLOYEE and ADMIN */}
+          <Route path="/employee/saved-jobs" element={
+            <ProtectedRoute requiredRoles={['ADMIN', 'EMPLOYEE']}>
+              <SavedJobs />
             </ProtectedRoute>
           } />
           

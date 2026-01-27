@@ -305,6 +305,20 @@ export async function createCheckoutSession(): Promise<Record<string, unknown> |
     return apiRequest(`/billing/create-checkout-session`, 'POST', {});
 }
 
+// Saved Jobs APIs
+export async function getSavedJobs(employeeId: number): Promise<unknown[]> {
+    const response = await apiRequest(`/employees/${employeeId}/saved-jobs`);
+    return (response as { data?: unknown[] })?.data || [];
+}
+
+export async function saveJob(employeeId: number, jobId: number): Promise<Record<string, unknown> | null> {
+    return apiRequest(`/employees/${employeeId}/saved-jobs/${jobId}`, 'PUT', {});
+}
+
+export async function unsaveJob(employeeId: number, jobId: number): Promise<Record<string, unknown> | null> {
+    return apiRequest(`/employees/${employeeId}/saved-jobs/${jobId}`, 'DELETE');
+}
+
 // Resume Rating APIs
 export interface AnalyzeResumeRequest {
     jdText: string;
