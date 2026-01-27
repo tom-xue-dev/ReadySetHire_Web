@@ -92,7 +92,7 @@ jobs:
             # docker volume rm readysethire_postgres_data || true
             
             # Start new containers with production config
-            docker compose up -d
+            docker compose up -d --build
             
             # Wait for backend to be healthy
             sleep 15
