@@ -513,6 +513,14 @@
     "included": "Included",
     "seats": "Seats",
     "support": "Support",
+    "demoSuccess": "Subscription activated successfully! You now have access to your selected plan features.",
+    "demoModal": {
+      "title": "Demo Mode",
+      "message": "This is currently in demo mode. No charges will be applied. Would you like to activate this plan?",
+      "selectedPlan": "Selected Plan",
+      "cancel": "Cancel",
+      "confirm": "Confirm"
+    },
     "plans": {
       "basic": {
         "name": "Basic",
@@ -631,6 +639,14 @@
     "validity": "Validity",
     "model": "AI Model",
     "accuracy": "Accuracy",
+    "demoSuccess": "Plan activated successfully! You now have access to AI resume scoring features.",
+    "demoModal": {
+      "title": "Demo Mode",
+      "message": "This is currently in demo mode. No charges will be applied. Would you like to activate this plan?",
+      "selectedPlan": "Selected Plan",
+      "cancel": "Cancel",
+      "confirm": "Confirm"
+    },
     "plans": {
       "trial": {
         "name": "Trial",

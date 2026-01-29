@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { createCheckoutSession } from '@/api/api';
+import { demoSubscribe } from '@/api/api';
 import { useI18n } from '@/contexts/I18nContext';
 import LandingHeader from '@/components/layout/LandingHeader';
 import LandingFooter from '@/components/layout/LandingFooter';
@@ -16,6 +16,9 @@ export default function EmployeeSubscription() {
   const { t } = useI18n();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
 
   const plans: PricingPlan[] = [
     {
@@ -54,17 +57,25 @@ export default function EmployeeSubscription() {
     }
   };
 
-  const handleSubscribe = async (planId: string) => {
-    setLoadingPlan(planId);
+  const handleSubscribeClick = (planId: string) => {
+    setSelectedPlan(planId);
+    setShowConfirmModal(true);
     setError(null);
+    setSuccessMessage(null);
+  };
+
+  const handleConfirmSubscribe = async () => {
+    if (!selectedPlan) return;
+    
+    setLoadingPlan(selectedPlan);
+    setShowConfirmModal(false);
+    setError(null);
+    setSuccessMessage(null);
+
     try {
-      const session = await createCheckoutSession();
-      if (typeof session === 'string') {
-        window.location.href = session;
-      } else if (session && typeof session.url === 'string') {
-        window.location.href = session.url;
-      } else if (session && typeof session.id === 'string') {
-        window.location.href = `https://checkout.stripe.com/pay/${session.id}`;
+      const response = await demoSubscribe(selectedPlan);
+      if (response?.success) {
+        setSuccessMessage(t('employeeSubscription.demoSuccess'));
       } else {
         setError(t('employeeSubscription.errorCheckout'));
       }
@@ -72,7 +83,13 @@ export default function EmployeeSubscription() {
       setError(e?.message || t('employeeSubscription.errorCheckout'));
     } finally {
       setLoadingPlan(null);
+      setSelectedPlan(null);
     }
+  };
+
+  const handleCancelModal = () => {
+    setShowConfirmModal(false);
+    setSelectedPlan(null);
   };
 
   return (
@@ -136,7 +153,7 @@ export default function EmployeeSubscription() {
             </div>
 
             <button
-              onClick={() => handleSubscribe(plan.id)}
+              onClick={() => handleSubscribeClick(plan.id)}
               disabled={loadingPlan === plan.id}
               style={{
                 ...subscribeButton,
@@ -186,6 +203,29 @@ export default function EmployeeSubscription() {
       </div>
 
           {error && <div style={errorBox}>{error}</div>}
+          {successMessage && <div style={successBox}>{successMessage}</div>}
+
+          {/* Demo Confirmation Modal */}
+          {showConfirmModal && (
+            <div style={modalOverlay}>
+              <div style={modalContent}>
+                <div style={modalIcon}>🎉</div>
+                <h3 style={modalTitle}>{t('employeeSubscription.demoModal.title')}</h3>
+                <p style={modalMessage}>{t('employeeSubscription.demoModal.message')}</p>
+                <p style={modalPlanInfo}>
+                  {t('employeeSubscription.demoModal.selectedPlan')}: <strong>{selectedPlan ? t(`employeeSubscription.plans.${selectedPlan}.name`) : ''}</strong>
+                </p>
+                <div style={modalButtons}>
+                  <button style={modalCancelButton} onClick={handleCancelModal}>
+                    {t('employeeSubscription.demoModal.cancel')}
+                  </button>
+                  <button style={modalConfirmButton} onClick={handleConfirmSubscribe}>
+                    {t('employeeSubscription.demoModal.confirm')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div style={featuresHighlight}>
             <div style={featureHighlightItem}>
@@ -416,6 +456,97 @@ const errorBox: React.CSSProperties = {
   color: '#b91c1c',
   fontSize: '14px',
   textAlign: 'center'
+};
+
+const successBox: React.CSSProperties = {
+  maxWidth: '600px',
+  margin: '24px auto',
+  padding: '16px',
+  background: '#f0fdf4',
+  border: '1px solid #86efac',
+  borderRadius: '8px',
+  color: '#166534',
+  fontSize: '14px',
+  textAlign: 'center'
+};
+
+const modalOverlay: React.CSSProperties = {
+  position: 'fixed',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  background: 'rgba(0, 0, 0, 0.5)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  zIndex: 1000
+};
+
+const modalContent: React.CSSProperties = {
+  background: 'white',
+  borderRadius: '16px',
+  padding: '32px',
+  maxWidth: '480px',
+  width: '90%',
+  textAlign: 'center',
+  boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)'
+};
+
+const modalIcon: React.CSSProperties = {
+  fontSize: '48px',
+  marginBottom: '16px'
+};
+
+const modalTitle: React.CSSProperties = {
+  fontSize: '24px',
+  fontWeight: 700,
+  color: '#111827',
+  marginBottom: '12px'
+};
+
+const modalMessage: React.CSSProperties = {
+  fontSize: '15px',
+  color: '#6b7280',
+  lineHeight: '24px',
+  marginBottom: '16px'
+};
+
+const modalPlanInfo: React.CSSProperties = {
+  fontSize: '14px',
+  color: '#374151',
+  marginBottom: '24px',
+  padding: '12px',
+  background: '#f3f4f6',
+  borderRadius: '8px'
+};
+
+const modalButtons: React.CSSProperties = {
+  display: 'flex',
+  gap: '12px',
+  justifyContent: 'center'
+};
+
+const modalCancelButton: React.CSSProperties = {
+  padding: '12px 24px',
+  fontSize: '14px',
+  fontWeight: 600,
+  border: '1px solid #e5e7eb',
+  borderRadius: '8px',
+  background: 'white',
+  color: '#374151',
+  cursor: 'pointer'
+};
+
+const modalConfirmButton: React.CSSProperties = {
+  padding: '12px 24px',
+  fontSize: '14px',
+  fontWeight: 600,
+  border: 'none',
+  borderRadius: '8px',
+  background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+  color: 'white',
+  cursor: 'pointer'
 };
 
 const featuresHighlight: React.CSSProperties = {

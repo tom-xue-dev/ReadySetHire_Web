@@ -1,4 +1,4 @@
-  FROM node:18-slim AS builder
+  FROM node:20-slim AS builder
 
   RUN apt-get update && apt-get install -y --no-install-recommends \
       ca-certificates openssl libc6 libstdc++6 libgomp1 \
@@ -29,9 +29,9 @@
   
   
 
-  FROM node:18-slim AS runtime
-  ENV NODE_ENV=dev
-  WORKDIR /app
+FROM node:20-slim AS runtime
+ENV NODE_ENV=dev
+WORKDIR /app
   
 
   RUN apt-get update && apt-get install -y --no-install-recommends \

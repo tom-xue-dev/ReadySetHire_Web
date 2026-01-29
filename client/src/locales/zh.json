@@ -514,6 +514,14 @@
     "included": "包含内容",
     "seats": "用户席位",
     "support": "客服支持",
+    "demoSuccess": "订阅激活成功！您现在可以使用所选套餐的全部功能。",
+    "demoModal": {
+      "title": "Demo 模式",
+      "message": "当前处于 Demo 模式，不会收取任何费用。您确定要激活此套餐吗？",
+      "selectedPlan": "已选套餐",
+      "cancel": "取消",
+      "confirm": "确认"
+    },
     "plans": {
       "basic": {
         "name": "Basic",
@@ -632,6 +640,14 @@
     "validity": "有效期",
     "model": "AI模型",
     "accuracy": "准确度",
+    "demoSuccess": "套餐激活成功！您现在可以使用AI简历评分功能。",
+    "demoModal": {
+      "title": "Demo 模式",
+      "message": "当前处于 Demo 模式，不会收取任何费用。您确定要激活此套餐吗？",
+      "selectedPlan": "已选套餐",
+      "cancel": "取消",
+      "confirm": "确认"
+    },
     "plans": {
       "trial": {
         "name": "体验版",

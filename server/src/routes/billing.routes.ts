@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import Stripe from 'stripe';
 import { authenticateToken } from '../middleware/auth';
+import prisma from '../services/database';
+import { SubscriptionPlan, SubscriptionStatus } from '@prisma/client';
 
 const router = Router();
 
@@ -16,7 +18,121 @@ if (!STRIPE_SECRET_KEY) {
 
 const stripe = STRIPE_SECRET_KEY ? new Stripe(STRIPE_SECRET_KEY) : (null as unknown as Stripe);
 
-// Create a Checkout Session for subscription
+// Map plan ID to subscription plan enum
+const planIdToEnum: Record<string, SubscriptionPlan> = {
+  // HR/Recruiter plans
+  basic: SubscriptionPlan.BASIC,
+  professional: SubscriptionPlan.PROFESSIONAL,
+  enterprise: SubscriptionPlan.ENTERPRISE,
+  // Employee plans
+  trial: SubscriptionPlan.TRIAL,
+  premium: SubscriptionPlan.PREMIUM,
+};
+
+// Demo mode subscription - directly activate subscription without payment
+router.post('/demo-subscribe', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
+
+    const { planId } = req.body;
+    if (!planId || !planIdToEnum[planId]) {
+      return res.status(400).json({ error: 'Invalid plan ID' });
+    }
+
+    const subscriptionPlan = planIdToEnum[planId];
+    const now = new Date();
+    
+    // Set expiration to 30 days from now for demo
+    const expiresAt = new Date(now);
+    expiresAt.setDate(expiresAt.getDate() + 30);
+
+    // Update user subscription in database
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        subscriptionPlan,
+        subscriptionStatus: SubscriptionStatus.ACTIVE,
+        subscriptionStartedAt: now,
+        subscriptionExpiresAt: expiresAt,
+      },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        subscriptionPlan: true,
+        subscriptionStatus: true,
+        subscriptionStartedAt: true,
+        subscriptionExpiresAt: true,
+      },
+    });
+
+    console.log(`[DEMO] User ${userId} subscribed to ${planId} plan`);
+
+    return res.json({
+      success: true,
+      message: 'Subscription activated (demo mode)',
+      subscription: {
+        plan: updatedUser.subscriptionPlan,
+        status: updatedUser.subscriptionStatus,
+        startedAt: updatedUser.subscriptionStartedAt,
+        expiresAt: updatedUser.subscriptionExpiresAt,
+      },
+    });
+  } catch (err: any) {
+    console.error('Demo subscription error:', err);
+    return res.status(500).json({ error: err.message || 'Failed to activate subscription' });
+  }
+});
+
+// Get current user's subscription status
+router.get('/subscription-status', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        subscriptionPlan: true,
+        subscriptionStatus: true,
+        subscriptionStartedAt: true,
+        subscriptionExpiresAt: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Check if subscription has expired
+    let status = user.subscriptionStatus;
+    if (user.subscriptionExpiresAt && new Date() > user.subscriptionExpiresAt) {
+      status = SubscriptionStatus.EXPIRED;
+      // Update status in database
+      await prisma.user.update({
+        where: { id: userId },
+        data: { subscriptionStatus: SubscriptionStatus.EXPIRED },
+      });
+    }
+
+    return res.json({
+      plan: user.subscriptionPlan,
+      status,
+      startedAt: user.subscriptionStartedAt,
+      expiresAt: user.subscriptionExpiresAt,
+    });
+  } catch (err: any) {
+    console.error('Get subscription status error:', err);
+    return res.status(500).json({ error: err.message || 'Failed to get subscription status' });
+  }
+});
+
+// Create a Checkout Session for subscription (Stripe - for production)
 router.post('/create-checkout-session', authenticateToken, async (req, res) => {
   try {
     if (!stripe) {

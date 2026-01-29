@@ -305,6 +305,34 @@ export async function createCheckoutSession(): Promise<Record<string, unknown> |
     return apiRequest(`/billing/create-checkout-session`, 'POST', {});
 }
 
+// Demo subscription API - activates subscription without payment
+export interface DemoSubscribeResponse {
+    success: boolean;
+    message: string;
+    subscription: {
+        plan: string;
+        status: string;
+        startedAt: string;
+        expiresAt: string;
+    };
+}
+
+export async function demoSubscribe(planId: string): Promise<DemoSubscribeResponse | null> {
+    return apiRequest(`/billing/demo-subscribe`, 'POST', { planId }) as Promise<DemoSubscribeResponse | null>;
+}
+
+// Get current subscription status
+export interface SubscriptionStatus {
+    plan: string | null;
+    status: string | null;
+    startedAt: string | null;
+    expiresAt: string | null;
+}
+
+export async function getSubscriptionStatus(): Promise<SubscriptionStatus | null> {
+    return apiRequest(`/billing/subscription-status`, 'GET') as Promise<SubscriptionStatus | null>;
+}
+
 // Saved Jobs APIs
 export async function getSavedJobs(employeeId: number): Promise<unknown[]> {
     const response = await apiRequest(`/employees/${employeeId}/saved-jobs`);

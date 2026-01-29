@@ -26,6 +26,12 @@ model User {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
+  // Subscription fields
+  subscriptionPlan      SubscriptionPlan?   @map("subscription_plan")
+  subscriptionStatus    SubscriptionStatus? @map("subscription_status")
+  subscriptionStartedAt DateTime?           @map("subscription_started_at")
+  subscriptionExpiresAt DateTime?           @map("subscription_expires_at")
+
   // Relations
   company     Company?         @relation(fields: [companyId], references: [id], onDelete: SetNull)
   jobs        Job[]
@@ -177,6 +183,23 @@ enum JobStatus {
   DRAFT
   PUBLISHED
   CLOSED
+}
+
+// Subscription plans for HR/Recruiter and Employee
+enum SubscriptionPlan {
+  // HR/Recruiter plans
+  BASIC
+  PROFESSIONAL
+  ENTERPRISE
+  // Employee plans
+  TRIAL
+  PREMIUM
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
 }
 
 enum Title {
