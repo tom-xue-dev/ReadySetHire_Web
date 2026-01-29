@@ -177,6 +177,37 @@ export class JobApplicationController {
   }
 
   /**
+   * GET /api/applications/my
+   * Get applications for the current user by email (protected)
+   */
+  async getMyApplications(req: Request, res: Response) {
+    try {
+      const { email } = req.query;
+
+      if (!email || typeof email !== 'string') {
+        return res.status(400).json({
+          error: 'Email is required',
+        });
+      }
+
+      const applications = await jobApplicationService.getApplicationsByEmail(email);
+
+      return res.json({
+        success: true,
+        count: applications.length,
+        applications,
+      });
+
+    } catch (error: any) {
+      console.error('❌ Get my applications error:', error);
+      return res.status(500).json({
+        error: 'Failed to fetch applications',
+        details: error.message,
+      });
+    }
+  }
+
+  /**
    * GET /api/applications/:id
    * Get single application details (protected)
    */
@@ -348,6 +379,31 @@ export class JobApplicationController {
 
     } catch (error: any) {
       console.error('❌ Download resume error:', error);
+      return res.status(404).json({
+        error: 'Resume not found',
+        details: error.message,
+      });
+    }
+  }
+
+  /**
+   * GET /api/resumes/:id/preview
+   * Preview resume file inline (protected)
+   */
+  async previewResume(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+
+      const { buffer, mimeType, originalName } = await resumeService.getResumeFile(
+        parseInt(id)
+      );
+
+      res.setHeader('Content-Type', mimeType);
+      res.setHeader('Content-Disposition', `inline; filename="${originalName}"`);
+      res.send(buffer);
+
+    } catch (error: any) {
+      console.error('❌ Preview resume error:', error);
       return res.status(404).json({
         error: 'Resume not found',
         details: error.message,

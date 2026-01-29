@@ -28,6 +28,13 @@ router.get('/candidates', authenticateToken, async (req, res) => {
                 status: true,
                 location: true,
               }
+            },
+            resume: {
+              select: {
+                id: true,
+                originalName: true,
+                fileName: true,
+              }
             }
           }
         },

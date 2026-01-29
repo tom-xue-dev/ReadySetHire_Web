@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import LandingHeader from '@/components/layout/LandingHeader';
+import LandingFooter from '@/components/layout/LandingFooter';
 
 interface ApplicationStatus {
   id: number;
@@ -140,24 +142,31 @@ export default function ApplicationTracker() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
-        <div className="text-xl text-gray-600">Loading application status...</div>
+      <div className="bg-white min-h-screen flex flex-col">
+        <LandingHeader showNavLinks={false} />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-xl text-gray-600">Loading application status...</div>
+        </div>
+        <LandingFooter />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-12 px-4">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">
-            Track Your Application
-          </h1>
-          <p className="text-gray-600 text-lg">
-            Enter your tracking number to check your application status
-          </p>
-        </div>
+    <div className="bg-white min-h-screen flex flex-col">
+      <LandingHeader showNavLinks={false} />
+      
+      <div className="flex-1 py-12 px-4">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-gray-800 mb-4">
+              Track Your Application
+            </h1>
+            <p className="text-gray-600 text-lg">
+              Enter your tracking number to check your application status
+            </p>
+          </div>
 
         {/* Search Form */}
         <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
@@ -198,31 +207,29 @@ export default function ApplicationTracker() {
                     Applicant: <span className="font-semibold">{application.applicantName}</span>
                   </p>
                 </div>
-                <div className={`px-6 py-3 rounded-full border-2 ${getStatusInfo(application.status).color} font-semibold text-lg`}>
-                  {getStatusInfo(application.status).icon} {getStatusInfo(application.status).label}
-                </div>
+                {/* Only show detailed status for HIRED or REJECTED */}
+                {['HIRED', 'REJECTED'].includes(application.status) ? (
+                  <div className={`px-6 py-3 rounded-full border-2 ${getStatusInfo(application.status).color} font-semibold text-lg`}>
+                    {getStatusInfo(application.status).icon} {getStatusInfo(application.status).label}
+                  </div>
+                ) : (
+                  <div className="px-6 py-3 rounded-full border-2 bg-blue-100 text-blue-800 border-blue-300 font-semibold text-lg">
+                    ⏳ In Progress
+                  </div>
+                )}
               </div>
 
-              {/* Progress Bar */}
-              {!['REJECTED', 'WITHDRAWN'].includes(application.status) && (
-                <div className="mb-8">
-                  <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
-                    <div
-                      className="bg-gradient-to-r from-blue-500 to-purple-500 h-full transition-all duration-500 ease-out"
-                      style={{ width: `${getProgressPercentage(application.status)}%` }}
-                    />
-                  </div>
-                  <p className="text-sm text-gray-600 mt-2 text-center">
-                    {getProgressPercentage(application.status)}% Complete
-                  </p>
-                </div>
-              )}
-
-              {/* Status Description */}
+              {/* Status Description - Only show details for HIRED or REJECTED */}
               <div className="bg-gray-50 rounded-lg p-6 mb-6">
-                <p className="text-gray-700 text-lg">
-                  {getStatusInfo(application.status).description}
-                </p>
+                {['HIRED', 'REJECTED'].includes(application.status) ? (
+                  <p className="text-gray-700 text-lg">
+                    {getStatusInfo(application.status).description}
+                  </p>
+                ) : (
+                  <p className="text-gray-700 text-lg">
+                    Your application is currently being processed. We will notify you once a decision has been made. Thank you for your patience.
+                  </p>
+                )}
               </div>
 
               {/* Timeline */}
@@ -255,16 +262,16 @@ export default function ApplicationTracker() {
             </div>
 
             {/* Info Card */}
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-xl p-8 text-white">
-              <h3 className="text-2xl font-bold mb-4">What happens next?</h3>
-              <ul className="space-y-3">
+            <div className="bg-indigo-50 border border-indigo-200 rounded-2xl p-8">
+              <h3 className="text-2xl font-bold mb-4 text-indigo-900">What happens next?</h3>
+              <ul className="space-y-3 text-indigo-800">
                 <li className="flex items-start gap-3">
                   <span className="text-2xl">📧</span>
-                  <span>You will receive email updates at each stage of the process</span>
+                  <span>You will receive email updates once a decision is made</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-2xl">🔔</span>
-                  <span>Check back here regularly for the latest status</span>
+                  <span>Check back here to see the final result</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-2xl">💬</span>
@@ -276,21 +283,24 @@ export default function ApplicationTracker() {
             {/* Actions */}
             <div className="flex gap-4">
               <button
-                onClick={() => navigate('/jobs')}
+                onClick={() => navigate('/employee/tracking-jobs')}
                 className="flex-1 bg-white text-gray-700 py-4 px-6 rounded-lg font-semibold border-2 border-gray-300 hover:bg-gray-50 transition"
               >
                 Browse More Jobs
               </button>
               <button
                 onClick={() => window.location.reload()}
-                className="flex-1 bg-blue-600 text-white py-4 px-6 rounded-lg font-semibold hover:bg-blue-700 transition shadow-lg hover:shadow-xl"
+                className="flex-1 bg-indigo-600 text-white py-4 px-6 rounded-lg font-semibold hover:bg-indigo-700 transition"
               >
                 Refresh Status
               </button>
             </div>
           </div>
         )}
+        </div>
       </div>
+      
+      <LandingFooter />
     </div>
   );
 }

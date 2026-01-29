@@ -15,6 +15,7 @@ router.get('/jobs/:id', optionalAuth, jobController.getById.bind(jobController))
 router.post('/jobs', authenticateToken, requireRole(['ADMIN', 'RECRUITER']), jobController.create.bind(jobController));
 router.patch('/jobs/:id', authenticateToken, requireRole(['ADMIN', 'RECRUITER']), jobController.update.bind(jobController));
 router.patch('/jobs/:id/publish', authenticateToken, requireRole(['ADMIN', 'RECRUITER']), jobController.publish.bind(jobController));
+router.patch('/jobs/:id/close', authenticateToken, requireRole(['ADMIN', 'RECRUITER']), jobController.close.bind(jobController));
 router.delete('/jobs/:id', authenticateToken, requireRole(['ADMIN', 'RECRUITER']), jobController.delete.bind(jobController));
 
 export default router;

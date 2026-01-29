@@ -44,28 +44,59 @@ export class JobController extends CRUDController<any> {
     }
   }
 
-  protected validateAndTransformData(data: any, req?: any): any {
+  protected validateAndTransformData(data: any, req?: any, isUpdate = false): any {
     ValidationUtils.validateRequired(data, ['title', 'description']);
     
-    return {
+    const result: any = {
       title: ValidationUtils.sanitizeString(data.title),
       description: ValidationUtils.sanitizeString(data.description),
       requirements: data.requirements ? ValidationUtils.sanitizeString(data.requirements) : null,
       location: data.location ? ValidationUtils.sanitizeString(data.location) : null,
       salaryRange: data.salaryRange ? ValidationUtils.sanitizeString(data.salaryRange) : null,
-      status: data.status || 'DRAFT',
-      userId: req?.user?.id || data.userId || data.user_id
     };
+
+    // Only set status for new jobs (create) or if explicitly provided
+    // Don't change status during edit unless explicitly requested
+    if (!isUpdate) {
+      result.status = data.status || 'DRAFT';
+    } else if (data.status) {
+      // Only include status in update if explicitly provided
+      result.status = data.status;
+    }
+
+    // Set userId for create operations
+    if (!isUpdate) {
+      result.userId = req?.user?.id || data.userId || data.user_id;
+    }
+
+    return result;
   }
 
   async create(req: Request, res: Response): Promise<void> {
     try {
-      const data = this.validateAndTransformData(req.body, req);
+      const data = this.validateAndTransformData(req.body, req, false);
       const item = await this.service.create(data);
       res.status(201).json(item);
     } catch (error) {
       console.error(`Error creating ${this.modelName}:`, error);
       res.status(500).json({ error: `Failed to create ${this.modelName}` });
+    }
+  }
+
+  async update(req: Request, res: Response): Promise<void> {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        res.status(400).json({ error: 'Invalid ID format' });
+        return;
+      }
+
+      const data = this.validateAndTransformData(req.body, req, true);
+      const item = await this.jobService.update(id, data);
+      res.json(item);
+    } catch (error) {
+      console.error(`Error updating ${this.modelName}:`, error);
+      res.status(500).json({ error: `Failed to update ${this.modelName}` });
     }
   }
 
@@ -111,6 +142,25 @@ export class JobController extends CRUDController<any> {
     } catch (error) {
       console.error('Error publishing job:', error);
       res.status(500).json({ error: 'Failed to publish job' });
+    }
+  }
+
+  async close(req: Request, res: Response): Promise<void> {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        res.status(400).json({ error: 'Invalid ID format' });
+        return;
+      }
+
+      const job = await this.jobService.update(
+        id,
+        { status: 'CLOSED' }
+      );
+      res.json(job);
+    } catch (error) {
+      console.error('Error closing job:', error);
+      res.status(500).json({ error: 'Failed to close job' });
     }
   }
 

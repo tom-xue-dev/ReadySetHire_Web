@@ -33,7 +33,8 @@
     "resumeManagement": "Resume Management",
     "jobSearch": "Job Search",
     "aiResumeRating": "AI Resume Rating",
-    "profile": "Profile"
+    "profile": "Profile",
+    "appliedJobs": "Applied Jobs"
   },
   "home": {
     "title": "ReadySetHire",
@@ -361,8 +362,12 @@
     },
     "errors": {
       "saveFailed": "Failed to save candidate",
-      "deleteFailed": "Failed to delete candidate"
+      "deleteFailed": "Failed to delete candidate",
+      "resumeDownloadFailed": "Failed to download resume"
     },
+    "viewResume": "View Resume",
+    "noResume": "No resume uploaded",
+    "downloadResume": "Download Resume",
     "validation": {
       "emailRequired": "Email is required",
       "jobRequired": "Please select a published job"
@@ -592,8 +597,9 @@
     "noApplications": "No candidates",
     "currentStatus": "Current Status",
     "moveToStage": "Move to Stage",
+    "selectStage": "Select target stage...",
     "notes": "Notes",
-    "moveStage": "Move Stage",
+    "moveStage": "Confirm Move",
     "updating": "Updating...",
     "firstName": "First Name",
     "lastName": "Last Name",
@@ -691,6 +697,19 @@
         "title": "Unlimited Usage",
         "description": "Score as many resumes as you need during your plan period"
       }
+    }
+  },
+  "appliedJobs": {
+    "title": "Applied Jobs",
+    "subtitle": "Track the status of your job applications",
+    "noApplications": "You haven't applied to any jobs yet",
+    "appliedOn": "Applied on",
+    "decidedOn": "Decision made on",
+    "trackingNumber": "Tracking Number",
+    "status": {
+      "hired": "Hired",
+      "rejected": "Not Selected",
+      "inProgress": "In Progress"
     }
   }
 }

@@ -18,6 +18,12 @@ router.get('/applications/track/:token',
   jobApplicationController.trackApplication.bind(jobApplicationController)
 );
 
+// Get my applications by email (for employees to view their own applications)
+router.get('/applications/my',
+  authenticateToken,
+  jobApplicationController.getMyApplications.bind(jobApplicationController)
+);
+
 /**
  * Protected Routes (authentication required)
  */
@@ -61,6 +67,13 @@ router.get(
   '/resumes/:id/download',
   authenticateToken,
   jobApplicationController.downloadResume.bind(jobApplicationController)
+);
+
+// Preview resume inline
+router.get(
+  '/resumes/:id/preview',
+  authenticateToken,
+  jobApplicationController.previewResume.bind(jobApplicationController)
 );
 
 export default router;
