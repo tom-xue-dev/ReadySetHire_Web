@@ -71,13 +71,13 @@ jobs:
           PGPASSWORD=readysethire_password psql -h localhost -U readysethire_user -d readysethire -c "SELECT 1" >/dev/null 2>&1 || (echo "Database failed to start" && exit 1)
       - run: npm ci
       - run: npx prisma generate
-      - name: Ensure test database exists
-        run: |
-          PGPASSWORD=readysethire_password psql -h localhost -U readysethire_user -d readysethire -tc "SELECT 1 FROM pg_database WHERE datname='readysethire_test'" | grep -q 1 || \
-          PGPASSWORD=readysethire_password createdb -h localhost -U readysethire_user readysethire_test
-      - name: Run migrations against test database
+      - name: Run migrations against main database
         run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://readysethire_user:readysethire_password@localhost:5432/readysethire?schema=public
       - run: npm run test:integration
+        env:
+          DATABASE_URL: postgresql://readysethire_user:readysethire_password@localhost:5432/readysethire?schema=public
 
   build:
     runs-on: ubuntu-latest

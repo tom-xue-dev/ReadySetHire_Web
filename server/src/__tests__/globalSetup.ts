@@ -106,14 +106,28 @@ export default async function globalSetup() {
 
     console.log('🗄️ Setting up test database schema...');
 
-    // Reset the test database
-    execSync('npx prisma migrate reset --force', {
-      env: {
-        ...process.env,
-        DATABASE_URL: TEST_DATABASE_URL,
-      },
-      stdio: 'inherit',
-    });
+    if (isCI) {
+      // In CI, migrations are already run by the workflow
+      // Just run prisma generate to ensure client is ready
+      console.log('📦 Generating Prisma client...');
+      execSync('npx prisma generate', {
+        env: {
+          ...process.env,
+          DATABASE_URL: TEST_DATABASE_URL,
+        },
+        stdio: 'inherit',
+      });
+    } else {
+      // For local development, deploy migrations (safer than reset)
+      console.log('🔄 Deploying migrations...');
+      execSync('npx prisma migrate deploy', {
+        env: {
+          ...process.env,
+          DATABASE_URL: TEST_DATABASE_URL,
+        },
+        stdio: 'inherit',
+      });
+    }
 
     console.log('✅ Test environment setup complete');
   } catch (error) {
