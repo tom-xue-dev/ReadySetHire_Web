@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { UserGroupIcon, MagnifyingGlassIcon, FunnelIcon, EllipsisVerticalIcon, ArrowsUpDownIcon } from '@heroicons/react/24/outline';
+import { UserGroupIcon, MagnifyingGlassIcon, FunnelIcon, EllipsisVerticalIcon, ArrowsUpDownIcon, EyeIcon, XMarkIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import { useI18n } from '@/contexts/I18nContext';
 import { useAuth } from '@/pages/auth/AuthContext';
 import { apiRequest } from '@/api/api';
 import { getJobs } from '@/api/job';
+import { downloadResume } from '@/api/application';
+import { apiConfig } from '@/config/apiConfig';
 
 interface Candidate {
   id: number;
@@ -21,6 +23,12 @@ interface Candidate {
   applications?: Array<{
     id: number;
     createdAt: string;
+    resumeId?: number | null;
+    resume?: {
+      id: number;
+      originalName: string;
+      fileName: string;
+    } | null;
     job?: {
       id: number;
       title: string;
@@ -67,6 +75,68 @@ export default function Candidates() {
     phone: ''
   });
   
+  // Resume preview state
+  const [previewResume, setPreviewResume] = useState<{
+    resumeId: number;
+    fileName: string;
+    candidateName: string;
+    blobUrl?: string;
+    loading?: boolean;
+    error?: string;
+  } | null>(null);
+
+  // Load resume for preview
+  async function loadResumePreview(resumeId: number, fileName: string, candidateName: string) {
+    // Set initial loading state
+    setPreviewResume({
+      resumeId,
+      fileName,
+      candidateName,
+      loading: true,
+    });
+
+    try {
+      const token = localStorage.getItem('token') || '';
+      const response = await fetch(`${apiConfig.baseUrl}/resumes/${resumeId}/preview`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to load resume: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+
+      setPreviewResume({
+        resumeId,
+        fileName,
+        candidateName,
+        blobUrl,
+        loading: false,
+      });
+    } catch (err: any) {
+      console.error('Failed to load resume preview:', err);
+      setPreviewResume({
+        resumeId,
+        fileName,
+        candidateName,
+        loading: false,
+        error: err.message || 'Failed to load resume',
+      });
+    }
+  }
+
+  // Cleanup blob URL when closing preview
+  function closePreview() {
+    if (previewResume?.blobUrl) {
+      URL.revokeObjectURL(previewResume.blobUrl);
+    }
+    setPreviewResume(null);
+  }
 
   useEffect(() => {
     loadCandidates();
@@ -512,7 +582,36 @@ export default function Candidates() {
                       {candidate.applications?.[0]?.job?.title || '—'}
                     </td>
                     <td className="px-6 py-4">
-                      <div className="relative">
+                      <div className="relative flex items-center gap-1">
+                        {/* View Resume Button */}
+                        {candidate.applications?.[0]?.resumeId ? (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const resumeId = candidate.applications?.[0]?.resumeId;
+                              const resume = candidate.applications?.[0]?.resume;
+                              if (resumeId) {
+                                loadResumePreview(
+                                  resumeId,
+                                  resume?.originalName || `Resume-${resumeId}`,
+                                  `${candidate.firstName || ''} ${candidate.lastName || ''}`.trim() || candidate.email
+                                );
+                              }
+                            }}
+                            className="p-2 hover:bg-blue-100 rounded-lg transition-colors"
+                            title={t('candidates.viewResume')}
+                          >
+                            <EyeIcon className="w-5 h-5 text-blue-600" />
+                          </button>
+                        ) : (
+                          <button
+                            disabled
+                            className="p-2 rounded-lg opacity-30 cursor-not-allowed"
+                            title={t('candidates.noResume')}
+                          >
+                            <EyeIcon className="w-5 h-5 text-gray-400" />
+                          </button>
+                        )}
                         <button
                           onClick={(e) => openCandidateMenu(candidate.id, e.currentTarget)}
                           className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -650,6 +749,67 @@ export default function Candidates() {
         }}
         t={t}
       />
+
+      {/* Resume Preview Panel */}
+      {previewResume && (
+        <>
+          {/* Backdrop with blur */}
+          <div 
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
+            onClick={closePreview}
+          />
+          
+          {/* Preview Panel - Right Side */}
+          <div className="fixed top-0 right-0 h-full w-[50vw] max-w-3xl bg-white shadow-2xl z-50 flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">{previewResume.candidateName}</h3>
+                <p className="text-sm text-gray-500">{previewResume.fileName}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    downloadResume(previewResume.resumeId).catch((err) => {
+                      console.error('Failed to download resume:', err);
+                      alert(t('candidates.errors.resumeDownloadFailed'));
+                    });
+                  }}
+                  className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+                  title={t('candidates.downloadResume')}
+                >
+                  <ArrowDownTrayIcon className="w-5 h-5 text-gray-600" />
+                </button>
+                <button
+                  onClick={closePreview}
+                  className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+                >
+                  <XMarkIcon className="w-5 h-5 text-gray-600" />
+                </button>
+              </div>
+            </div>
+            
+            {/* PDF Viewer */}
+            <div className="flex-1 overflow-hidden">
+              {previewResume.loading ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-gray-500">{t('forms.loading')}</div>
+                </div>
+              ) : previewResume.error ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-red-500">{previewResume.error}</div>
+                </div>
+              ) : previewResume.blobUrl ? (
+                <iframe
+                  src={previewResume.blobUrl}
+                  className="w-full h-full border-0"
+                  title="Resume Preview"
+                />
+              ) : null}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

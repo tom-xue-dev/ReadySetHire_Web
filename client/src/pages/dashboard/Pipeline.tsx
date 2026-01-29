@@ -66,7 +66,7 @@ const STAGE_CONFIG: {
   { key: 'WITHDRAWN', colorClass: 'text-gray-700', bgClass: 'bg-gray-50', borderClass: 'border-gray-200' },
 ];
 
-// Get next stages for a given status
+// Get available stages for a given status (both forward and backward movement allowed)
 function getNextStages(currentStatus: ApplicationStatus): ApplicationStatus[] {
   const stageOrder: ApplicationStatus[] = [
     'SUBMITTED',
@@ -79,20 +79,39 @@ function getNextStages(currentStatus: ApplicationStatus): ApplicationStatus[] {
   ];
   const currentIndex = stageOrder.indexOf(currentStatus);
   
-  // Can always reject or withdraw
   const availableStages: ApplicationStatus[] = [];
   
-  // Forward progression
-  if (currentIndex >= 0 && currentIndex < stageOrder.length - 1) {
+  // For terminated states (REJECTED, WITHDRAWN), allow moving back to any stage
+  if (['REJECTED', 'WITHDRAWN'].includes(currentStatus)) {
+    // Can move back to any stage in the flow
+    availableStages.push(...stageOrder);
+    return availableStages;
+  }
+  
+  // For HIRED status, allow moving back to previous stages (in case of mistake)
+  if (currentStatus === 'HIRED') {
+    for (let i = 0; i < stageOrder.length - 1; i++) {
+      availableStages.push(stageOrder[i]);
+    }
+    availableStages.push('REJECTED');
+    return availableStages;
+  }
+  
+  // For normal flow stages: allow both backward and forward movement
+  if (currentIndex >= 0) {
+    // Backward progression (for correcting mistakes)
+    for (let i = 0; i < currentIndex; i++) {
+      availableStages.push(stageOrder[i]);
+    }
+    
+    // Forward progression
     for (let i = currentIndex + 1; i < stageOrder.length; i++) {
       availableStages.push(stageOrder[i]);
     }
   }
   
   // Can always reject (if not already rejected/withdrawn/hired)
-  if (!['REJECTED', 'WITHDRAWN', 'HIRED'].includes(currentStatus)) {
-    availableStages.push('REJECTED');
-  }
+  availableStages.push('REJECTED');
   
   return availableStages;
 }
@@ -108,6 +127,7 @@ export default function Pipeline() {
   const [showJobDropdown, setShowJobDropdown] = useState(false);
   const [activeStageFilter, setActiveStageFilter] = useState<ApplicationStatus | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [selectedTargetStage, setSelectedTargetStage] = useState<ApplicationStatus | null>(null);
   const [showAddCandidateModal, setShowAddCandidateModal] = useState(false);
   const [candidateForm, setCandidateForm] = useState({
     firstName: '',
@@ -641,26 +661,38 @@ export default function Pipeline() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {t('pipeline.moveToStage')}
                 </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {getNextStages(selectedApplication.status).map(nextStage => {
-                    const config = STAGE_CONFIG.find(s => s.key === nextStage)!;
-                    const isReject = nextStage === 'REJECTED';
-
-                    return (
-                      <button
-                        key={nextStage}
-                        onClick={() => updateApplicationStatus(selectedApplication.id, nextStage)}
-                        disabled={updatingStatus}
-                        className={`px-3 py-2 rounded-lg text-sm font-medium border transition-colors disabled:opacity-50 ${
-                          isReject
-                            ? 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100'
-                            : `${config.bgClass} ${config.colorClass} ${config.borderClass} hover:opacity-80`
-                        }`}
-                      >
+                <div className="space-y-3">
+                  {/* Stage Selection Dropdown */}
+                  <select
+                    value={selectedTargetStage || ''}
+                    onChange={(e) => setSelectedTargetStage(e.target.value as ApplicationStatus || null)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  >
+                    <option value="">{t('pipeline.selectStage')}</option>
+                    {getNextStages(selectedApplication.status).map(nextStage => (
+                      <option key={nextStage} value={nextStage}>
                         {t(`pipeline.stages.${nextStage}`)}
-                      </button>
-                    );
-                  })}
+                      </option>
+                    ))}
+                  </select>
+                  
+                  {/* Move Stage Button */}
+                  <button
+                    onClick={() => {
+                      if (selectedTargetStage) {
+                        updateApplicationStatus(selectedApplication.id, selectedTargetStage);
+                        setSelectedTargetStage(null);
+                      }
+                    }}
+                    disabled={updatingStatus || !selectedTargetStage}
+                    className={`w-full px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                      selectedTargetStage === 'REJECTED'
+                        ? 'bg-red-600 text-white hover:bg-red-700'
+                        : 'bg-purple-600 text-white hover:bg-purple-700'
+                    }`}
+                  >
+                    {updatingStatus ? t('pipeline.updating') : t('pipeline.moveStage')}
+                  </button>
                 </div>
               </div>
 
@@ -677,16 +709,6 @@ export default function Pipeline() {
               )}
             </div>
 
-            {/* Panel Footer */}
-            <div className="border-t border-gray-200 p-4">
-              <button
-                onClick={() => updateApplicationStatus(selectedApplication.id, getNextStages(selectedApplication.status)[0])}
-                disabled={updatingStatus || getNextStages(selectedApplication.status).length === 0}
-                className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-              >
-                {updatingStatus ? t('pipeline.updating') : t('pipeline.moveStage')}
-              </button>
-            </div>
           </div>
         )}
       </div>

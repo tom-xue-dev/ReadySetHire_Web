@@ -283,7 +283,7 @@ export default function Jobs() {
 
   async function handleCloseJob(jobId: number) {
     try {
-      await apiRequest(`/jobs/${jobId}`, 'PATCH', { status: 'CLOSED' } as any);
+      await apiRequest(`/jobs/${jobId}/close`, 'PATCH');
       loadJobs();
       setOpenMenuId(null);
     } catch (err) {

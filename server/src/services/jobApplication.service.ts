@@ -206,6 +206,33 @@ export class JobApplicationService {
   }
 
   /**
+   * Get applications by email (for employees to view their own applications)
+   */
+  async getApplicationsByEmail(email: string) {
+    return await (prisma as any).jobApplication.findMany({
+      where: {
+        email: {
+          equals: email,
+          mode: 'insensitive',
+        },
+      },
+      include: {
+        job: {
+          select: {
+            id: true,
+            title: true,
+            location: true,
+            description: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
+  /**
    * Update application status
    */
   async updateApplicationStatus(

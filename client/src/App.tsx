@@ -24,6 +24,8 @@ import EmployeeSettings from "./pages/employee/EmployeeSettings.tsx";
 import EmployeeSubscription from "./pages/employee/EmployeeSubscription.tsx";
 import EmployeeProfile from "./pages/employee/EmployeeProfile.tsx";
 import SavedJobs from "./pages/employee/SavedJobs.tsx";
+import AppliedJobs from "./pages/employee/AppliedJobs.tsx";
+import ApplicationTracker from "./pages/ApplicationTracker.tsx";
 function AppContent() {
   const { showAuthNotification, hideAuthNotification } = useAuth();
   
@@ -86,6 +88,17 @@ function AppContent() {
               <SavedJobs />
             </ProtectedRoute>
           } />
+          
+          {/* Employee Applied Jobs - View application status */}
+          <Route path="/employee/applied-jobs" element={
+            <ProtectedRoute requiredRoles={['ADMIN', 'EMPLOYEE']}>
+              <AppliedJobs />
+            </ProtectedRoute>
+          } />
+          
+          {/* Application Tracker - Public route */}
+          <Route path="/track/:token" element={<ApplicationTracker />} />
+          <Route path="/track" element={<ApplicationTracker />} />
           
           {/* Dashboard routes - Protected with Layout */}
           <Route path="/*" element={

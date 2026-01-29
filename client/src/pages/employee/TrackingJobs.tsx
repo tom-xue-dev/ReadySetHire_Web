@@ -98,6 +98,11 @@ export default function TrackingJobs() {
 
   const filteredJobs = useMemo(() => {
     return jobs.filter((job) => {
+      // Only show published jobs to job seekers (exclude DRAFT and CLOSED)
+      if (job.status !== 'PUBLISHED') {
+        return false;
+      }
+      
       // Keyword search
       if (searchKeyword && !job.title.toLowerCase().includes(searchKeyword.toLowerCase()) &&
           !job.description?.toLowerCase().includes(searchKeyword.toLowerCase())) {

@@ -34,7 +34,8 @@
     "menu": "菜单",
     "jobSearch": "职位搜索",
     "aiResumeRating": "AI简历评分",
-    "profile": "个人资料"
+    "profile": "个人资料",
+    "appliedJobs": "我的申请"
   },
   "home": {
     "title": "ReadySetHire",
@@ -362,8 +363,12 @@
     },
     "errors": {
       "saveFailed": "保存候选人失败",
-      "deleteFailed": "删除候选人失败"
+      "deleteFailed": "删除候选人失败",
+      "resumeDownloadFailed": "下载简历失败"
     },
+    "viewResume": "查看简历",
+    "noResume": "未上传简历",
+    "downloadResume": "下载简历",
     "validation": {
       "emailRequired": "邮箱为必填项",
       "jobRequired": "请选择一个已发布的职位"
@@ -593,8 +598,9 @@
     "noApplications": "暂无候选人",
     "currentStatus": "当前状态",
     "moveToStage": "移动到阶段",
+    "selectStage": "选择目标阶段...",
     "notes": "备注",
-    "moveStage": "移动阶段",
+    "moveStage": "确认移动",
     "updating": "更新中...",
     "firstName": "名",
     "lastName": "姓",
@@ -692,6 +698,19 @@
         "title": "不限使用",
         "description": "在套餐有效期内无限次评分简历"
       }
+    }
+  },
+  "appliedJobs": {
+    "title": "我的申请",
+    "subtitle": "查看您的职位申请状态",
+    "noApplications": "您还没有申请任何职位",
+    "appliedOn": "申请时间",
+    "decidedOn": "结果时间",
+    "trackingNumber": "追踪号",
+    "status": {
+      "hired": "已录用",
+      "rejected": "未通过",
+      "inProgress": "处理中"
     }
   }
 }
