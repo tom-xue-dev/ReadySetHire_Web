@@ -110,7 +110,9 @@ export default function PublicJobApplication() {
   const fetchUserProfile = async () => {
     try {
       const response = await apiRequest('/auth/profile');
-      setUserProfile(response as UserProfile);
+      if (response && typeof response === 'object') {
+        setUserProfile(response as unknown as UserProfile);
+      }
     } catch (err) {
       console.error('Failed to fetch user profile:', err);
     }

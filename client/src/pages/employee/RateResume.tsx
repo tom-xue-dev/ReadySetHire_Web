@@ -4,7 +4,6 @@ import {
   DocumentArrowUpIcon,
   DocumentTextIcon,
   ArrowPathIcon,
-  BookmarkIcon,
   BriefcaseIcon,
   UserIcon,
   ChartBarIcon,
