@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useI18n } from '@/contexts/I18nContext';
-import { useAuth } from '@/pages/auth/AuthContext';
 import { apiConfig } from '@/config/apiConfig';
 import LandingHeader from '@/components/layout/LandingHeader';
 import LandingFooter from '@/components/layout/LandingFooter';
@@ -28,7 +27,6 @@ interface UserProfile {
 
 export default function EmployeeProfile() {
   const { t } = useI18n();
-  const { user } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedClassifications, setSelectedClassifications] = useState<string[]>([]);

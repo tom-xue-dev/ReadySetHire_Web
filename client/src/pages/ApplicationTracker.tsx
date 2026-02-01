@@ -125,20 +125,6 @@ export default function ApplicationTracker() {
     };
   };
 
-  const getProgressPercentage = (status: string): number => {
-    const progression: Record<string, number> = {
-      SUBMITTED: 10,
-      UNDER_REVIEW: 25,
-      SHORTLISTED: 40,
-      INTERVIEW_SCHEDULED: 60,
-      INTERVIEWED: 75,
-      OFFER_EXTENDED: 90,
-      HIRED: 100,
-      REJECTED: 0,
-      WITHDRAWN: 0,
-    };
-    return progression[status] || 0;
-  };
 
   if (loading) {
     return (
