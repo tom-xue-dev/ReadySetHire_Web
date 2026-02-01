@@ -160,6 +160,7 @@
   "forms": {
     "save": "Save",
     "cancel": "Cancel",
+    "close": "Close",
     "edit": "Edit",
     "delete": "Delete",
     "add": "Add",
@@ -383,6 +384,7 @@
       "email": "Email",
       "phone": "Phone",
       "applications": "Applications",
+      "score": "Score",
       "added": "Added",
       "appliedJob": "Applied Job"
     },
@@ -398,6 +400,46 @@
       "job": "Job",
       "jobPlaceholder": "Select a published job",
       "jobHint": "New candidates must be linked to a published job (application will be created)."
+    },
+    "rate": "AI Rate",
+    "rating": "Rating...",
+    "batchRate": "Batch Rate",
+    "batchRateTitle": "Batch AI Rating",
+    "batchRateDesc": "AI rating for {count} candidate(s)",
+    "startBatchRate": "Start Rating",
+    "viewFeedback": "View Rating Report",
+    "feedbackTitle": "AI Rating Report",
+    "overallScore": "Overall Score",
+    "batchStatus": {
+      "pending": "Pending",
+      "rating": "Rating",
+      "success": "Completed",
+      "error": "Failed"
+    },
+    "conclusion": {
+      "strongHire": "Strong Hire",
+      "hire": "Hire",
+      "leanHire": "Lean Hire",
+      "leanNo": "Lean No",
+      "no": "No"
+    },
+    "feedback": {
+      "strengths": "Top Strengths",
+      "gaps": "Top Gaps",
+      "risks": "Risk Alerts",
+      "skills": "Skills Matrix",
+      "interviewQuestions": "Suggested Interview Questions",
+      "purpose": "Purpose",
+      "goodAnswer": "Expected Answer"
+    },
+    "errors": {
+      "saveFailed": "Failed to save candidate",
+      "deleteFailed": "Failed to delete candidate",
+      "resumeDownloadFailed": "Failed to download resume",
+      "noApplication": "No application found for this candidate",
+      "noResumeText": "Resume text not extracted, cannot rate",
+      "rateFailed": "Rating failed",
+      "noSelection": "Please select candidates to rate"
     }
   },
   "dashboard": {
@@ -486,15 +528,24 @@
   "profile": {
     "title": "My Profile",
     "subtitle": "Manage your resume and job preferences",
+    "loadError": "Failed to load profile",
     "resumeSection": {
       "title": "Resume",
       "description": "Upload your resume to quickly apply for jobs",
       "upload": "Upload Resume",
+      "uploadNew": "Upload New Resume (replace existing)",
       "current": "Current Resume",
       "noResume": "No resume uploaded yet",
-      "uploadFormats": "Supports PDF, DOCX formats",
+      "uploadFormats": "Supports PDF, DOCX formats (max 10MB)",
+      "fileTooLarge": "File size exceeds 10MB limit",
       "uploadSuccess": "Resume uploaded successfully",
-      "uploadError": "Failed to upload resume"
+      "uploadError": "Failed to upload resume",
+      "uploading": "Uploading...",
+      "uploadedOn": "Uploaded on",
+      "preview": "Preview Resume",
+      "previewTitle": "Resume Preview",
+      "download": "Download Resume",
+      "downloadError": "Download failed"
     },
     "preferencesSection": {
       "title": "Job Preferences",
@@ -697,6 +748,24 @@
         "title": "Unlimited Usage",
         "description": "Score as many resumes as you need during your plan period"
       }
+    }
+  },
+  "jobApplication": {
+    "resume": "Resume/CV",
+    "useProfileResume": "Use uploaded resume",
+    "uploadNewResume": "Upload new resume",
+    "uploadedOn": "Uploaded on",
+    "emailFromProfile": "Using email from your account",
+    "validation": {
+      "firstNameRequired": "First name is required",
+      "lastNameRequired": "Last name is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Invalid email format",
+      "resumeRequired": "Resume is required",
+      "noProfileResume": "No profile resume found, please upload a new one"
+    },
+    "errors": {
+      "submitFailed": "Failed to submit application"
     }
   },
   "appliedJobs": {

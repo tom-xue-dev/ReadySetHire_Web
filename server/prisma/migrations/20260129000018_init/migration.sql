@@ -24,8 +24,10 @@ CREATE TABLE "users" (
     "password_hash" TEXT NOT NULL,
     "first_name" TEXT,
     "last_name" TEXT,
+    "phone" TEXT,
     "role" "UserRole" NOT NULL DEFAULT 'RECRUITER',
     "company_id" INTEGER,
+    "resume_id" INTEGER,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "subscription_plan" "SubscriptionPlan",
@@ -88,6 +90,9 @@ CREATE TABLE "job_applications" (
     "notes" TEXT,
     "reviewed_by" INTEGER,
     "reviewed_at" TIMESTAMP(3),
+    "score" DOUBLE PRECISION,
+    "feedback" TEXT,
+    "scored_at" TIMESTAMP(3),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -136,6 +141,9 @@ CREATE UNIQUE INDEX "users_username_key" ON "users"("username");
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "users_resume_id_key" ON "users"("resume_id");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "candidates_user_id_email_key" ON "candidates"("user_id", "email");
 
 -- CreateIndex
@@ -164,6 +172,9 @@ CREATE UNIQUE INDEX "saved_jobs_user_id_job_id_key" ON "saved_jobs"("user_id", "
 
 -- AddForeignKey
 ALTER TABLE "users" ADD CONSTRAINT "users_company_id_fkey" FOREIGN KEY ("company_id") REFERENCES "companies"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "users" ADD CONSTRAINT "users_resume_id_fkey" FOREIGN KEY ("resume_id") REFERENCES "resumes"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "jobs" ADD CONSTRAINT "jobs_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;

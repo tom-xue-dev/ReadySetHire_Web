@@ -216,18 +216,10 @@ export default function RateResume() {
               </Button>
               <Button
                 type="button"
-                onClick={() => alert(t('rateResume.savingFeature'))}
-                className="flex items-center gap-2 bg-white text-gray-700 ring-1 ring-gray-300 hover:bg-gray-50"
-              >
-                <BookmarkIcon className="w-4 h-4" />
-                {t('rateResume.saveReport')}
-              </Button>
-              <Button
-                type="button"
                 onClick={handleReset}
-                className="flex items-center gap-2 bg-white text-gray-700 ring-1 ring-gray-300 hover:bg-gray-50"
+                className="flex items-center gap-2 bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
               >
-                <ArrowPathIcon className="w-4 h-4" />
+                <ArrowPathIcon className="w-4 h-4 " />
                 {t('rateResume.reset')}
               </Button>
             </div>

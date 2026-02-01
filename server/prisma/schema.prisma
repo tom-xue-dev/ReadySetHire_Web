@@ -21,8 +21,10 @@ model User {
   passwordHash String   @map("password_hash")
   firstName    String?  @map("first_name")
   lastName     String?  @map("last_name")
+  phone        String?  @map("phone")
   role         UserRole @default(RECRUITER)
   companyId    Int?     @map("company_id")
+  resumeId     Int?     @unique @map("resume_id")  // Employee's profile resume
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
@@ -33,10 +35,11 @@ model User {
   subscriptionExpiresAt DateTime?           @map("subscription_expires_at")
 
   // Relations
-  company     Company?         @relation(fields: [companyId], references: [id], onDelete: SetNull)
-  jobs        Job[]
-  candidates  Candidate[]
-  savedJobs   SavedJob[]
+  company       Company?         @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  profileResume Resume?          @relation(fields: [resumeId], references: [id], onDelete: SetNull)
+  jobs          Job[]
+  candidates    Candidate[]
+  savedJobs     SavedJob[]
 
   @@map("users")
 }
@@ -100,6 +103,9 @@ model JobApplication {
   notes           String?
   reviewedBy      Int?              @map("reviewed_by")
   reviewedAt      DateTime?         @map("reviewed_at")
+  score           Float?            @map("score")           // AI 评分 (0-100)
+  feedback        String?           @map("feedback")        // AI 反馈报告
+  scoredAt        DateTime?         @map("scored_at")       // 评分时间
   createdAt       DateTime          @default(now()) @map("created_at")
   updatedAt       DateTime          @updatedAt @map("updated_at")
 
@@ -127,6 +133,7 @@ model Resume {
   uploadedAt   DateTime @default(now()) @map("uploaded_at")
 
   applications JobApplication[]
+  profileOwner User?              // User who has this as their profile resume
 
   @@map("resumes")
 }

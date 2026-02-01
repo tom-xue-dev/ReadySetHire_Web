@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-// import { useI18n } from '../contexts/I18nContext';
+import { useAuth } from './auth/AuthContext';
+import { apiRequest } from '@/api/api';
+import { useI18n } from '@/contexts/I18nContext';
 
 interface Job {
   id: number;
@@ -10,6 +12,23 @@ interface Job {
   location?: string;
   salaryRange?: string;
   publishedAt: string;
+}
+
+interface ProfileResume {
+  id: number;
+  originalName: string;
+  fileSize: number;
+  mimeType: string;
+  uploadedAt: string;
+}
+
+interface UserProfile {
+  id: number;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  profileResume?: ProfileResume | null;
 }
 
 interface ApplicationForm {
@@ -24,10 +43,13 @@ interface ApplicationForm {
   resume: File | null;
 }
 
+type ResumeSource = 'profile' | 'upload';
+
 export default function PublicJobApplication() {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
-  // const { t } = useI18n();
+  const { user, isAuthenticated } = useAuth();
+  const { t } = useI18n();
   
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
@@ -35,6 +57,10 @@ export default function PublicJobApplication() {
   const [submitted, setSubmitted] = useState(false);
   const [trackingToken, setTrackingToken] = useState<string>('');
   const [error, setError] = useState<string>('');
+  
+  // User profile with resume
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [resumeSource, setResumeSource] = useState<ResumeSource>('upload');
   
   const [form, setForm] = useState<ApplicationForm>({
     firstName: '',
@@ -50,11 +76,45 @@ export default function PublicJobApplication() {
 
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
+  // Fetch user profile if authenticated
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      fetchUserProfile();
+    }
+  }, [isAuthenticated, user]);
+
+  // Pre-fill form when profile is loaded
+  useEffect(() => {
+    if (userProfile) {
+      setForm(prev => ({
+        ...prev,
+        firstName: userProfile.firstName || prev.firstName,
+        lastName: userProfile.lastName || prev.lastName,
+        email: userProfile.email || prev.email,
+        phone: userProfile.phone || prev.phone,
+      }));
+      
+      // If user has a profile resume, default to using it
+      if (userProfile.profileResume) {
+        setResumeSource('profile');
+      }
+    }
+  }, [userProfile]);
+
   useEffect(() => {
     if (jobId) {
       fetchJob();
     }
   }, [jobId]);
+
+  const fetchUserProfile = async () => {
+    try {
+      const response = await apiRequest('/auth/profile');
+      setUserProfile(response as UserProfile);
+    } catch (err) {
+      console.error('Failed to fetch user profile:', err);
+    }
+  };
 
   const fetchJob = async () => {
     try {
@@ -120,21 +180,25 @@ export default function PublicJobApplication() {
     const errors: Record<string, string> = {};
 
     if (!form.firstName.trim()) {
-      errors.firstName = 'First name is required';
+      errors.firstName = t('jobApplication.validation.firstNameRequired');
     }
 
     if (!form.lastName.trim()) {
-      errors.lastName = 'Last name is required';
+      errors.lastName = t('jobApplication.validation.lastNameRequired');
     }
 
     if (!form.email.trim()) {
-      errors.email = 'Email is required';
+      errors.email = t('jobApplication.validation.emailRequired');
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-      errors.email = 'Invalid email format';
+      errors.email = t('jobApplication.validation.emailInvalid');
     }
 
-    if (!form.resume) {
-      errors.resume = 'Resume is required';
+    // Resume validation: either upload a file or use profile resume
+    if (resumeSource === 'upload' && !form.resume) {
+      errors.resume = t('jobApplication.validation.resumeRequired');
+    }
+    if (resumeSource === 'profile' && !userProfile?.profileResume) {
+      errors.resume = t('jobApplication.validation.noProfileResume');
     }
 
     setFormErrors(errors);
@@ -162,8 +226,18 @@ export default function PublicJobApplication() {
       formData.append('portfolioUrl', form.portfolioUrl);
       formData.append('yearsExperience', form.yearsExperience);
       
-      if (form.resume) {
+      // Handle resume: either use profile resume ID or upload new file
+      if (resumeSource === 'profile' && userProfile?.profileResume) {
+        formData.append('resumeId', String(userProfile.profileResume.id));
+      } else if (form.resume) {
         formData.append('resume', form.resume);
+      }
+
+      // Include auth token if logged in
+      const token = localStorage.getItem('token');
+      const headers: HeadersInit = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
       }
 
       const response = await fetch(
@@ -171,12 +245,13 @@ export default function PublicJobApplication() {
         {
           method: 'POST',
           body: formData,
+          headers,
         }
       );
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Application submission failed');
+        throw new Error(errorData.error || t('jobApplication.errors.submitFailed'));
       }
 
       const result = await response.json();
@@ -184,7 +259,7 @@ export default function PublicJobApplication() {
       setSubmitted(true);
 
     } catch (err: any) {
-      setError(err.message || 'Failed to submit application');
+      setError(err.message || t('jobApplication.errors.submitFailed'));
     } finally {
       setSubmitting(false);
     }
@@ -354,11 +429,15 @@ export default function PublicJobApplication() {
                 name="email"
                 value={form.email}
                 onChange={handleInputChange}
+                readOnly={!!userProfile}
                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                   formErrors.email ? 'border-red-500' : 'border-gray-300'
-                }`}
+                } ${userProfile ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                 placeholder="john.doe@example.com"
               />
+              {userProfile && (
+                <p className="text-xs text-gray-500 mt-1">{t('jobApplication.emailFromProfile')}</p>
+              )}
               {formErrors.email && (
                 <p className="text-red-500 text-sm mt-1">{formErrors.email}</p>
               )}
@@ -438,33 +517,82 @@ export default function PublicJobApplication() {
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Resume/CV <span className="text-red-500">*</span>
+                {t('jobApplication.resume')} <span className="text-red-500">*</span>
               </label>
-              <div className="mt-2">
-                <input
-                  type="file"
-                  onChange={handleFileChange}
-                  accept=".pdf,.doc,.docx"
-                  className="block w-full text-sm text-gray-500
-                    file:mr-4 file:py-3 file:px-6
-                    file:rounded-lg file:border-0
-                    file:text-sm file:font-semibold
-                    file:bg-blue-50 file:text-blue-700
-                    hover:file:bg-blue-100
-                    file:cursor-pointer cursor-pointer"
-                />
-                <p className="text-xs text-gray-500 mt-2">
-                  PDF, DOC, or DOCX (max 10MB)
-                </p>
-                {form.resume && (
-                  <p className="text-sm text-green-600 mt-2">
-                    ✓ {form.resume.name} ({(form.resume.size / 1024 / 1024).toFixed(2)} MB)
+
+              {/* Resume source selection (only show if user has profile resume) */}
+              {userProfile?.profileResume && (
+                <div className="mb-4 flex gap-4">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="resumeSource"
+                      value="profile"
+                      checked={resumeSource === 'profile'}
+                      onChange={() => setResumeSource('profile')}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">{t('jobApplication.useProfileResume')}</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="resumeSource"
+                      value="upload"
+                      checked={resumeSource === 'upload'}
+                      onChange={() => setResumeSource('upload')}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">{t('jobApplication.uploadNewResume')}</span>
+                  </label>
+                </div>
+              )}
+
+              {/* Show profile resume info */}
+              {resumeSource === 'profile' && userProfile?.profileResume && (
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <span className="text-green-600 text-xl">📄</span>
+                    <div>
+                      <p className="font-medium text-green-800">{userProfile.profileResume.originalName}</p>
+                      <p className="text-sm text-green-600">
+                        {(userProfile.profileResume.fileSize / 1024 / 1024).toFixed(2)} MB • 
+                        {t('jobApplication.uploadedOn')} {new Date(userProfile.profileResume.uploadedAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* File upload (show if no profile resume OR user chose to upload) */}
+              {(resumeSource === 'upload' || !userProfile?.profileResume) && (
+                <div className="mt-2">
+                  <input
+                    type="file"
+                    onChange={handleFileChange}
+                    accept=".pdf,.doc,.docx"
+                    className="block w-full text-sm text-gray-500
+                      file:mr-4 file:py-3 file:px-6
+                      file:rounded-lg file:border-0
+                      file:text-sm file:font-semibold
+                      file:bg-blue-50 file:text-blue-700
+                      hover:file:bg-blue-100
+                      file:cursor-pointer cursor-pointer"
+                  />
+                  <p className="text-xs text-gray-500 mt-2">
+                    PDF, DOC, or DOCX (max 10MB)
                   </p>
-                )}
-                {formErrors.resume && (
-                  <p className="text-red-500 text-sm mt-1">{formErrors.resume}</p>
-                )}
-              </div>
+                  {form.resume && (
+                    <p className="text-sm text-green-600 mt-2">
+                      ✓ {form.resume.name} ({(form.resume.size / 1024 / 1024).toFixed(2)} MB)
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {formErrors.resume && (
+                <p className="text-red-500 text-sm mt-1">{formErrors.resume}</p>
+              )}
             </div>
 
             <div className="border-t pt-6">
