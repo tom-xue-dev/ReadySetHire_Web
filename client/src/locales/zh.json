@@ -161,6 +161,7 @@
   "forms": {
     "save": "保存",
     "cancel": "取消",
+    "close": "关闭",
     "edit": "编辑",
     "delete": "删除",
     "add": "添加",
@@ -384,6 +385,7 @@
       "email": "邮箱",
       "phone": "电话",
       "applications": "申请数",
+      "score": "评分",
       "added": "添加时间",
       "appliedJob": "申请职位"
     },
@@ -399,6 +401,46 @@
       "job": "职位",
       "jobPlaceholder": "选择已发布职位",
       "jobHint": "新建候选人必须绑定一个已发布职位（会自动创建申请记录）。"
+    },
+    "rate": "AI评分",
+    "rating": "评分中...",
+    "batchRate": "批量评分",
+    "batchRateTitle": "批量AI评分",
+    "batchRateDesc": "将对 {count} 位候选人进行AI评分",
+    "startBatchRate": "开始评分",
+    "viewFeedback": "查看评分报告",
+    "feedbackTitle": "AI评分报告",
+    "overallScore": "综合评分",
+    "batchStatus": {
+      "pending": "待评分",
+      "rating": "评分中",
+      "success": "已完成",
+      "error": "评分失败"
+    },
+    "conclusion": {
+      "strongHire": "强烈推荐",
+      "hire": "推荐",
+      "leanHire": "倾向推荐",
+      "leanNo": "倾向不推荐",
+      "no": "不推荐"
+    },
+    "feedback": {
+      "strengths": "最强证据",
+      "gaps": "最大缺口",
+      "risks": "风险提醒",
+      "skills": "技能矩阵",
+      "interviewQuestions": "建议面试问题",
+      "purpose": "目的",
+      "goodAnswer": "期望答案"
+    },
+    "errors": {
+      "saveFailed": "保存候选人失败",
+      "deleteFailed": "删除候选人失败",
+      "resumeDownloadFailed": "下载简历失败",
+      "noApplication": "该候选人没有申请记录",
+      "noResumeText": "简历文本未提取，无法评分",
+      "rateFailed": "评分失败",
+      "noSelection": "请先选择要评分的候选人"
     }
   },
   "dashboard": {
@@ -487,15 +529,24 @@
   "profile": {
     "title": "我的资料",
     "subtitle": "管理您的简历和职位偏好",
+    "loadError": "加载资料失败",
     "resumeSection": {
       "title": "简历",
       "description": "上传您的简历以快速申请职位",
       "upload": "上传简历",
+      "uploadNew": "上传新简历（替换现有）",
       "current": "当前简历",
       "noResume": "尚未上传简历",
-      "uploadFormats": "支持 PDF、DOCX 格式",
+      "uploadFormats": "支持 PDF、DOCX 格式（最大 10MB）",
+      "fileTooLarge": "文件大小超过 10MB 限制",
       "uploadSuccess": "简历上传成功",
-      "uploadError": "简历上传失败"
+      "uploadError": "简历上传失败",
+      "uploading": "上传中...",
+      "uploadedOn": "上传于",
+      "preview": "预览简历",
+      "previewTitle": "简历预览",
+      "download": "下载简历",
+      "downloadError": "下载失败"
     },
     "preferencesSection": {
       "title": "职位偏好",
@@ -698,6 +749,24 @@
         "title": "不限使用",
         "description": "在套餐有效期内无限次评分简历"
       }
+    }
+  },
+  "jobApplication": {
+    "resume": "简历/CV",
+    "useProfileResume": "使用已上传的简历",
+    "uploadNewResume": "上传新简历",
+    "uploadedOn": "上传于",
+    "emailFromProfile": "使用您账户中的邮箱",
+    "validation": {
+      "firstNameRequired": "请输入名字",
+      "lastNameRequired": "请输入姓氏",
+      "emailRequired": "请输入邮箱",
+      "emailInvalid": "邮箱格式不正确",
+      "resumeRequired": "请上传简历",
+      "noProfileResume": "您还没有上传个人简历，请上传新简历"
+    },
+    "errors": {
+      "submitFailed": "提交申请失败"
     }
   },
   "appliedJobs": {

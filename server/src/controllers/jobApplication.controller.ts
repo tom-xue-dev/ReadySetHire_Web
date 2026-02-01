@@ -44,6 +44,7 @@ export class JobApplicationController {
         linkedinUrl,
         portfolioUrl,
         yearsExperience,
+        resumeId: existingResumeId, // Support using existing resume from profile
       } = req.body;
 
       // Validate required fields
@@ -65,9 +66,15 @@ export class JobApplicationController {
         });
       }
 
-      // Handle resume upload if provided
+      // Handle resume: either use existing resumeId or upload new file
       let resumeId: number | undefined;
-      if (req.file) {
+      
+      if (existingResumeId) {
+        // Use existing resume from user profile
+        resumeId = parseInt(existingResumeId);
+        console.log('📄 Using existing resume ID:', resumeId);
+      } else if (req.file) {
+        // Upload new resume
         const resume = await resumeService.uploadResume({
           originalName: req.file.originalname,
           buffer: req.file.buffer,

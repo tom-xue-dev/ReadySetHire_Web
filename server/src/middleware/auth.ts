@@ -278,9 +278,21 @@ export const getProfile = async (req: Request, res: Response): Promise<void> => 
         email: true,
         firstName: true,
         lastName: true,
+        phone: true,
         role: true,
+        resumeId: true,
         createdAt: true,
-        updatedAt: true
+        updatedAt: true,
+        profileResume: {
+          select: {
+            id: true,
+            originalName: true,
+            fileName: true,
+            fileSize: true,
+            mimeType: true,
+            uploadedAt: true,
+          }
+        }
       }}
     );
 
@@ -304,12 +316,13 @@ export const updateProfile = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-    const { firstName, lastName, email } = req.body;
+    const { firstName, lastName, email, phone } = req.body;
     const updateData: any = {};
 
     if (firstName !== undefined) updateData.firstName = firstName;
     if (lastName !== undefined) updateData.lastName = lastName;
     if (email !== undefined) updateData.email = email;
+    if (phone !== undefined) updateData.phone = phone;
 
     const user = await userService.update(req.user.id, updateData);
 
@@ -317,5 +330,53 @@ export const updateProfile = async (req: Request, res: Response): Promise<void> 
   } catch (error) {
     console.error('Update profile error:', error);
     res.status(500).json({ error: 'Failed to update profile' });
+  }
+};
+
+// Upload profile resume
+export const uploadProfileResume = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: 'Authentication required' });
+      return;
+    }
+
+    if (!req.file) {
+      res.status(400).json({ error: 'Resume file is required' });
+      return;
+    }
+
+    // Import resume service dynamically to avoid circular deps
+    const { resumeService } = await import('../services/resume.service');
+
+    // Upload the resume file
+    const resume = await resumeService.uploadResume({
+      originalName: req.file.originalname,
+      buffer: req.file.buffer,
+      mimeType: req.file.mimetype,
+      size: req.file.size,
+    });
+
+    // Update user's resumeId
+    await userService.update(req.user.id, { resumeId: resume.id });
+
+    // Parse resume in background
+    resumeService.parseResumeWithLLM(resume.id).catch(err => {
+      console.error('Background resume parsing failed:', err);
+    });
+
+    res.json({
+      message: 'Resume uploaded successfully',
+      resume: {
+        id: resume.id,
+        originalName: resume.originalName,
+        fileSize: resume.fileSize,
+        mimeType: resume.mimeType,
+        uploadedAt: resume.uploadedAt,
+      }
+    });
+  } catch (error) {
+    console.error('Upload profile resume error:', error);
+    res.status(500).json({ error: 'Failed to upload resume' });
   }
 };
